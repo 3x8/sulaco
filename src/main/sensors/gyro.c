@@ -694,6 +694,7 @@ bool gyroInit(void)
     }
 #endif // USE_DUAL_GYRO
 
+/*
 #ifdef USE_DUAL_GYRO
     // Only allow using both gyros simultaneously if they are the same hardware type.
     // If the user selected "BOTH" and they are not the same type, then reset to using only the first gyro.
@@ -706,7 +707,8 @@ bool gyroInit(void)
 
         }
     }
-#endif // USE_DUAL_GYRO
+#endif // USE_DUAL_GYRO*/
+
     return ret;
 }
 

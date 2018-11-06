@@ -66,8 +66,8 @@
 
 #define GYRO_2_SPI_INSTANCE     SPI1
 #define GYRO_2_CS_PIN           PA8           // External IMU
-#define GYRO_2_ALIGN            CW0_DEG
-#define ACC_2_ALIGN             CW0_DEG
+#define GYRO_2_ALIGN            CW270_DEG
+#define ACC_2_ALIGN             CW270_DEG
 
 #define GYRO_CONFIG_USE_GYRO_DEFAULT GYRO_CONFIG_USE_GYRO_1
 
@@ -77,7 +77,7 @@
 //#define USE_MPU_DATA_READY_SIGNAL
 
 #define USE_MAG
-#define MAG_I2C_INSTANCE        (I2CDEV_1) 
+#define MAG_I2C_INSTANCE        (I2CDEV_1)
 #define USE_MAG_HMC5883
 
 #define USE_BARO
