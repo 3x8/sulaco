@@ -47,6 +47,9 @@
 #define USE_ACC
 #define USE_GYRO
 
+#define DEFAULT_ATTITUDE_UPDATE_INTERVAL 1000
+#define DEFAULT_ACC_SAMPLE_INTERVAL      1000
+
 // For debugging with NUC405RG
 #define USE_FAKE_ACC
 #define USE_FAKE_GYRO
