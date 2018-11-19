@@ -694,21 +694,6 @@ bool gyroInit(void)
     }
 #endif // USE_DUAL_GYRO
 
-/*
-#ifdef USE_DUAL_GYRO
-    // Only allow using both gyros simultaneously if they are the same hardware type.
-    // If the user selected "BOTH" and they are not the same type, then reset to using only the first gyro.
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
-        if (gyroSensor1.gyroDev.gyroHardware != gyroSensor2.gyroDev.gyroHardware) {
-            gyroToUse = GYRO_CONFIG_USE_GYRO_1;
-            gyroConfigMutable()->gyro_to_use = GYRO_CONFIG_USE_GYRO_1;
-            detectedSensors[SENSOR_INDEX_GYRO] = gyroSensor1.gyroDev.gyroHardware;
-            sensorsSet(SENSOR_GYRO);
-
-        }
-    }
-#endif // USE_DUAL_GYRO*/
-
     return ret;
 }
 
