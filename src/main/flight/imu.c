@@ -1,21 +1,18 @@
 /*
- * This file is part of Cleanflight and Betaflight.
+ * This file is part of Cleanflight.
  *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Cleanflight is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * Cleanflight is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
+ * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // Inertial Measurement Unit (IMU)
@@ -50,6 +47,9 @@
 #include "sensors/compass.h"
 #include "sensors/gyro.h"
 #include "sensors/sensors.h"
+#ifdef USE_ACC_IMUF9001
+#include "drivers/accgyro/accgyro_imuf9001.h"
+#endif
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
 #include <stdio.h>
@@ -73,7 +73,6 @@ static bool imuUpdated = false;
 #endif
 
 int32_t accSum[XYZ_AXIS_COUNT];
-float accAverage[XYZ_AXIS_COUNT];
 
 uint32_t accTimeSum = 0;        // keep track for integration of acc
 int accSumCount = 0;
@@ -202,6 +201,7 @@ static float imuUseFastGains(void) {
         }
     }
 }
+#ifndef SITL
 #if defined(USE_MAG) || defined(USE_GPS)
 static void applyVectorError(float ez_ef, quaternion *vError){
     // Rotate mag error vector back to BF and accumulate
@@ -275,6 +275,7 @@ static void applySensorCorrection(quaternion *vError){
     }
 #endif
 }
+#endif
 
 static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError) {
     quaternion vKpKi = VECTOR_INITIALIZE;
@@ -371,6 +372,11 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
 //  printf("[imu]deltaT = %u, imuDeltaT = %u, currentTimeUs = %u, micros64_real = %lu\n", deltaT, imuDeltaT, currentTimeUs, micros64_real());
     deltaT = imuDeltaT;
 #endif
+    // get sensor data
+#ifdef USE_GYRO_IMUF9001
+    if (gyroConfig()->imuf_mode != GTBCM_GYRO_ACC_QUAT_FILTER_F)
+    {
+#endif
     quaternion vError = VECTOR_INITIALIZE;
     quaternion vGyroAverage;
     quaternion vAccAverage;
@@ -382,6 +388,22 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
     }
     applySensorCorrection(&vError);
     imuMahonyAHRSupdate(deltaT * 1e-6f, &vGyroAverage, &vError);
+#ifdef USE_GYRO_IMUF9001
+    } else {
+        UNUSED(deltaT);
+        UNUSED(applyAccError);
+        UNUSED(imuMahonyAHRSupdate);
+        qAttitude.w = imufQuat.w;
+        qAttitude.x = imufQuat.x;
+        qAttitude.y = imufQuat.y;
+        qAttitude.z = imufQuat.z;
+        quaternionNormalize(&qAttitude);
+        quaternionComputeProducts(&qAttitude, &qpAttitude);
+
+        DEBUG_SET(DEBUG_IMU, DEBUG_IMU0, lrintf(quaternionModulus(&qAttitude) * 1000));
+        DEBUG_SET(DEBUG_IMU, DEBUG_IMU1, lrintf(vGyroStdDevModulus * 1000));
+    }
+#endif
     imuUpdateEulerAngles();
 #endif
 
