@@ -72,14 +72,14 @@ static bool imuUpdated = false;
 
 #endif
 
-int32_t accSum[XYZ_AXIS_COUNT];
+//int32_t accSum[XYZ_AXIS_COUNT];
 
-uint32_t accTimeSum = 0;        // keep track for integration of acc
-int accSumCount = 0;
-float accVelScale;
+//uint32_t accTimeSum = 0;        // keep track for integration of acc
+//int accSumCount = 0;
+//float accVelScale;
 
 static float throttleAngleScale;
-static float fc_acc;
+//static float fc_acc;
 static float smallAngleCosZ = 0;
 
 static imuRuntimeConfig_t imuRuntimeConfig;
@@ -106,10 +106,11 @@ PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
 
 
 // calculate RC time constant used in the accZ lpf.
+/*
 static float calculateAccZLowPassFilterRCTimeConstant(float accz_lpf_cutoff)
 {
     return 0.5f / (M_PIf * accz_lpf_cutoff);
-}
+}*/
 
 static float calculateThrottleAngleScale(uint16_t throttle_correction_angle)
 {
@@ -123,14 +124,14 @@ void imuConfigure(uint16_t throttle_correction_angle)
     imuRuntimeConfig.acc_unarmedcal = imuConfig()->acc_unarmedcal;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 
-    fc_acc = calculateAccZLowPassFilterRCTimeConstant(5.0f); // Set to fix value
+    //fc_acc = calculateAccZLowPassFilterRCTimeConstant(5.0f); // Set to fix value
     throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 }
 
 void imuInit(void)
 {
     smallAngleCosZ = cos_approx(degreesToRadians(imuRuntimeConfig.small_angle));
-    accVelScale = 9.80665f / acc.dev.acc_1G / 10000.0f;
+    //accVelScale = 9.80665f / acc.dev.acc_1G / 10000.0f;
 
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
@@ -140,6 +141,7 @@ void imuInit(void)
 #endif
 }
 
+/*
 void imuResetAccelerationSum(void)
 {
     accSum[0] = 0;
@@ -147,8 +149,9 @@ void imuResetAccelerationSum(void)
     accSum[2] = 0;
     accSumCount = 0;
     accTimeSum = 0;
-}
+}*/
 
+/*
 #if defined(USE_ALT_HOLD)
 // rotate acc into Earth frame and calculate acceleration in it
 static void imuCalculateAcceleration(timeDelta_t deltaT)
@@ -187,6 +190,7 @@ static void imuCalculateAcceleration(timeDelta_t deltaT)
     accSumCount++;
 }
 #endif // USE_ALT_HOLD
+*/
 
 static float imuUseFastGains(void) {
    if (!ARMING_FLAG(ARMED)) {
@@ -407,9 +411,10 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
     imuUpdateEulerAngles();
 #endif
 
+/*
 #if defined(USE_ALT_HOLD)
     imuCalculateAcceleration(deltaT); // rotate acc vector into earth frame
-#endif
+#endif*/
 }
 
 void imuUpdateAttitude(timeUs_t currentTimeUs)
