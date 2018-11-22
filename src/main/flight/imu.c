@@ -397,15 +397,17 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
         UNUSED(deltaT);
         UNUSED(applyAccError);
         UNUSED(imuMahonyAHRSupdate);
+
         qAttitude.w = imufQuat.w;
         qAttitude.x = imufQuat.x;
         qAttitude.y = imufQuat.y;
         qAttitude.z = imufQuat.z;
-        quaternionNormalize(&qAttitude);
-        quaternionComputeProducts(&qAttitude, &qpAttitude);
 
         DEBUG_SET(DEBUG_IMU, DEBUG_IMU0, lrintf(quaternionModulus(&qAttitude) * 1000));
         DEBUG_SET(DEBUG_IMU, DEBUG_IMU1, lrintf(vGyroStdDevModulus * 1000));
+
+        quaternionNormalize(&qAttitude);
+        quaternionComputeProducts(&qAttitude, &qpAttitude);
     }
 #endif
     imuUpdateEulerAngles();
