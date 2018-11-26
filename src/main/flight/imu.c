@@ -15,6 +15,9 @@
 #include "pg/pg_ids.h"
 
 #include "drivers/time.h"
+#ifdef USE_ACC_IMUF9001
+#include "drivers/accgyro/accgyro_imuf9001.h"
+#endif
 
 #include "fc/runtime_config.h"
 
@@ -30,9 +33,6 @@
 #include "sensors/compass.h"
 #include "sensors/gyro.h"
 #include "sensors/sensors.h"
-#ifdef USE_ACC_IMUF9001
-#include "drivers/accgyro/accgyro_imuf9001.h"
-#endif
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
 #include <stdio.h>
@@ -55,7 +55,7 @@ static bool imuUpdated = false;
 
 #endif
 
-static float smallAngleCosZ = 0;
+static float smallAngleCosZ;
 static imuRuntimeConfig_t imuRuntimeConfig;
 
 // sensor frame relative to earth frame
@@ -65,7 +65,7 @@ STATIC_UNIT_TESTED quaternionProducts qpAttitude = QUATERNION_PRODUCTS_INITIALIZ
 quaternion qHeadfree = QUATERNION_INITIALIZE;
 quaternion qOffset = QUATERNION_INITIALIZE;
 
-// absolute angle inclination in multiple of 0.1 degree    180 deg = 1800
+// euler angles resolution = 0.1 degree   180 deg = 1800
 attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 
 PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
