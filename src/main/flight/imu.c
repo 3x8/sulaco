@@ -15,9 +15,6 @@
 #include "pg/pg_ids.h"
 
 #include "drivers/time.h"
-#ifdef USE_ACC_IMUF9001
-#include "drivers/accgyro/accgyro_imuf9001.h"
-#endif
 
 #include "fc/runtime_config.h"
 
@@ -33,6 +30,10 @@
 #include "sensors/compass.h"
 #include "sensors/gyro.h"
 #include "sensors/sensors.h"
+
+#ifdef USE_ACC_IMUF9001
+#include "drivers/accgyro/accgyro_imuf9001.h"
+#endif
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
 #include <stdio.h>
