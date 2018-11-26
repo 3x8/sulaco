@@ -131,6 +131,7 @@ static void applySensorCorrection(quaternion *vError){
 #if !defined(USE_MAG) && !defined(USE_GPS)
     UNUSED(vError);
 #endif
+
 #ifdef USE_GPS
     if (sensors(SENSOR_GPS) && STATE(GPS_FIX) && gpsSol.numSat >= 5 && gpsSol.groundSpeed >= 600) {
         float courseOverGround = DECIDEGREES_TO_RADIANS(gpsSol.groundCourse);
@@ -162,8 +163,8 @@ static void applySensorCorrection(quaternion *vError){
 #ifdef USE_MAG
     if (sensors(SENSOR_MAG)) {
       quaternion vMagAverage;
-      // For magnetometer correction we make an assumption that magnetic field is perpendicular to gravity (ignore Z-component in EF).
-      // This way magnetic field will only affect heading and wont mess roll/pitch angles
+      // assumption  magnetic field is perpendicular to gravity (ignore Z-component in EF).
+      // magnetic field correction will only affect heading not roll/pitch angles
 
       compassGetAverage(&vMagAverage);
       if (compassIsHealthy(&vMagAverage)){
