@@ -81,7 +81,7 @@ enum {
     DEBUG_IMU3
 };
 
-void imuConfigure(uint16_t throttle_correction_angle);
+void imuConfigure();
 
 float getCosTiltAngle(void);
 void imuUpdateAttitude(timeUs_t currentTimeUs);

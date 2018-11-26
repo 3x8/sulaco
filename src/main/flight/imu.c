@@ -55,7 +55,6 @@ static bool imuUpdated = false;
 
 #endif
 
-static float throttleAngleScale;
 static float smallAngleCosZ = 0;
 static imuRuntimeConfig_t imuRuntimeConfig;
 
@@ -79,17 +78,11 @@ PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
     .acc_unarmedcal = 1
 );
 
-static float calculateThrottleAngleScale(uint16_t throttle_correction_angle) {
-    return (1800.0f / M_PIf) * (900.0f / throttle_correction_angle);
-}
-
-void imuConfigure(uint16_t throttle_correction_angle) {
+void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
     imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
     imuRuntimeConfig.acc_unarmedcal = imuConfig()->acc_unarmedcal;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
-
-    throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 }
 
 void imuInit(void) {
@@ -344,21 +337,6 @@ void imuUpdateAttitude(timeUs_t currentTimeUs) {
 
 float getCosTiltAngle(void) {
     return (1.0f - 2.0f * (qpAttitude.xx + qpAttitude.yy));
-}
-
-int16_t calculateThrottleAngleCorrection(uint8_t throttle_correction_value) {
-    /*
-    * Use 0 as the throttle angle correction if we are inverted, vertical or with a
-    * small angle < 0.86 deg
-    * TODO: Define this small angle in config.
-    */
-    if (getCosTiltAngle() <= 0.015f) {
-        return 0;
-    }
-    int angle = lrintf(acos_approx(getCosTiltAngle()) * throttleAngleScale);
-    if (angle > 900)
-        angle = 900;
-    return lrintf(throttle_correction_value * sin_approx(angle / (900.0f * M_PIf / 2.0f)));
 }
 
 #ifdef SIMULATOR_BUILD
