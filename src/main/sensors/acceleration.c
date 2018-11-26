@@ -493,8 +493,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
     }
 }
 
-void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims)
-{
+void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
 
     if (!acc.dev.readFn(&acc.dev)) {
@@ -549,13 +548,11 @@ bool accGetAverage(quaternion *vAverage) {
   }
 }
 
-void setAccelerationTrims(flightDynamicsTrims_t *accelerationTrimsToUse)
-{
+void setAccelerationTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
     accelerationTrims = accelerationTrimsToUse;
 }
 
-void accInitFilters(void)
-{
+void accInitFilters(void) {
     accLpfCutHz = accelerometerConfig()->acc_lpf_hz;
     if (accLpfCutHz) {
         for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
