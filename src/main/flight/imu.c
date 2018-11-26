@@ -88,11 +88,12 @@ void imuConfigure(uint16_t throttle_correction_angle) {
     imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
     imuRuntimeConfig.acc_unarmedcal = imuConfig()->acc_unarmedcal;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
+
+    throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 }
 
 void imuInit(void) {
     smallAngleCosZ = cos_approx(degreesToRadians(imuRuntimeConfig.small_angle));
-    throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
     if (pthread_mutex_init(&imuUpdateLock, NULL) != 0) {
@@ -320,6 +321,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
 #endif
     imuUpdateEulerAngles();
 #endif
+}
 
 void imuUpdateAttitude(timeUs_t currentTimeUs) {
     if (sensors(SENSOR_ACC) && acc.isAccelUpdatedAtLeastOnce) {
