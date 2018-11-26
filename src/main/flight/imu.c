@@ -1,20 +1,3 @@
-/*
- * This file is part of Cleanflight.
- *
- * Cleanflight is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Cleanflight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 // Inertial Measurement Unit (IMU)
 
 #include <stdbool.h>
@@ -72,22 +55,14 @@ static bool imuUpdated = false;
 
 #endif
 
-//int32_t accSum[XYZ_AXIS_COUNT];
-
-//uint32_t accTimeSum = 0;        // keep track for integration of acc
-//int accSumCount = 0;
-//float accVelScale;
-
 static float throttleAngleScale;
-//static float fc_acc;
 static float smallAngleCosZ = 0;
-
 static imuRuntimeConfig_t imuRuntimeConfig;
 
-// quaternion of sensor frame relative to earth frame
+// sensor frame relative to earth frame
 quaternion qAttitude = QUATERNION_INITIALIZE;
 STATIC_UNIT_TESTED quaternionProducts qpAttitude = QUATERNION_PRODUCTS_INITIALIZE;
-// headfree quaternions
+// headfree
 quaternion qHeadfree = QUATERNION_INITIALIZE;
 quaternion qOffset = QUATERNION_INITIALIZE;
 
@@ -104,35 +79,20 @@ PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
     .acc_unarmedcal = 1
 );
 
-
-// calculate RC time constant used in the accZ lpf.
-/*
-static float calculateAccZLowPassFilterRCTimeConstant(float accz_lpf_cutoff)
-{
-    return 0.5f / (M_PIf * accz_lpf_cutoff);
-}*/
-
-static float calculateThrottleAngleScale(uint16_t throttle_correction_angle)
-{
+static float calculateThrottleAngleScale(uint16_t throttle_correction_angle) {
     return (1800.0f / M_PIf) * (900.0f / throttle_correction_angle);
 }
 
-void imuConfigure(uint16_t throttle_correction_angle)
-{
+void imuConfigure(uint16_t throttle_correction_angle) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
     imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
     imuRuntimeConfig.acc_unarmedcal = imuConfig()->acc_unarmedcal;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
-
-    //fc_acc = calculateAccZLowPassFilterRCTimeConstant(5.0f); // Set to fix value
-    throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 }
 
-void imuInit(void)
-{
+void imuInit(void) {
     smallAngleCosZ = cos_approx(degreesToRadians(imuRuntimeConfig.small_angle));
-    //accVelScale = 9.80665f / acc.dev.acc_1G / 10000.0f;
-
+    throttleAngleScale = calculateThrottleAngleScale(throttle_correction_angle);
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
     if (pthread_mutex_init(&imuUpdateLock, NULL) != 0) {
@@ -140,57 +100,6 @@ void imuInit(void)
     }
 #endif
 }
-
-/*
-void imuResetAccelerationSum(void)
-{
-    accSum[0] = 0;
-    accSum[1] = 0;
-    accSum[2] = 0;
-    accSumCount = 0;
-    accTimeSum = 0;
-}*/
-
-/*
-#if defined(USE_ALT_HOLD)
-// rotate acc into Earth frame and calculate acceleration in it
-static void imuCalculateAcceleration(timeDelta_t deltaT)
-{
-    static float accZoffset = 0;
-    static float accz_smooth = 0;
-
-    // deltaT is measured in us ticks
-    const float dT = (float)deltaT * 1e-6f;
-
-    quaternion accel_ned;
-    accel_ned.x = acc.accADC[X];
-    accel_ned.y = acc.accADC[Y];
-    accel_ned.z = acc.accADC[Z];
-    quaternionTransformVectorBodyToEarth(&accel_ned, &qAttitude);
-
-    if (imuRuntimeConfig.acc_unarmedcal == 1) {
-        if (!ARMING_FLAG(ARMED)) {
-            accZoffset -= accZoffset / 64;
-            accZoffset += accel_ned.z;
-        }
-        accel_ned.z -= accZoffset / 64;  // compensate for gravitation on z-axis
-    } else {
-        accel_ned.z -= acc.dev.acc_1G;
-    }
-
-    accz_smooth = accz_smooth + (dT / (fc_acc + dT)) * (accel_ned.z - accz_smooth); // low pass filter
-
-    // apply Deadband to reduce integration drift and vibration influence
-    accSum[X] += applyDeadband(lrintf(accel_ned.x), imuRuntimeConfig.accDeadband.xy);
-    accSum[Y] += applyDeadband(lrintf(accel_ned.y), imuRuntimeConfig.accDeadband.xy);
-    accSum[Z] += applyDeadband(lrintf(accz_smooth), imuRuntimeConfig.accDeadband.z);
-
-    // sum up Values for later integration to get velocity and distance
-    accTimeSum += deltaT;
-    accSumCount++;
-}
-#endif // USE_ALT_HOLD
-*/
 
 static float imuUseFastGains(void) {
    if (!ARMING_FLAG(ARMED)) {
@@ -256,7 +165,6 @@ static void applySensorCorrection(quaternion *vError){
 #endif
 
 #ifdef USE_MAG
-
     if (sensors(SENSOR_MAG)) {
       quaternion vMagAverage;
       // For magnetometer correction we make an assumption that magnetic field is perpendicular to gravity (ignore Z-component in EF).
@@ -362,8 +270,8 @@ STATIC_UNIT_TESTED void imuUpdateEulerAngles(void) {
         DISABLE_STATE(SMALL_ANGLE);
     }
 }
-static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
-{
+
+static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     static timeUs_t previousIMUUpdateTime;
     const timeDelta_t deltaT = currentTimeUs - previousIMUUpdateTime;
     previousIMUUpdateTime = currentTimeUs;
@@ -378,12 +286,12 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
 #endif
     // get sensor data
 #ifdef USE_GYRO_IMUF9001
-    if (gyroConfig()->imuf_mode != GTBCM_GYRO_ACC_QUAT_FILTER_F)
-    {
+    if (gyroConfig()->imuf_mode != GTBCM_GYRO_ACC_QUAT_FILTER_F) {
 #endif
     quaternion vError = VECTOR_INITIALIZE;
     quaternion vGyroAverage;
     quaternion vAccAverage;
+
     gyroGetAverage(&vGyroAverage);
     accGetAverage(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
@@ -413,14 +321,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
     imuUpdateEulerAngles();
 #endif
 
-/*
-#if defined(USE_ALT_HOLD)
-    imuCalculateAcceleration(deltaT); // rotate acc vector into earth frame
-#endif*/
-}
-
-void imuUpdateAttitude(timeUs_t currentTimeUs)
-{
+void imuUpdateAttitude(timeUs_t currentTimeUs) {
     if (sensors(SENSOR_ACC) && acc.isAccelUpdatedAtLeastOnce) {
         IMU_LOCK;
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
@@ -443,8 +344,7 @@ float getCosTiltAngle(void) {
     return (1.0f - 2.0f * (qpAttitude.xx + qpAttitude.yy));
 }
 
-int16_t calculateThrottleAngleCorrection(uint8_t throttle_correction_value)
-{
+int16_t calculateThrottleAngleCorrection(uint8_t throttle_correction_value) {
     /*
     * Use 0 as the throttle angle correction if we are inverted, vertical or with a
     * small angle < 0.86 deg
