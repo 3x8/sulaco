@@ -129,7 +129,7 @@ static void applyAccError(quaternion *vAcc, quaternion *vError) {
 }
 
 static void applySensorCorrection(quaternion *vError){
-#if !defined(USE_MAG) && !defined(USE_GPS)
+#if (!defined(USE_MAG) && !defined(USE_GPS))
     UNUSED(vError);
 #endif
 
