@@ -223,7 +223,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // vKpKi integration
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old bf method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
-    if (vKpKiModulus > 0.003f) {
+    if (vKpKiModulus > 0.007f) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
