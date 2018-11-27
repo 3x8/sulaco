@@ -35,7 +35,7 @@
 #include "drivers/accgyro/accgyro_imuf9001.h"
 #endif
 
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
+#if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD))
 #include <stdio.h>
 #include <pthread.h>
 
@@ -89,7 +89,7 @@ void imuConfigure(void) {
 void imuInit(void) {
     smallAngleCosZ = cos_approx(degreesToRadians(imuRuntimeConfig.small_angle));
 
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD)
+#if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD))
     if (pthread_mutex_init(&imuUpdateLock, NULL) != 0) {
         printf("Create imuUpdateLock error!\n");
     }
@@ -109,8 +109,9 @@ static float imuUseFastGains(void) {
         }
     }
 }
+
 #ifndef SITL
-#if defined(USE_MAG) || defined(USE_GPS)
+#if (defined(USE_MAG) || defined(USE_GPS))
 static void applyVectorError(float ez_ef, quaternion *vError){
     // Rotate mag error vector back to BF and accumulate
     vError->x += (2.0f * (qpAttitude.xz + -qpAttitude.wy)) * ez_ef;
