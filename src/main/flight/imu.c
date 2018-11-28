@@ -120,7 +120,7 @@ static void applyVectorError(float ez_ef, quaternion *vError){
 }
 #endif
 
-static void applyAccError(quaternion *vAcc, quaternion *vError) {
+static void accCalculateErrorVector(quaternion *vAcc, quaternion *vError) {
     quaternionNormalize(vAcc);
     // Error is sum of cross product between estimated direction and measured direction of gravity
     vError->x += (vAcc->y * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) - vAcc->z * (2.0f * (qpAttitude.yz - -qpAttitude.wx)));
@@ -128,7 +128,7 @@ static void applyAccError(quaternion *vAcc, quaternion *vError) {
     vError->z += (vAcc->x * (2.0f * (qpAttitude.yz - -qpAttitude.wx)) - vAcc->y * (2.0f * (qpAttitude.xz + -qpAttitude.wy)));
 }
 
-static void applySensorCorrection(quaternion *vError){
+static void gpsMagCorrection(quaternion *vError){
 #if (!defined(USE_MAG) && !defined(USE_GPS))
     UNUSED(vError);
 #endif
@@ -292,17 +292,20 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     quaternion vAccAverage;
 
     gyroGetAverage(&vGyroAverage);
+
     accGetAverage(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accIsHealthy(&vAccAverage)) {
-         applyAccError(&vAccAverage, &vError);
+         accCalculateErrorVector(&vAccAverage, &vError);
     }
-    applySensorCorrection(&vError);
+
+    gpsMagCorrection(&vError);
+
     imuMahonyAHRSupdate(deltaT * 1e-6f, &vGyroAverage, &vError);
 #ifdef USE_GYRO_IMUF9001
     } else {
         UNUSED(deltaT);
-        UNUSED(applyAccError);
+        UNUSED(accCalculateErrorVector);
         UNUSED(imuMahonyAHRSupdate);
 
         qAttitude.w = imufQuat.w;
