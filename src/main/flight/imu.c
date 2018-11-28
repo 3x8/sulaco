@@ -140,10 +140,12 @@ static void applySensorCorrection(quaternion *vError){
         // In case of a fixed-wing aircraft we can use GPS course over ground to correct heading
         if(!STATE(FIXED_WING))
         {
-            float tiltDirection = atan2_approx(attitude.values.roll, attitude.values.pitch); // For applying correction to heading based on craft tilt in 2d space
+            // For applying correction to heading based on craft tilt in 2d space
+            float tiltDirection = atan2_approx(attitude.values.roll, attitude.values.pitch);
             courseOverGround += tiltDirection;
 
-            if (!hasInitializedGPSHeading && GPS_distanceToHome > 50) { // Initially correct the gps heading, we can deal with gradual corrections later
+            // Initially correct the gps heading, we can deal with gradual corrections later
+            if (!hasInitializedGPSHeading && GPS_distanceToHome > 50) {
                 attitude.values.yaw = RADIANS_TO_DECIDEGREES(courseOverGround);
                 hasInitializedGPSHeading = true;
             }
