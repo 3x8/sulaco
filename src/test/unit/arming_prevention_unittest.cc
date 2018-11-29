@@ -771,7 +771,7 @@ TEST(ArmingPreventionTest, Paralyze)
     // expect
     EXPECT_TRUE(IS_RC_MODE_ACTIVE(BOXVTXPITMODE));
     EXPECT_TRUE(IS_RC_MODE_ACTIVE(BOXBEEPERON));
-    
+
     // given
     // try exiting paralyze mode and ensure arming and pit mode are still disabled
     rcData[AUX2] = 1000;
@@ -834,7 +834,6 @@ extern "C" {
     void updateRcCommands(void) {}
     void applyAltHold(void) {}
     void resetYawAxis(void) {}
-    int16_t calculateThrottleAngleCorrection(uint8_t) { return 0; }
     void processRcCommand(void) {}
     void updateGpsStateForHomeAndHoldMode(void) {}
     void blackboxUpdate(timeUs_t) {}
