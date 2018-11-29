@@ -85,7 +85,6 @@ void imuConfigure();
 
 float getCosTiltAngle(void);
 void imuUpdateAttitude(timeUs_t currentTimeUs);
-int16_t calculateThrottleAngleCorrection(uint8_t throttle_correction_value);
 
 void imuResetAccelerationSum(void);
 void imuInit(void);
