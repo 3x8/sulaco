@@ -449,18 +449,12 @@ void validateAndFixGyroConfig(void)
     }
 #endif
 
-/*
 #ifdef USE_GYRO_IMUF9001
-    //keeop imuf_rate in sync with the gyro.
+    //keep imuf_rate in sync with the gyro.
     uint8_t imuf_rate = getImufRateFromGyroSyncDenom(gyroConfigMutable()->gyro_sync_denom);
     gyroConfigMutable()->imuf_rate = imuf_rate;
-    if (imuf_rate == IMUF_RATE_32K) {
-        gyroConfigMutable()->imuf_mode = GTBCM_GYRO_ACC_FILTER_F;
-    } else {
-        gyroConfigMutable()->imuf_mode = GTBCM_DEFAULT;
-    }
 #endif
-*/
+
     // Prevent invalid notch cutoff
     if (gyroConfig()->gyro_soft_notch_cutoff_1 >= gyroConfig()->gyro_soft_notch_hz_1) {
         gyroConfigMutable()->gyro_soft_notch_hz_1 = 0;
