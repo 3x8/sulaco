@@ -1,3 +1,5 @@
+// Inertial Measurement Unit (IMU)
+
 #pragma once
 
 #include "common/axis.h"
@@ -14,7 +16,7 @@ extern int accSumCount;
 extern float accVelScale;
 extern int32_t accSum[XYZ_AXIS_COUNT];
 
-// absolute inclination in multiple of 0.1 degree    180 deg = 1800
+// euler angles resolution = 0.1 degree   180 deg = 1800
 typedef union {
     int16_t raw[XYZ_AXIS_COUNT];
     struct {
@@ -68,7 +70,7 @@ void imuResetAccelerationSum(void);
 void imuInit(void);
 
 #ifdef SIMULATOR_BUILD
-void imuSetAttitudeRPY(float roll, float pitch, float yaw);  // in deg
+void imuSetAttitudeRPY(float roll, float pitch, float yaw);
 void imuSetAttitudeQuat(float w, float x, float y, float z);
 #if defined(SIMULATOR_IMU_SYNC)
 void imuSetHasNewData(uint32_t dt);
