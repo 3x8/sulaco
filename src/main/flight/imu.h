@@ -18,7 +18,6 @@ extern int32_t accSum[XYZ_AXIS_COUNT];
 typedef union {
     int16_t raw[XYZ_AXIS_COUNT];
     struct {
-
         int16_t roll;
         int16_t pitch;
         int16_t yaw;
