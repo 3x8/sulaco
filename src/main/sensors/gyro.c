@@ -94,6 +94,8 @@
 #include "hardware_revision.h"
 #endif
 
+#include "flight/imu.h"
+
 #if ((FLASH_SIZE > 128) && (defined(USE_GYRO_SPI_ICM20601) || defined(USE_GYRO_SPI_ICM20689) || defined(USE_GYRO_SPI_MPU6500)))
 #define USE_GYRO_SLEW_LIMITER
 #endif
@@ -977,6 +979,7 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
             vStdDev.y =  devStandardDeviation(&gyroSensor->calibration.var[Y]);
             vStdDev.z =  devStandardDeviation(&gyroSensor->calibration.var[Z]);
             vGyroStdDevModulus =  quaternionModulus(&vStdDev) / 1000.0f;
+            quaternionInitQuaternion(&qAttitude);
 
             beeper(BEEPER_GYRO_CALIBRATED);
         }

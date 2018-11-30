@@ -59,7 +59,7 @@ static bool imuUpdated = false;
 static float smallAngleCosZ;
 static imuRuntimeConfig_t imuRuntimeConfig;
 
-// sensor frame relative to earth frame
+// BodyFrame relative to EarthFrame
 quaternion qAttitude = QUATERNION_INITIALIZE;
 STATIC_UNIT_TESTED quaternionProducts qpAttitude = QUATERNION_PRODUCTS_INITIALIZE;
 // headfree
@@ -112,7 +112,7 @@ static float imuUseFastGains(void) {
 
 #ifndef SITL
 #if (defined(USE_MAG) || defined(USE_GPS))
-static void applyVectorError(float ez_ef, quaternion *vError){
+static void applyVectorError(float ez_ef, quaternion *vError) {
     // Rotate mag error vector back to BF and accumulate
     vError->x += (2.0f * (qpAttitude.xz + -qpAttitude.wy)) * ez_ef;
     vError->y += (2.0f * (qpAttitude.yz - -qpAttitude.wx)) * ez_ef;
@@ -128,7 +128,7 @@ static void accCalculateErrorVector(quaternion *vAcc, quaternion *vError) {
     vError->z += (vAcc->x * (2.0f * (qpAttitude.yz - -qpAttitude.wx)) - vAcc->y * (2.0f * (qpAttitude.xz + -qpAttitude.wy)));
 }
 
-static void gpsMagCorrection(quaternion *vError){
+static void gpsMagCorrection(quaternion *vError) {
 #if (!defined(USE_MAG) && !defined(USE_GPS))
     UNUSED(vError);
 #endif
@@ -138,8 +138,7 @@ static void gpsMagCorrection(quaternion *vError){
         float courseOverGround = DECIDEGREES_TO_RADIANS(gpsSol.groundCourse);
         static bool hasInitializedGPSHeading = false;
         // In case of a fixed-wing aircraft we can use GPS course over ground to correct heading
-        if(!STATE(FIXED_WING))
-        {
+        if (!STATE(FIXED_WING)) {
             // For applying correction to heading based on craft tilt in 2d space
             float tiltDirection = atan2_approx(attitude.values.roll, attitude.values.pitch);
             courseOverGround += tiltDirection;
