@@ -52,7 +52,6 @@ void imuConfigure();
 float getCosTiltAngle(void);
 void imuUpdateAttitude(timeUs_t currentTimeUs);
 
-void imuResetAccelerationSum(void);
 void imuInit(void);
 
 #ifdef SIMULATOR_BUILD

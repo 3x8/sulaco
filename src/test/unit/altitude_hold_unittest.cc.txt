@@ -169,8 +169,6 @@ void updateAccelerationReadings(rollAndPitchTrims_t *rollAndPitchTrims)
     UNUSED(rollAndPitchTrims);
 }
 
-void imuResetAccelerationSum(void) {};
-
 int32_t applyDeadband(int32_t, int32_t) { return 0; }
 uint32_t micros(void) { return 0; }
 bool isBaroCalibrationComplete(void) { return true; }
