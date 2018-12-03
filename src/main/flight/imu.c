@@ -74,15 +74,12 @@ PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
     .dcm_kp = 7013,
     .dcm_ki = 13,
-    .small_angle = 25,
-    .accDeadband = {.xy = 40, .z= 40},
-    .acc_unarmedcal = 1
+    .small_angle = 25
 );
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
     imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
-    imuRuntimeConfig.acc_unarmedcal = imuConfig()->acc_unarmedcal;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
