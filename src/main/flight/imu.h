@@ -11,11 +11,6 @@
 #define DEFAULT_ATTITUDE_UPDATE_INTERVAL 200
 #endif
 
-extern uint32_t accTimeSum;
-extern int accSumCount;
-extern float accVelScale;
-extern int32_t accSum[XYZ_AXIS_COUNT];
-
 // euler angles resolution = 0.1 degree   180 deg = 1800
 typedef union {
     int16_t raw[XYZ_AXIS_COUNT];
