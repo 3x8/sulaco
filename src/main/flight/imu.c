@@ -84,7 +84,7 @@ void imuConfigure(void) {
 }
 
 void imuInit(void) {
-    smallAngleCosZ = cos_approx(degreesToRadians(imuRuntimeConfig.small_angle));
+    smallAngleCosZ = cosf(degreesToRadians(imuRuntimeConfig.small_angle));
 
 #if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_MULTITHREAD))
     if (pthread_mutex_init(&imuUpdateLock, NULL) != 0) {
@@ -137,7 +137,7 @@ static void gpsMagCorrection(quaternion *vError) {
         // In case of a fixed-wing aircraft we can use GPS course over ground to correct heading
         if (!STATE(FIXED_WING)) {
             // For applying correction to heading based on craft tilt in 2d space
-            float tiltDirection = atan2_approx(attitude.values.roll, attitude.values.pitch);
+            float tiltDirection = atan2f(attitude.values.roll, attitude.values.pitch);
             courseOverGround += tiltDirection;
 
             // Initially correct the gps heading, we can deal with gradual corrections later
@@ -154,7 +154,7 @@ static void gpsMagCorrection(quaternion *vError) {
         // (Rxx; Ryx) - measured (estimated) heading vector (EF)
         // (cos(COG), sin(COG)) - reference heading vector (EF)
         // error is cross product between reference heading and estimated heading (calculated in EF)
-        courseOverGround = -(float)sin_approx(courseOverGround) * (1.0f - 2.0f * qpAttitude.yy - 2.0f * qpAttitude.zz) - cos_approx(courseOverGround) * (2.0f * (qpAttitude.xy - -qpAttitude.wz));
+        courseOverGround = -sinf(courseOverGround) * (1.0f - 2.0f * qpAttitude.yy - 2.0f * qpAttitude.zz) - cosf(courseOverGround) * (2.0f * (qpAttitude.xy - -qpAttitude.wz));
         applyVectorError(courseOverGround, vError);
     }
 #endif
@@ -251,9 +251,9 @@ STATIC_UNIT_TESTED void imuUpdateEulerAngles(void) {
         quaternionComputeProducts(&qAttitude, &buffer);
     }
 
-    attitude.values.roll = lrintf(atan2_approx((+2.0f * (buffer.wx + buffer.yz)), (+1.0f - 2.0f * (buffer.xx + buffer.yy))) * (1800.0f / M_PIf));
-    attitude.values.pitch = lrintf(((0.5f * M_PIf) - acos_approx(+2.0f * (buffer.wy - buffer.xz))) * (1800.0f / M_PIf));
-    attitude.values.yaw = lrintf((-atan2_approx((+2.0f * (buffer.wz + buffer.xy)), (+1.0f - 2.0f * (buffer.yy + buffer.zz))) * (1800.0f / M_PIf)));
+    attitude.values.roll = lrintf(atan2f((+2.0f * (buffer.wx + buffer.yz)), (+1.0f - 2.0f * (buffer.xx + buffer.yy))) * (1800.0f / M_PIf));
+    attitude.values.pitch = lrintf(((0.5f * M_PIf) - acosf(+2.0f * (buffer.wy - buffer.xz))) * (1800.0f / M_PIf));
+    attitude.values.yaw = lrintf((-atan2f((+2.0f * (buffer.wz + buffer.xy)), (+1.0f - 2.0f * (buffer.yy + buffer.zz))) * (1800.0f / M_PIf)));
 
     if (attitude.values.yaw < 0) {
         attitude.values.yaw += 3600;
@@ -381,11 +381,11 @@ void imuSetHasNewData(uint32_t dt) {
 // HEADFREE HEADADJ allowed for tilt below 37°
 bool imuQuaternionHeadfreeOffsetSet(void) {
     if ((ABS(getCosTiltAngle()) > 0.8f)) {
-        const float yawHalf = atan2_approx((+2.0f * (qpAttitude.wz + qpAttitude.xy)), (+1.0f - 2.0f * (qpAttitude.yy + qpAttitude.zz))) / 2.0f;
-        qOffset.w = cos_approx(yawHalf);
+        const float yawHalf = atan2f((+2.0f * (qpAttitude.wz + qpAttitude.xy)), (+1.0f - 2.0f * (qpAttitude.yy + qpAttitude.zz))) / 2.0f;
+        qOffset.w = cosf(yawHalf);
         qOffset.x = 0;
         qOffset.y = 0;
-        qOffset.z = sin_approx(yawHalf);
+        qOffset.z = sinf(yawHalf);
         quaternionConjugate(&qOffset, &qOffset);
         return (true);
     } else {
