@@ -47,12 +47,11 @@ enum {
     DEBUG_IMU3
 };
 
+void imuInit(void);
 void imuConfigure();
 
 float getCosTiltAngle(void);
 void imuUpdateAttitude(timeUs_t currentTimeUs);
-
-void imuInit(void);
 
 #ifdef SIMULATOR_BUILD
 void imuSetAttitudeRPY(float roll, float pitch, float yaw);
