@@ -222,6 +222,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // vKpKi integration
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
+    //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
     if (vKpKiModulus > 0.007f) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
