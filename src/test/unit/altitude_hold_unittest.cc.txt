@@ -136,17 +136,8 @@ uint32_t rcModeActivationMask;
 float rcCommand[4];
 int16_t rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];
 
-uint32_t accTimeSum ;        // keep track for integration of acc
-int accSumCount;
-float accVelScale;
-
 rollAndPitchInclination_t inclination;
 
-//uint16_t acc_1G;
-//int16_t heading;
-//gyro_t gyro;
-int32_t accSum[XYZ_AXIS_COUNT];
-//int16_t magADC[XYZ_AXIS_COUNT];
 int32_t BaroAlt;
 int16_t debug[DEBUG16_VALUE_COUNT];
 
@@ -177,8 +168,6 @@ void updateAccelerationReadings(rollAndPitchTrims_t *rollAndPitchTrims)
 {
     UNUSED(rollAndPitchTrims);
 }
-
-void imuResetAccelerationSum(void) {};
 
 int32_t applyDeadband(int32_t, int32_t) { return 0; }
 uint32_t micros(void) { return 0; }

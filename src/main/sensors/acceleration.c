@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -132,7 +112,7 @@ void accResetFlightDynamicsTrims(void)
 void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance)
 {
     RESET_CONFIG_2(accelerometerConfig_t, instance,
-        .acc_lpf_hz = 10,
+        .acc_lpf_hz = 3,
         .acc_align = ALIGN_DEFAULT,
         .acc_hardware = ACC_DEFAULT,
         .acc_high_fsr = false,
@@ -493,8 +473,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
     }
 }
 
-void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims)
-{
+void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
 
     if (!acc.dev.readFn(&acc.dev)) {
@@ -549,13 +528,11 @@ bool accGetAverage(quaternion *vAverage) {
   }
 }
 
-void setAccelerationTrims(flightDynamicsTrims_t *accelerationTrimsToUse)
-{
+void setAccelerationTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
     accelerationTrims = accelerationTrimsToUse;
 }
 
-void accInitFilters(void)
-{
+void accInitFilters(void) {
     accLpfCutHz = accelerometerConfig()->acc_lpf_hz;
     if (accLpfCutHz) {
         for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
@@ -565,7 +542,6 @@ void accInitFilters(void)
 }
 
 bool accIsHealthy(quaternion *q) {
-    // acc calibbration error max 2.4% (non Z axes)
     // accept 7% deviation
     float accModulus = quaternionModulus(q);
     accModulus = accModulus / acc.dev.acc_1G;
