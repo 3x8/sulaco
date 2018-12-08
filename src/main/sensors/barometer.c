@@ -323,8 +323,7 @@ bool isBaroReady(void) {
     return baroReady;
 }
 
-uint32_t baroUpdate(void)
-{
+uint32_t baroUpdate(void) {
     static barometerState_e state = BAROMETER_NEEDS_SAMPLES;
 
     switch (state) {
@@ -344,7 +343,6 @@ uint32_t baroUpdate(void)
             baro.baroTemperature = baroTemperature;
             baroPressureSum = recalculateBarometerTotal(barometerConfig()->baro_sample_count, baroPressureSum, baroPressure);
             state = BAROMETER_NEEDS_SAMPLES;
-            //return baro.dev.ut_delay;
             return 0;
         break;
     }

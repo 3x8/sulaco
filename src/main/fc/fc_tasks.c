@@ -523,7 +523,7 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
     [TASK_BARO] = {
         .taskName = "BARO",
         .taskFunc = taskUpdateBaro,
-        .desiredPeriod = TASK_PERIOD_HZ(20),
+        .desiredPeriod = TASK_PERIOD_HZ(1),
         .staticPriority = TASK_PRIORITY_LOW,
     },
 #endif
