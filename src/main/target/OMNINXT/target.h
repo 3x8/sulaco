@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #define USE_TARGET_CONFIG
@@ -58,13 +38,15 @@
 
 #define USE_DUAL_GYRO
 
+// Onboard IMU
 #define GYRO_1_SPI_INSTANCE     SPI1
-#define GYRO_1_CS_PIN           PB12          // Onboard IMU
+#define GYRO_1_CS_PIN           PB12
 #define GYRO_1_ALIGN            CW270_DEG
 #define ACC_1_ALIGN             CW270_DEG
 
+// External IMU
 #define GYRO_2_SPI_INSTANCE     SPI1
-#define GYRO_2_CS_PIN           PA8           // External IMU
+#define GYRO_2_CS_PIN           PA8
 #define GYRO_2_ALIGN            CW180_DEG
 #define ACC_2_ALIGN             CW180_DEG
 
@@ -180,10 +162,6 @@
 #define CAMERA_CONTROL_PIN      PB15
 
 #define USE_TRANSPONDER
-
-//#define USE_RANGEFINDER
-//#define USE_RANGEFINDER_HCSR04
-//#define USE_RANGEFINDER_TF
 
 #define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
 
