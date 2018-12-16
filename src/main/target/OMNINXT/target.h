@@ -74,6 +74,7 @@
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
+#define ENSURE_MPU_DATA_READY_IS_LOW
 
 #define USE_MAG
 #define MAG_I2C_INSTANCE        (I2CDEV_1)
