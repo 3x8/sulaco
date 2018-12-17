@@ -73,13 +73,13 @@ PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
     .dcm_kp = 7013,
-    .dcm_ki = 13,
+    .dcm_ki = 130,
     .small_angle = 25
 );
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
-    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 100000.0f;
+    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 1000000.0f;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
@@ -224,7 +224,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.007f)) {
+    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= vGyroStdDevModulus)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
