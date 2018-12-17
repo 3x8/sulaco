@@ -185,9 +185,11 @@ static void gpsMagCorrection(quaternion *vError) {
 }
 #endif
 
+static quaternion vIntegralFB = VECTOR_INITIALIZE;
+
 static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError) {
     quaternion vKpKi = VECTOR_INITIALIZE;
-    static quaternion vIntegralFB = VECTOR_INITIALIZE;
+
     quaternion qBuff, qDiff;
 
     // scale dcm to converge faster (if not armed)
