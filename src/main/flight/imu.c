@@ -224,7 +224,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = 2 * quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if (vKpKiModulus >= vGyroStdDevModulus) {
+    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= vGyroStdDevModulus)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
