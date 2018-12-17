@@ -79,7 +79,7 @@ PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
-    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
+    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 1000000.0f;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
@@ -94,13 +94,14 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
+
    if (!ARMING_FLAG(ARMED)) {
-        return (17.0f);
+        return (10.0f);
     }
     else {
         //onboard beeper influences vAcc
         if (isBeeperOn()) {
-          return (0.17f);
+          return (0.1f);
         } else {
           return (1.0f);
         }
@@ -195,9 +196,9 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
 
     // calculate integral feedback
     if (imuRuntimeConfig.dcm_ki > 0.0f) {
-        vIntegralFB.x += dcmKiGain * vError->x * dt;
-        vIntegralFB.y += dcmKiGain * vError->y * dt;
-        vIntegralFB.z += dcmKiGain * vError->z * dt;
+        vIntegralFB.x += dcmKiGain * vError->x;
+        vIntegralFB.y += dcmKiGain * vError->y;
+        vIntegralFB.z += dcmKiGain * vError->z;
     } else {
         quaternionInitVector(&vIntegralFB);
     }
@@ -223,7 +224,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if (vKpKiModulus > 0.007f) {
+    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.013f)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
@@ -293,7 +294,9 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     accGetAverage(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accIsHealthy(&vAccAverage)) {
-         accCalculateErrorVector(&vAccAverage, &vError);
+        accCalculateErrorVector(&vAccAverage, &vError);
+    } else {
+        quaternionInitVector(&vError);
     }
 
     gpsMagCorrection(&vError);
