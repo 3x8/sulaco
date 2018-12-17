@@ -185,11 +185,9 @@ static void gpsMagCorrection(quaternion *vError) {
 }
 #endif
 
-static quaternion vIntegralFB = VECTOR_INITIALIZE;
-
 static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError) {
     quaternion vKpKi = VECTOR_INITIALIZE;
-
+    static quaternion vIntegralFB = VECTOR_INITIALIZE;
     quaternion qBuff, qDiff;
 
     // scale dcm to converge faster (if not armed)
@@ -198,9 +196,9 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
 
     // calculate integral feedback
     if (imuRuntimeConfig.dcm_ki > 0.0f) {
-        vIntegralFB.x += dcmKiGain * vError->x * dt;
-        vIntegralFB.y += dcmKiGain * vError->y * dt;
-        vIntegralFB.z += dcmKiGain * vError->z * dt;
+        vIntegralFB.x += dcmKiGain * vError->x;
+        vIntegralFB.y += dcmKiGain * vError->y;
+        vIntegralFB.z += dcmKiGain * vError->z;
     } else {
         quaternionInitVector(&vIntegralFB);
     }
