@@ -94,7 +94,8 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
-   if (!ARMING_FLAG(ARMED)) {
+  return (1.0f);
+   /*if (!ARMING_FLAG(ARMED)) {
         return (17.0f);
     }
     else {
@@ -104,7 +105,7 @@ static float imuUseFastGains(void) {
         } else {
           return (1.0f);
         }
-    }
+    }*/
 }
 
 #ifndef SITL
