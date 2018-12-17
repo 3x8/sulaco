@@ -191,8 +191,8 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     quaternion qBuff, qDiff;
 
     // scale dcm to converge faster (if not armed)
-    const float dcmKpGain = imuRuntimeConfig.dcm_kp * 10.0f *imuUseFastGains();
-    const float dcmKiGain = imuRuntimeConfig.dcm_ki * 0.1f * imuUseFastGains();
+    const float dcmKpGain = imuRuntimeConfig.dcm_kp * imuUseFastGains();
+    const float dcmKiGain = imuRuntimeConfig.dcm_ki * imuUseFastGains();
 
     // calculate integral feedback
     if (imuRuntimeConfig.dcm_ki > 0.0f) {
@@ -224,7 +224,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if (vKpKiModulus > 0.007f) {
+    if ((vKpKiModulus > vGyroModulus) && (vKpKiModulus > 7)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
