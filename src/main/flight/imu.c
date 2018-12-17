@@ -212,19 +212,19 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // PCDM Acta Mech 224, 3091–3109 (2013)
     const float vGyroModulus = quaternionModulus(vGyro);
     // reduce gyro noise integration integrate only above vGyroStdDevModulus
-    if (vGyroModulus > vGyroStdDevModulus) {
+    /*if (vGyroModulus > vGyroStdDevModulus) {
         qDiff.w = cosf(vGyroModulus * 0.5f * dt);
         qDiff.x = sinf(vGyroModulus * 0.5f * dt) * (vGyro->x / vGyroModulus);
         qDiff.y = sinf(vGyroModulus * 0.5f * dt) * (vGyro->y / vGyroModulus);
         qDiff.z = sinf(vGyroModulus * 0.5f * dt) * (vGyro->z / vGyroModulus);
         quaternionMultiply(&qAttitude, &qDiff, &qAttitude);
-    }
+    }*/
 
     // vKpKi integration
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if ((vKpKiModulus > 0.007f) && (vGyroModulus < 100.0f)) {
+    if (vKpKiModulus > 0.007f) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
