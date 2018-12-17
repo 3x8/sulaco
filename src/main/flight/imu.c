@@ -191,8 +191,8 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     quaternion qBuff, qDiff;
 
     // scale dcm to converge faster (if not armed)
-    const float dcmKpGain = imuRuntimeConfig.dcm_kp * imuUseFastGains();
-    const float dcmKiGain = imuRuntimeConfig.dcm_ki * imuUseFastGains();
+    const float dcmKpGain = imuRuntimeConfig.dcm_kp * 0.1f *imuUseFastGains();
+    const float dcmKiGain = imuRuntimeConfig.dcm_ki * 10 * imuUseFastGains();
 
     // calculate integral feedback
     if (imuRuntimeConfig.dcm_ki > 0.0f) {
