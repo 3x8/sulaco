@@ -224,7 +224,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= vGyroStdDevModulus)) {
+    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.013f)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
@@ -294,7 +294,9 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     accGetAverage(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accIsHealthy(&vAccAverage)) {
-         accCalculateErrorVector(&vAccAverage, &vError);
+        accCalculateErrorVector(&vAccAverage, &vError);
+    } else {
+        quaternionInitVector(&vError);
     }
 
     gpsMagCorrection(&vError);
