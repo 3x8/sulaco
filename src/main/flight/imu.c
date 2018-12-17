@@ -79,7 +79,7 @@ PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
-    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000.0f;
+    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 100000.0f;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
