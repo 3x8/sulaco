@@ -94,18 +94,18 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
-  return (1.0f);
-   /*if (!ARMING_FLAG(ARMED)) {
-        return (17.0f);
+
+   if (!ARMING_FLAG(ARMED)) {
+        return (10.0f);
     }
     else {
         //onboard beeper influences vAcc
         if (isBeeperOn()) {
-          return (0.17f);
+          return (0.1f);
         } else {
           return (1.0f);
         }
-    }*/
+    }
 }
 
 #ifndef SITL
