@@ -307,7 +307,7 @@ const mpuDetectionResult_t *gyroMpuDetectionResult(void)
         return &gyroSensor1.gyroDev.mpuDetectionResult;
     }
 #else
-    return &gyroSensor2.gyroDev.mpuDetectionResult;
+    return &gyroSensor1.gyroDev.mpuDetectionResult;
 #endif
 }
 
