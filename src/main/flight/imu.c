@@ -92,7 +92,6 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
-
    if (!ARMING_FLAG(ARMED)) {
         return (17.0f);
     }
@@ -177,7 +176,6 @@ static void gpsMagCorrection(quaternion *vError) {
         // magnetometer error is cross product between estimated magnetic north and measured magnetic north (calculated in EF)
         applyVectorError(-(float)(hy * bx), vError);
       }
-
     }
 #endif
 }
