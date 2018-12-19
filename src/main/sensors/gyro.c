@@ -265,7 +265,7 @@ const busDevice_t *gyroSensorBus(void)
         return &gyroSensor1.gyroDev.bus;
     }
 #else
-    return &gyroSensor1.gyroDev.bus;
+    return &gyroSensor2.gyroDev.bus;
 #endif
 }
 
@@ -307,7 +307,7 @@ const mpuDetectionResult_t *gyroMpuDetectionResult(void)
         return &gyroSensor1.gyroDev.mpuDetectionResult;
     }
 #else
-    return &gyroSensor1.gyroDev.mpuDetectionResult;
+    return &gyroSensor2.gyroDev.mpuDetectionResult;
 #endif
 }
 
