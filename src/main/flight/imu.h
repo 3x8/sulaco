@@ -1,5 +1,3 @@
-// Inertial Measurement Unit (IMU)
-
 #pragma once
 
 #include "common/axis.h"
@@ -27,8 +25,8 @@ extern quaternion qHeadfree;
 extern quaternion qAttitude;
 
 typedef struct imuConfig_s {
-    uint16_t dcm_kp;                        // DCM proportional gain ( x 10000)
-    uint16_t dcm_ki;                        // DCM integral gain ( x 10000)
+    uint16_t dcm_kp;                        // DCM proportional gain
+    uint16_t dcm_ki;                        // DCM integral gain
     uint8_t small_angle;
 } imuConfig_t;
 

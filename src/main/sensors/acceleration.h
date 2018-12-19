@@ -55,7 +55,7 @@ typedef enum {
 typedef struct acc_s {
     accDev_t dev;
     float accADC[XYZ_AXIS_COUNT];
-    bool isAccelUpdatedAtLeastOnce;
+    bool accUpdatedOnce;
 } acc_t;
 
 extern acc_t acc;
@@ -87,8 +87,8 @@ bool accIsCalibrationComplete(void);
 void accSetCalibrationCycles(uint16_t calibrationCyclesRequired);
 void resetRollAndPitchTrims(rollAndPitchTrims_t *rollAndPitchTrims);
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims);
-bool accGetAverage(quaternion *average);
+bool accGetVector(quaternion *average);
 union flightDynamicsTrims_u;
 void setAccelerationTrims(union flightDynamicsTrims_u *accelerationTrimsToUse);
 void accInitFilters(void);
-bool accIsHealthy(quaternion *q);
+bool accHealthy(quaternion *q);

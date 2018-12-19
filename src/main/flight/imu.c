@@ -1,5 +1,3 @@
-// Inertial Measurement Unit (IMU)
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
@@ -72,14 +70,14 @@ attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
-    .dcm_kp = 7013,
-    .dcm_ki = 13,
+    .dcm_kp = 2503,
+    .dcm_ki = 0,
     .small_angle = 25
 );
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
-    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 1000000.0f;
+    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000000.0f;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
@@ -94,14 +92,13 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
-
    if (!ARMING_FLAG(ARMED)) {
-        return (10.0f);
+        return (17.0f);
     }
     else {
         //onboard beeper influences vAcc
         if (isBeeperOn()) {
-          return (0.1f);
+          return (0.17f);
         } else {
           return (1.0f);
         }
@@ -179,7 +176,6 @@ static void gpsMagCorrection(quaternion *vError) {
         // magnetometer error is cross product between estimated magnetic north and measured magnetic north (calculated in EF)
         applyVectorError(-(float)(hy * bx), vError);
       }
-
     }
 #endif
 }
@@ -223,8 +219,8 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // vKpKi integration
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
-    //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.013f)) {
+    // reduce acc noise integration integrate only above vGyroModulus
+    if (vKpKiModulus >= vGyroModulus) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
@@ -289,11 +285,11 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     quaternion vGyroAverage;
     quaternion vAccAverage;
 
-    gyroGetAverage(&vGyroAverage);
+    gyroGetVector(&vGyroAverage);
 
-    accGetAverage(&vAccAverage);
+    accGetVector(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
-    if (accIsHealthy(&vAccAverage)) {
+    if (accHealthy(&vAccAverage)) {
         accCalculateErrorVector(&vAccAverage, &vError);
     } else {
         quaternionInitVector(&vError);
@@ -325,7 +321,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
 }
 
 void imuUpdateAttitude(timeUs_t currentTimeUs) {
-    if (sensors(SENSOR_ACC) && acc.isAccelUpdatedAtLeastOnce) {
+    if (sensors(SENSOR_ACC) && acc.accUpdatedOnce) {
         IMU_LOCK;
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
         if (imuUpdated == false) {
