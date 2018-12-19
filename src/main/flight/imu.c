@@ -70,8 +70,8 @@ attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
-    .dcm_kp = 2503,
-    .dcm_ki = 0,
+    .dcm_kp = 7013,
+    .dcm_ki = 13,
     .small_angle = 25
 );
 
@@ -220,7 +220,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     // reduce acc noise integration integrate only above vGyroModulus
-    if (vKpKiModulus >= vGyroModulus) {
+    if (vKpKiModulus > vGyroStdDevModulus) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
