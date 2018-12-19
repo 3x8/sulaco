@@ -1,5 +1,3 @@
-// Inertial Measurement Unit (IMU)
-
 #pragma once
 
 #include "common/axis.h"
