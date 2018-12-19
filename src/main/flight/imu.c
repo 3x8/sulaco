@@ -284,9 +284,9 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     quaternion vGyroAverage;
     quaternion vAccAverage;
 
-    gyroGetAverage(&vGyroAverage);
+    gyroGetVector(&vGyroAverage);
 
-    accGetAverage(&vAccAverage);
+    accGetVector(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accIsHealthy(&vAccAverage)) {
         accCalculateErrorVector(&vAccAverage, &vError);

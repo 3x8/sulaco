@@ -114,8 +114,8 @@ bool compassIsHealthy(quaternion *) { return true; }
 bool isBaroCalibrationComplete(void) { return true; }
 void performBaroCalibrationCycle(void) {}
 int32_t baroCalculateAltitude(void) { return 0; }
-bool gyroGetAverage(quaternion *) { return false; }
-bool accGetAverage(quaternion *) { return false; }
+bool gyroGetVector(quaternion *) { return false; }
+bool accGetVector(quaternion *) { return false; }
 bool accIsHealthy(quaternion *) { return false; }
 bool compassGetAverage(quaternion *) { return false; }
 bool isBeeperOn(void){ return true; }
