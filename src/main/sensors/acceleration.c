@@ -331,7 +331,9 @@ bool accInit(void) {
     acc.dev.acc_high_fsr = accelerometerConfig()->acc_high_fsr;
 
 #ifdef USE_DUAL_GYRO
-    if (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_2) {
+    if (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH) {
+        acc.dev.accAlign = ACC_2_ALIGN;
+    } else if (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_2) {
         acc.dev.accAlign = ACC_2_ALIGN;
     } else {
         acc.dev.accAlign = ACC_1_ALIGN;

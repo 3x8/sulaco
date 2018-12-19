@@ -259,7 +259,9 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
 const busDevice_t *gyroSensorBus(void)
 {
 #ifdef USE_DUAL_GYRO
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
+    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
+        return &gyroSensor2.gyroDev.bus;
+    } else if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
         return &gyroSensor2.gyroDev.bus;
     } else {
         return &gyroSensor1.gyroDev.bus;
@@ -301,7 +303,9 @@ const mpuConfiguration_t *gyroMpuConfiguration(void)
 const mpuDetectionResult_t *gyroMpuDetectionResult(void)
 {
 #ifdef USE_DUAL_GYRO
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
+    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
+        return &gyroSensor2.gyroDev.mpuDetectionResult;
+    } else if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
         return &gyroSensor2.gyroDev.mpuDetectionResult;
     } else {
         return &gyroSensor1.gyroDev.mpuDetectionResult;
