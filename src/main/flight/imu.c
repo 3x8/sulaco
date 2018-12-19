@@ -95,9 +95,6 @@ void imuInit(void) {
 
 static float imuUseFastGains(void) {
 
-  //test
-  return (1.0f);
-
    if (!ARMING_FLAG(ARMED)) {
         return (17.0f);
     }
@@ -226,9 +223,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // vKpKi integration
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
-    //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
-    /*
-    if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.013f)) {
+    if (vKpKiModulus >= vGyroModulus) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
         qDiff.y = vKpKi.y * 0.5f * dt;
@@ -236,7 +231,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
         quaternionMultiply(&qAttitude, &qDiff, &qBuff);
         quaternionAdd(&qAttitude, &qBuff, &qAttitude);
         quaternionNormalize(&qAttitude);
-    }*/
+    }
 
     // compute caching products
     quaternionComputeProducts(&qAttitude, &qpAttitude);

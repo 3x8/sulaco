@@ -67,9 +67,6 @@
 
 FAST_RAM_ZERO_INIT acc_t acc;                       // acc access functions
 
-static float accumulatedMeasurements[XYZ_AXIS_COUNT];
-static int accumulatedMeasurementCount;
-
 static uint16_t calibratingA = 0;      // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
 
 extern uint16_t InflightcalibratingA;
@@ -479,19 +476,20 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     if (!acc.dev.readFn(&acc.dev)) {
         return;
     }
+
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         DEBUG_SET(DEBUG_ACCELEROMETER, axis, acc.dev.ADCRaw[axis]);
-        acc.accADC[axis] = acc.dev.ADCRaw[axis];
-    }
-    #ifndef USE_ACC_IMUF9001
-    alignSensors(acc.accADC, acc.dev.accAlign);
-    #endif
 
-    if (accLpfCutHz) {
-        for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
+        acc.accADC[axis] = acc.dev.ADCRaw[axis];
+
+        if (accLpfCutHz) {
             acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
         }
     }
+
+    #ifndef USE_ACC_IMUF9001
+    alignSensors(acc.accADC, acc.dev.accAlign);
+    #endif
 
     if (!accIsCalibrationComplete()) {
         performAccelerationCalibration(rollAndPitchTrims);
@@ -499,32 +497,24 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
         performInflightAccelerationCalibration(rollAndPitchTrims);
     }
 
-    acc.accADC[X] -= accelerationTrims->raw[X];
-    acc.accADC[Y] -= accelerationTrims->raw[Y];
-    acc.accADC[Z] -= accelerationTrims->raw[Z];
-
-    ++accumulatedMeasurementCount;
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        accumulatedMeasurements[axis] += acc.accADC[axis];
+        acc.accADC[axis] -= accelerationTrims->raw[axis];
     }
+
     acc.isAccelUpdatedAtLeastOnce = true;
 }
 
 bool accGetAverage(quaternion *vAverage) {
-  if (accumulatedMeasurementCount > 0) {
+  if (acc.isAccelUpdatedAtLeastOnce) {
     vAverage->w = 0;
-    vAverage->x = accumulatedMeasurements[X] / accumulatedMeasurementCount;
-    vAverage->y = accumulatedMeasurements[Y] / accumulatedMeasurementCount;
-    vAverage->z = accumulatedMeasurements[Z] / accumulatedMeasurementCount;
+    vAverage->x = acc.accADC[X];
+    vAverage->y = acc.accADC[Y];
+    vAverage->z = acc.accADC[Z];
 
-    for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-      accumulatedMeasurements[axis] = 0.0f;
-    }
-    accumulatedMeasurementCount = 0;
-    return true;
+    return (true);
   } else {
     quaternionInitVector(vAverage);
-    return false;
+    return (false);
   }
 }
 
