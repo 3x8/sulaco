@@ -320,7 +320,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
 }
 
 void imuUpdateAttitude(timeUs_t currentTimeUs) {
-    if (sensors(SENSOR_ACC) && acc.isAccelUpdatedAtLeastOnce) {
+    if (sensors(SENSOR_ACC) && acc.accUpdatedOnce) {
         IMU_LOCK;
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
         if (imuUpdated == false) {

@@ -55,7 +55,7 @@ typedef enum {
 typedef struct acc_s {
     accDev_t dev;
     float accADC[XYZ_AXIS_COUNT];
-    bool isAccelUpdatedAtLeastOnce;
+    bool accUpdatedOnce;
 } acc_t;
 
 extern acc_t acc;

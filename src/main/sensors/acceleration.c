@@ -489,11 +489,11 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
         acc.accADC[axis] -= accelerationTrims->raw[axis];
     }
 
-    acc.isAccelUpdatedAtLeastOnce = true;
+    acc.accUpdatedOnce = true;
 }
 
 bool accGetVector(quaternion *vAverage) {
-  if (acc.isAccelUpdatedAtLeastOnce) {
+  if (acc.accUpdatedOnce) {
     vAverage->w = 0;
     vAverage->x = acc.accADC[X];
     vAverage->y = acc.accADC[Y];
