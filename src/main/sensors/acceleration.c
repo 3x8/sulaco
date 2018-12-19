@@ -519,7 +519,7 @@ void accInitFilters(void) {
     }
 }
 
-bool accIsHealthy(quaternion *q) {
+bool accHealthy(quaternion *q) {
     // accept 10% deviation
     float accModulus = quaternionModulus(q);
     accModulus = accModulus / acc.dev.acc_1G;

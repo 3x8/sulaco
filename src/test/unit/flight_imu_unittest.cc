@@ -116,7 +116,7 @@ void performBaroCalibrationCycle(void) {}
 int32_t baroCalculateAltitude(void) { return 0; }
 bool gyroGetVector(quaternion *) { return false; }
 bool accGetVector(quaternion *) { return false; }
-bool accIsHealthy(quaternion *) { return false; }
+bool accHealthy(quaternion *) { return false; }
 bool compassGetAverage(quaternion *) { return false; }
 bool isBeeperOn(void){ return true; }
 }
