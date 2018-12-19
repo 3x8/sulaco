@@ -47,7 +47,8 @@
 
 #ifdef USE_ACC_IMUF9001
 #include "drivers/accgyro/accgyro_imuf9001.h"
-#endif //USE_ACC_IMUF9001
+#endif
+
 #include "drivers/bus_spi.h"
 
 #include "fc/config.h"
@@ -65,10 +66,10 @@
 #endif
 
 
-FAST_RAM_ZERO_INIT acc_t acc;                       // acc access functions
+FAST_RAM_ZERO_INIT acc_t acc;
 
-static uint16_t calibratingA = 0;      // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
-
+// the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
+static uint16_t calibratingA = 0;
 extern uint16_t InflightcalibratingA;
 extern bool AccInflightCalibrationMeasurementDone;
 extern bool AccInflightCalibrationSavetoEEProm;
@@ -81,33 +82,28 @@ static biquadFilter_t accFilter[XYZ_AXIS_COUNT];
 
 PG_REGISTER_WITH_RESET_FN(accelerometerConfig_t, accelerometerConfig, PG_ACCELEROMETER_CONFIG, 0);
 
-void resetRollAndPitchTrims(rollAndPitchTrims_t *rollAndPitchTrims)
-{
+void resetRollAndPitchTrims(rollAndPitchTrims_t *rollAndPitchTrims) {
     RESET_CONFIG_2(rollAndPitchTrims_t, rollAndPitchTrims,
         .values.roll = 0,
         .values.pitch = 0,
     );
 }
 
-void accResetRollAndPitchTrims(void)
-{
+void accResetRollAndPitchTrims(void) {
     resetRollAndPitchTrims(&accelerometerConfigMutable()->accelerometerTrims);
 }
 
-static void resetFlightDynamicsTrims(flightDynamicsTrims_t *accZero)
-{
+static void resetFlightDynamicsTrims(flightDynamicsTrims_t *accZero) {
     accZero->values.roll = 0;
     accZero->values.pitch = 0;
     accZero->values.yaw = 0;
 }
 
-void accResetFlightDynamicsTrims(void)
-{
+void accResetFlightDynamicsTrims(void) {
     resetFlightDynamicsTrims(&accelerometerConfigMutable()->accZero);
 }
 
-void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance)
-{
+void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance) {
     RESET_CONFIG_2(accelerometerConfig_t, instance,
         .acc_lpf_hz = 3,
         .acc_align = ALIGN_DEFAULT,
@@ -118,8 +114,7 @@ void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance)
     resetFlightDynamicsTrims(&instance->accZero);
 }
 
-bool accDetect(accDev_t *dev, accelerationSensor_e accHardwareToUse)
-{
+bool accDetect(accDev_t *dev, accelerationSensor_e accHardwareToUse) {
     accelerationSensor_e accHardware = ACC_NONE;
 
 #ifdef USE_ACC_ADXL345
@@ -320,12 +315,12 @@ retry:
     }
 
     if (accHardware == ACC_NONE) {
-        return false;
+        return (false);
     }
 
     detectedSensors[SENSOR_INDEX_ACC] = accHardware;
     sensorsSet(SENSOR_ACC);
-    return true;
+    return (true);
 }
 
 bool accInit(void)
@@ -347,7 +342,7 @@ bool accInit(void)
 #endif
 
     if (!accDetect(&acc.dev, accelerometerConfig()->acc_hardware)) {
-        return false;
+        return (false);
     }
     acc.dev.acc_1G = 256; // set default
     acc.dev.initFn(&acc.dev); // driver initialisation
@@ -362,7 +357,7 @@ bool accInit(void)
         acc.dev.accAlign = accelerometerConfig()->acc_align;
     }
     #endif //USE_ACC_IMUF9001
-    return true;
+    return (true);
 }
 
 void accSetCalibrationCycles(uint16_t calibrationCyclesRequired)
