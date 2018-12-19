@@ -323,8 +323,7 @@ retry:
     return (true);
 }
 
-bool accInit(void)
-{
+bool accInit(void) {
     memset(&acc, 0, sizeof(acc));
     // copy over the common gyro mpu settings
     acc.dev.bus = *gyroSensorBus();
@@ -360,28 +359,23 @@ bool accInit(void)
     return (true);
 }
 
-void accSetCalibrationCycles(uint16_t calibrationCyclesRequired)
-{
+void accSetCalibrationCycles(uint16_t calibrationCyclesRequired) {
     calibratingA = calibrationCyclesRequired;
 }
 
-bool accIsCalibrationComplete(void)
-{
+bool accIsCalibrationComplete(void) {
     return calibratingA == 0;
 }
 
-static bool isOnFinalAccelerationCalibrationCycle(void)
-{
+static bool isOnFinalAccelerationCalibrationCycle(void) {
     return calibratingA == 1;
 }
 
-static bool isOnFirstAccelerationCalibrationCycle(void)
-{
+static bool isOnFirstAccelerationCalibrationCycle(void) {
     return calibratingA == CALIBRATING_ACC_CYCLES;
 }
 
-static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrims)
-{
+static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
     static int32_t a[3];
 
     for (int axis = 0; axis < 3; axis++) {
@@ -413,8 +407,7 @@ static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrim
     calibratingA--;
 }
 
-static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrims)
-{
+static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
     static int32_t b[3];
     static int16_t accZero_saved[3] = { 0, 0, 0 };
     static rollAndPitchTrims_t angleTrim_saved = { { 0, 0 } };
@@ -527,8 +520,8 @@ void accInitFilters(void) {
 }
 
 bool accIsHealthy(quaternion *q) {
-    // accept 7% deviation
+    // accept 10% deviation
     float accModulus = quaternionModulus(q);
     accModulus = accModulus / acc.dev.acc_1G;
-    return ((0.93f < accModulus) && (accModulus < 1.07f));
+    return ((0.9f < accModulus) && (accModulus < 1.1f));
 }
