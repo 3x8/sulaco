@@ -72,14 +72,14 @@ attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
-    .dcm_kp = 7013,
-    .dcm_ki = 13,
+    .dcm_kp = 2503,
+    .dcm_ki = 0,
     .small_angle = 25
 );
 
 void imuConfigure(void) {
     imuRuntimeConfig.dcm_kp = imuConfig()->dcm_kp / 10000.0f;
-    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 1000000.0f;
+    imuRuntimeConfig.dcm_ki = imuConfig()->dcm_ki / 10000000.0f;
     imuRuntimeConfig.small_angle = imuConfig()->small_angle;
 }
 
@@ -95,13 +95,16 @@ void imuInit(void) {
 
 static float imuUseFastGains(void) {
 
+  //test
+  return (1.0f);
+
    if (!ARMING_FLAG(ARMED)) {
-        return (10.0f);
+        return (17.0f);
     }
     else {
         //onboard beeper influences vAcc
         if (isBeeperOn()) {
-          return (0.1f);
+          return (0.17f);
         } else {
           return (1.0f);
         }
@@ -224,6 +227,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     // Euler integration (q(n+1) is determined by a first-order Taylor expansion) (old betaflight method adapted)
     const float vKpKiModulus = quaternionModulus(&vKpKi);
     //ToDo replace constant deadband with a calibration computed vKpKiStdDevModulus
+    /*
     if ((vKpKiModulus >= vGyroModulus) && (vKpKiModulus >= 0.013f)) {
         qDiff.w = 0;
         qDiff.x = vKpKi.x * 0.5f * dt;
@@ -232,7 +236,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
         quaternionMultiply(&qAttitude, &qDiff, &qBuff);
         quaternionAdd(&qAttitude, &qBuff, &qAttitude);
         quaternionNormalize(&qAttitude);
-    }
+    }*/
 
     // compute caching products
     quaternionComputeProducts(&qAttitude, &qpAttitude);
