@@ -265,7 +265,7 @@ const busDevice_t *gyroSensorBus(void)
         return &gyroSensor1.gyroDev.bus;
     }
 #else
-    return &gyroSensor2.gyroDev.bus;
+    return &gyroSensor1.gyroDev.bus;
 #endif
 }
 
