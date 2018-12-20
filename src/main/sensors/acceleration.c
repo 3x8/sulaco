@@ -494,9 +494,9 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
 
-    acc.accADC[X] = (acc.accADC[X] - accelerationTrims->raw[X]) * (2048.0f/ 2063.0f);
-    acc.accADC[Y] = (acc.accADC[Y] - accelerationTrims->raw[Y]) * (2048.0f/ 2048.0f);
-    acc.accADC[Z] = (acc.accADC[Z] - accelerationTrims->raw[Z]) * (2048.0f/ 2079.0f);
+    acc.accADC[X] = (acc.accADC[X] - accelerationTrims->raw[X]) * (2048.0f / accelerationTrims->raw[3]);
+    acc.accADC[Y] = (acc.accADC[Y] - accelerationTrims->raw[Y]) * (2048.0f / accelerationTrims->raw[4]);
+    acc.accADC[Z] = (acc.accADC[Z] - accelerationTrims->raw[Z]) * (2048.0f / accelerationTrims->raw[5]);
 
 
     acc.accUpdatedOnce = true;
