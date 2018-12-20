@@ -467,7 +467,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
-    float accCalibrationFactor[3] = {(acc.dev.acc_1G / accelerationTrims->raw[3]), (acc.dev.acc_1G / accelerationTrims->raw[4]),(acc.dev.acc_1G / accelerationTrims->raw[5])};
+    //float accCalibrationFactor[3] = {(acc.dev.acc_1G / accelerationTrims->raw[3]), (acc.dev.acc_1G / accelerationTrims->raw[4]), (acc.dev.acc_1G / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
         return;
@@ -496,7 +496,8 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
       DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
-      acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
+      //acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
+      acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * (acc.dev.acc_1G / accelerationTrims->raw[axis + 3]);
     }
     DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
 
