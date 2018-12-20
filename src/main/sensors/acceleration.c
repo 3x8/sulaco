@@ -477,6 +477,8 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
             acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
         }
     }
+    DEBUG_SET(DEBUG_ACC_RAW, 3, acc.dev.acc_1G);
+
 
     #ifndef USE_ACC_IMUF9001
     alignSensors(acc.accADC, acc.dev.accAlign);
@@ -492,6 +494,7 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
       DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
       acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
     }
+    DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
 
     acc.accUpdatedOnce = true;
 }
