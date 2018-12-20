@@ -497,7 +497,7 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
       DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
       //acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
-      acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * (acc.dev.acc_1G / accelerationTrims->raw[axis + 3]);
+      acc.accADC[axis] = (acc.accADC[axis] - (float)accelerationTrims->raw[axis]) * ((float)acc.dev.acc_1G / (float)accelerationTrims->raw[axis + 3]);
     }
     DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
 
