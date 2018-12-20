@@ -97,6 +97,9 @@ static void resetFlightDynamicsTrims(flightDynamicsTrims_t *accZero) {
     accZero->values.roll = 0;
     accZero->values.pitch = 0;
     accZero->values.yaw = 0;
+    accZero->raw[FACTOR_X] = 2048;
+    accZero->raw[FACTOR_Y] = 2048;
+    accZero->raw[FACTOR_Z] = 2048;
 }
 
 void accResetFlightDynamicsTrims(void) {
@@ -490,13 +493,15 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
       //test
       DEBUG_SET(DEBUG_ACCELEROMETER, axis, lrintf(acc.accADC[axis]));
 
+      acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * (2048.0f / accelerationTrims->raw[axis + 3]);
+
         //acc.accADC[axis] -= accelerationTrims->raw[axis];
     }
 
-
+    /*
     acc.accADC[X] = (acc.accADC[X] - accelerationTrims->raw[X]) * (2048.0f / accelerationTrims->raw[3]);
     acc.accADC[Y] = (acc.accADC[Y] - accelerationTrims->raw[Y]) * (2048.0f / accelerationTrims->raw[4]);
-    acc.accADC[Z] = (acc.accADC[Z] - accelerationTrims->raw[Z]) * (2048.0f / accelerationTrims->raw[5]);
+    acc.accADC[Z] = (acc.accADC[Z] - accelerationTrims->raw[Z]) * (2048.0f / accelerationTrims->raw[5]);*/
 
 
     acc.accUpdatedOnce = true;
