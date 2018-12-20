@@ -97,6 +97,9 @@ static void resetFlightDynamicsTrims(flightDynamicsTrims_t *accZero) {
     accZero->values.roll = 0;
     accZero->values.pitch = 0;
     accZero->values.yaw = 0;
+    accZero->raw[FACTOR_X] = 2048;
+    accZero->raw[FACTOR_Y] = 2048;
+    accZero->raw[FACTOR_Z] = 2048;
 }
 
 void accResetFlightDynamicsTrims(void) {
@@ -462,14 +465,14 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
+    const float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
         return;
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        DEBUG_SET(DEBUG_ACCELEROMETER, axis, acc.dev.ADCRaw[axis]);
-
+        DEBUG_SET(DEBUG_ACC_RAW, axis, acc.dev.ADCRaw[axis]);
         acc.accADC[axis] = acc.dev.ADCRaw[axis];
 
         if (accLpfCutHz) {
@@ -488,7 +491,8 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        acc.accADC[axis] -= accelerationTrims->raw[axis];
+      DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
+      acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
     }
 
     acc.accUpdatedOnce = true;
