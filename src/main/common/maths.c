@@ -165,13 +165,12 @@ float devStandardDeviation(stdev_t *dev)
     return sqrtf(devVariance(dev));
 }
 
-float degreesToRadians(int16_t degrees)
-{
-    return degrees * RAD;
+float degreesToRadians(int16_t degrees){
+    return (degrees * RAD);
 }
 
 float deciDegreesToRadians(int16_t degrees) {
-    return degrees / 10.0f  * RAD;
+    return (degrees * 0.1f  * RAD);
 }
 
 int scaleRange(int x, int srcFrom, int srcTo, int destFrom, int destTo) {
