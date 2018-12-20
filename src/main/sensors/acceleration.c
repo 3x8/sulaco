@@ -463,7 +463,6 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
-
     const float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
@@ -491,9 +490,7 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
       DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
-      //acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * (2048.0f / accelerationTrims->raw[axis + 3]);
       acc.accADC[axis] = (acc.accADC[axis] - accelerationTrims->raw[axis]) * accCalibrationFactor[axis];
-
     }
 
     acc.accUpdatedOnce = true;
