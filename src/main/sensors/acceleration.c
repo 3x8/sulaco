@@ -467,7 +467,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
-    float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
+    float accCalibrationFactor[3] = {(acc.dev.acc_1G / accelerationTrims->raw[3]), (acc.dev.acc_1G / accelerationTrims->raw[4]),(acc.dev.acc_1G / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
         return;
