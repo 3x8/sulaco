@@ -464,9 +464,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
 
-    const float accCalibrationFactor[0] = (2048.0f / accelerationTrims->raw[3];
-    const float accCalibrationFactor[1] = (2048.0f / accelerationTrims->raw[4];
-    const float accCalibrationFactor[2] = (2048.0f / accelerationTrims->raw[5];
+    const float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
         return;
