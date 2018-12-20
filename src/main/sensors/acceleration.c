@@ -466,7 +466,7 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        DEBUG_SET(DEBUG_ACCELEROMETER, axis, acc.dev.ADCRaw[axis]);
+        //DEBUG_SET(DEBUG_ACCELEROMETER, axis, acc.dev.ADCRaw[axis]);
 
         acc.accADC[axis] = acc.dev.ADCRaw[axis];
 
@@ -486,6 +486,10 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
+
+      //test
+      DEBUG_SET(DEBUG_ACCELEROMETER, axis, lrintf(acc.accADC[axis]));
+
         acc.accADC[axis] -= accelerationTrims->raw[axis];
     }
 
