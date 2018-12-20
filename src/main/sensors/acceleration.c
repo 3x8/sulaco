@@ -97,9 +97,9 @@ static void resetFlightDynamicsTrims(flightDynamicsTrims_t *accZero) {
     accZero->values.roll = 0;
     accZero->values.pitch = 0;
     accZero->values.yaw = 0;
-    accZero->raw[FACTOR_X] = 2048;
-    accZero->raw[FACTOR_Y] = 2048;
-    accZero->raw[FACTOR_Z] = 2048;
+    accZero->raw[FACTOR_X] = acc.dev.acc_1G;
+    accZero->raw[FACTOR_Y] = acc.dev.acc_1G;
+    accZero->raw[FACTOR_Z] = acc.dev.acc_1G;
 }
 
 void accResetFlightDynamicsTrims(void) {
@@ -402,6 +402,10 @@ static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrim
         accelerationTrims->raw[Y] = a[Y] / CALIBRATING_ACC_CYCLES;
         accelerationTrims->raw[Z] = a[Z] / CALIBRATING_ACC_CYCLES - acc.dev.acc_1G;
 
+        accelerationTrims->raw[FACTOR_X] = acc.dev.acc_1G;
+        accelerationTrims->raw[FACTOR_Y] = acc.dev.acc_1G;
+        accelerationTrims->raw[FACTOR_Z] = acc.dev.acc_1G;
+
         resetRollAndPitchTrims(rollAndPitchTrims);
 
         saveConfigAndNotify();
@@ -463,7 +467,7 @@ static void performInflightAccelerationCalibration(rollAndPitchTrims_t *rollAndP
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     UNUSED(currentTimeUs);
-    const float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
+    float accCalibrationFactor[3] = {(2048.0f / accelerationTrims->raw[3]), (2048.0f / accelerationTrims->raw[4]),(2048.0f / accelerationTrims->raw[5])};
 
     if (!acc.dev.readFn(&acc.dev)) {
         return;
