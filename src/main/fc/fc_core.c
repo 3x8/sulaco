@@ -420,29 +420,6 @@ void tryArm(void)
     }
 }
 
-// Automatic ACC Offset Calibration
-bool AccInflightCalibrationArmed = false;
-bool AccInflightCalibrationMeasurementDone = false;
-bool AccInflightCalibrationSavetoEEProm = false;
-bool AccInflightCalibrationActive = false;
-uint16_t InflightcalibratingA = 0;
-
-void handleInflightCalibrationStickPosition(void)
-{
-    if (AccInflightCalibrationMeasurementDone) {
-        // trigger saving into eeprom after landing
-        AccInflightCalibrationMeasurementDone = false;
-        AccInflightCalibrationSavetoEEProm = true;
-    } else {
-        AccInflightCalibrationArmed = !AccInflightCalibrationArmed;
-        if (AccInflightCalibrationArmed) {
-            beeper(BEEPER_ACC_CALIBRATION);
-        } else {
-            beeper(BEEPER_ACC_CALIBRATION_FAIL);
-        }
-    }
-}
-
 #if defined(USE_GPS) || defined(USE_MAG)
 void updateMagHold(void)
 {

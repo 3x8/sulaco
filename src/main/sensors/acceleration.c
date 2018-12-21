@@ -69,11 +69,7 @@
 FAST_RAM_ZERO_INIT acc_t acc;
 
 // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
-static uint16_t calibratingA = 0;
-extern uint16_t InflightcalibratingA;
-extern bool AccInflightCalibrationMeasurementDone;
-extern bool AccInflightCalibrationSavetoEEProm;
-extern bool AccInflightCalibrationActive;
+static uint16_t accCalibrationCyclesToDo = 0;
 
 static flightDynamicsTrims_t *accelerationTrims;
 
@@ -367,19 +363,19 @@ bool accInit(void) {
 }
 
 void accSetCalibrationCycles(uint16_t calibrationCyclesRequired) {
-    calibratingA = calibrationCyclesRequired;
+    accCalibrationCyclesToDo = calibrationCyclesRequired;
 }
 
 bool accCalibrationComplete(void) {
-    return calibratingA == 0;
+    return accCalibrationCyclesToDo == 0;
 }
 
 static bool accCalibrationFinalCycle(void) {
-    return calibratingA == 1;
+    return accCalibrationCyclesToDo == 1;
 }
 
 static bool accCalibrationFirstCycle(void) {
-    return calibratingA == CALIBRATING_ACC_CYCLES;
+    return accCalibrationCyclesToDo == CALIBRATING_ACC_CYCLES;
 }
 
 static void accRunCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
@@ -409,7 +405,7 @@ static void accRunCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
         resetRollAndPitchTrims(rollAndPitchTrims);
         saveConfigAndNotify();
     }
-    calibratingA--;
+    accCalibrationCyclesToDo--;
 }
 
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
