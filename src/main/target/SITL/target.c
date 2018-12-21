@@ -137,9 +137,9 @@ void updateState(const fdm_packet* pkt) {
     double t3 = +2.0 * (qw * qz + qx * qy);
     double t4 = +1.0 - 2.0 * (ysqr + qz * qz);
     zf = atan2(t3, t4) * RAD2DEG;
-    imuSetAttitudeRPY(xf, -yf, zf); // yes! pitch was inverted!!
+    imuSetAttitudeEuler(xf, -yf, zf); // yes! pitch was inverted!!
 #else
-    imuSetAttitudeQuat(pkt->imu_orientation_quat[0], pkt->imu_orientation_quat[1], pkt->imu_orientation_quat[2], pkt->imu_orientation_quat[3]);
+    imuSetAttitudeQuaternion(pkt->imu_orientation_quat[0], pkt->imu_orientation_quat[1], pkt->imu_orientation_quat[2], pkt->imu_orientation_quat[3]);
 #endif
 #endif
 

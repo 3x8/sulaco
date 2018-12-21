@@ -344,7 +344,7 @@ float getCosTiltAngle(void) {
 }
 
 #ifdef SIMULATOR_BUILD
-void imuSetAttitudeRPY(float roll, float pitch, float yaw) {
+void imuSetAttitudeEuler(float roll, float pitch, float yaw) {
     IMU_LOCK;
 
     attitude.values.roll = roll * 10;
@@ -354,7 +354,7 @@ void imuSetAttitudeRPY(float roll, float pitch, float yaw) {
     IMU_UNLOCK;
 }
 
-void imuSetAttitudeQuat(float w, float x, float y, float z) {
+void imuSetAttitudeQuaternion(float w, float x, float y, float z) {
     IMU_LOCK;
 
     qAttitude.w = w;
@@ -379,7 +379,7 @@ void imuSetHasNewData(uint32_t dt) {
 #endif
 
 // HEADFREE HEADADJ allowed for tilt below 37°
-bool imuQuaternionHeadfreeOffsetSet(void) {
+bool imuSetHeadfreeOffsetQuaternion(void) {
     if ((ABS(getCosTiltAngle()) > 0.8f)) {
         const float yawHalf = atan2f((+2.0f * (qpAttitude.wz + qpAttitude.xy)), (+1.0f - 2.0f * (qpAttitude.yy + qpAttitude.zz))) / 2.0f;
         qOffset.w = cosf(yawHalf);

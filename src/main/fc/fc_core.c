@@ -384,7 +384,7 @@ void tryArm(void)
             ENABLE_ARMING_FLAG(WAS_ARMED_WITH_PREARM);
         }
         if (sensors(SENSOR_ACC)){
-            imuQuaternionHeadfreeOffsetSet();
+            imuSetHeadfreeOffsetQuaternion();
         }
 
         disarmAt = currentTimeUs + armingConfig()->auto_disarm_delay * 1e6;   // start disarm timeout, will be extended when throttle is nonzero
@@ -777,7 +777,7 @@ bool processRx(timeUs_t currentTimeUs)
             DISABLE_FLIGHT_MODE(HEADFREE_MODE);
         }
         if (IS_RC_MODE_ACTIVE(BOXHEADADJ)) {
-            if (imuQuaternionHeadfreeOffsetSet()){
+            if (imuSetHeadfreeOffsetQuaternion()){
                beeper(BEEPER_RX_SET);
             }
         }
