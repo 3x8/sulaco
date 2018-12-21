@@ -368,24 +368,24 @@ void accSetCalibrationCycles(uint16_t calibrationCyclesRequired) {
     calibratingA = calibrationCyclesRequired;
 }
 
-bool accIsCalibrationComplete(void) {
+bool accCalibrationComplete(void) {
     return calibratingA == 0;
 }
 
-static bool isOnFinalAccelerationCalibrationCycle(void) {
+static bool accCalibrationFinalCycle(void) {
     return calibratingA == 1;
 }
 
-static bool isOnFirstAccelerationCalibrationCycle(void) {
+static bool accCalibrationFirstCycle(void) {
     return calibratingA == CALIBRATING_ACC_CYCLES;
 }
 
-static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
+static void accRunCalibration(rollAndPitchTrims_t *rollAndPitchTrims) {
     // low precision 1 point calibration
     static int32_t accCalibrationBuffer[3];
 
     for (int axis = 0; axis < 3; axis++) {
-        if (isOnFirstAccelerationCalibrationCycle()) {
+        if (accCalibrationFirstCycle()) {
             accCalibrationBuffer[axis] = 0;
         }
 
@@ -396,7 +396,7 @@ static void performAccelerationCalibration(rollAndPitchTrims_t *rollAndPitchTrim
         accelerationTrims->raw[axis] = 0;
     }
 
-    if (isOnFinalAccelerationCalibrationCycle()) {
+    if (accCalibrationFinalCycle()) {
         accelerationTrims->raw[X] = accCalibrationBuffer[X] / CALIBRATING_ACC_CYCLES;
         accelerationTrims->raw[Y] = accCalibrationBuffer[Y] / CALIBRATING_ACC_CYCLES;
         accelerationTrims->raw[Z] = accCalibrationBuffer[Z] / CALIBRATING_ACC_CYCLES - acc.dev.acc_1G;
@@ -427,13 +427,12 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
     DEBUG_SET(DEBUG_ACC_RAW, 3, acc.dev.acc_1G);
 
-
     #ifndef USE_ACC_IMUF9001
     alignSensors(acc.accADC, acc.dev.accAlign);
     #endif
 
-    if (!accIsCalibrationComplete()) {
-        performAccelerationCalibration(rollAndPitchTrims);
+    if (!accCalibrationComplete()) {
+        accRunCalibration(rollAndPitchTrims);
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
@@ -458,7 +457,7 @@ bool accGetVector(quaternion *vAverage) {
     }
 }
 
-void setAccelerationTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
+void accSetTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
     accelerationTrims = accelerationTrimsToUse;
 }
 

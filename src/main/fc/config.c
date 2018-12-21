@@ -139,7 +139,7 @@ static void activateConfig(void)
     useAdjustmentConfig(currentPidProfile);
 
     failsafeReset();
-    setAccelerationTrims(&accelerometerConfigMutable()->accZero);
+    accSetTrims(&accelerometerConfigMutable()->accZero);
     accInitFilters();
 
     imuConfigure();

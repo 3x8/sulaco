@@ -804,7 +804,7 @@ extern "C" {
     void systemBeep(bool) {}
     void saveConfigAndNotify(void) {}
     void blackboxFinish(void) {}
-    bool accIsCalibrationComplete(void) { return true; }
+    bool accCalibrationComplete(void) { return true; }
     bool isBaroCalibrationComplete(void) { return true; }
     bool isGyroCalibrationComplete(void) { return gyroCalibDone; }
     void gyroStartCalibration(bool) {}
