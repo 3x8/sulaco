@@ -83,12 +83,12 @@ typedef struct accelerometerConfig_s {
 PG_DECLARE(accelerometerConfig_t, accelerometerConfig);
 
 bool accInit(void);
-bool accIsCalibrationComplete(void);
+bool accCalibrationComplete(void);
 void accSetCalibrationCycles(uint16_t calibrationCyclesRequired);
 void resetRollAndPitchTrims(rollAndPitchTrims_t *rollAndPitchTrims);
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims);
 bool accGetVector(quaternion *average);
 union flightDynamicsTrims_u;
-void setAccelerationTrims(union flightDynamicsTrims_u *accelerationTrimsToUse);
+void accSetTrims(union flightDynamicsTrims_u *accelerationTrimsToUse);
 void accInitFilters(void);
 bool accHealthy(quaternion *q);

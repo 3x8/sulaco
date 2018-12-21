@@ -52,11 +52,11 @@ float getCosTiltAngle(void);
 void imuUpdateAttitude(timeUs_t currentTimeUs);
 
 #ifdef SIMULATOR_BUILD
-void imuSetAttitudeRPY(float roll, float pitch, float yaw);
-void imuSetAttitudeQuat(float w, float x, float y, float z);
+void imuSetAttitudeEuler(float roll, float pitch, float yaw);
+void imuSetAttitudeQuaternion(float w, float x, float y, float z);
 #if defined(SIMULATOR_IMU_SYNC)
 void imuSetHasNewData(uint32_t dt);
 #endif
 #endif
 
-bool imuQuaternionHeadfreeOffsetSet(void);
+bool imuSetHeadfreeOffsetQuaternion(void);

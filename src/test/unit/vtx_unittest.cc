@@ -126,7 +126,7 @@ extern "C" {
     void systemBeep(bool) {}
     void saveConfigAndNotify(void) {}
     void blackboxFinish(void) {}
-    bool accIsCalibrationComplete(void) { return true; }
+    bool accCalibrationComplete(void) { return true; }
     bool isBaroCalibrationComplete(void) { return true; }
     bool isGyroCalibrationComplete(void) { return gyroCalibDone; }
     void gyroStartCalibration(bool) {}
@@ -167,7 +167,7 @@ extern "C" {
     void changeControlRateProfile(uint8_t) {}
     void dashboardEnablePageCycling(void) {}
     void dashboardDisablePageCycling(void) {}
-    bool imuQuaternionHeadfreeOffsetSet(void) { return true; }
+    bool imuSetHeadfreeOffsetQuaternion(void) { return true; }
     void rescheduleTask(cfTaskId_e, uint32_t) {}
     bool usbCableIsInserted(void) { return false; }
     bool usbVcpIsConnected(void) { return false; }
