@@ -443,22 +443,6 @@ void handleInflightCalibrationStickPosition(void)
     }
 }
 
-static void updateInflightCalibrationState(void)
-{
-    if (AccInflightCalibrationArmed && ARMING_FLAG(ARMED) && rcData[THROTTLE] > rxConfig()->mincheck && !IS_RC_MODE_ACTIVE(BOXARM)) {   // Copter is airborne and you are turning it off via boxarm : start measurement
-        InflightcalibratingA = 50;
-        AccInflightCalibrationArmed = false;
-    }
-    if (IS_RC_MODE_ACTIVE(BOXCALIB)) {      // Use the Calib Option to activate : Calib = TRUE measurement started, Land and Calib = 0 measurement stored
-        if (!AccInflightCalibrationActive && !AccInflightCalibrationMeasurementDone)
-            InflightcalibratingA = 50;
-        AccInflightCalibrationActive = true;
-    } else if (AccInflightCalibrationMeasurementDone && !ARMING_FLAG(ARMED)) {
-        AccInflightCalibrationMeasurementDone = false;
-        AccInflightCalibrationSavetoEEProm = true;
-    }
-}
-
 #if defined(USE_GPS) || defined(USE_MAG)
 void updateMagHold(void)
 {
