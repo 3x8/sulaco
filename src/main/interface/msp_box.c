@@ -233,10 +233,6 @@ void initActiveBoxIds(void)
         BME(BOXCAMSTAB);
     }
 
-    if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
-        BME(BOXCALIB);
-    }
-
     BME(BOXOSD);
 
 #ifdef USE_TELEMETRY

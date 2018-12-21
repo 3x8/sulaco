@@ -715,10 +715,6 @@ bool processRx(timeUs_t currentTimeUs)
 
     processRcStickPositions();
 
-    if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
-        updateInflightCalibrationState();
-    }
-
     updateActivatedModes();
 
 #ifdef USE_DSHOT
@@ -1017,7 +1013,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     //gyroUpdateSensor in gyro.c is called by gyroUpdate
     gyroUpdate(currentTimeUs);
     DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
-    
+
     if (pidUpdateCountdown) {
         pidUpdateCountdown--;
     } else {
