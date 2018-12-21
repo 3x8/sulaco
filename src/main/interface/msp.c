@@ -1258,7 +1258,6 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
         sbufWriteU8(dst, gyroConfig()->gyro_high_fsr);
         sbufWriteU8(dst, gyroConfig()->gyroMovementCalibrationThreshold);
         sbufWriteU16(dst, gyroConfig()->gyroCalibrationDuration);
-        sbufWriteU16(dst, gyroConfig()->gyro_offset_yaw);
         sbufWriteU8(dst, gyroConfig()->checkOverflow);
 
         break;
@@ -1810,7 +1809,6 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
             gyroConfigMutable()->gyro_high_fsr = sbufReadU8(src);
             gyroConfigMutable()->gyroMovementCalibrationThreshold = sbufReadU8(src);
             gyroConfigMutable()->gyroCalibrationDuration = sbufReadU16(src);
-            gyroConfigMutable()->gyro_offset_yaw = sbufReadU16(src);
             gyroConfigMutable()->checkOverflow = sbufReadU8(src);
         }
 

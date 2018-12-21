@@ -223,7 +223,6 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .imuf_roll_af = IMUF_DEFAULT_ROLL_AF,
     .imuf_pitch_af = IMUF_DEFAULT_PITCH_AF,
     .imuf_yaw_af = IMUF_DEFAULT_YAW_AF,
-    .gyro_offset_yaw = 0,
 );
 #else //USE_GYRO_IMUF9001
 PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
@@ -247,7 +246,6 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .checkOverflow = GYRO_OVERFLOW_CHECK_ALL_AXES,
     .gyro_filter_q = 400,
     .gyro_filter_r = 88,
-    .gyro_offset_yaw = 0,
     .yaw_spin_recovery = true,
     .yaw_spin_threshold = 1950,
     .dyn_notch_quality = 70,
@@ -942,11 +940,7 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
                 return;
             }
 
-            // please take care with exotic boardalignment !!
             gyroSensor->gyroDev.gyroZero[axis] = gyroSensor->calibration.sum[axis] / gyroCalculateCalibratingCycles();
-            if (axis == Z) {
-              gyroSensor->gyroDev.gyroZero[axis] -= ((float)gyroConfig()->gyro_offset_yaw / 100);
-            }
         }
     }
 
