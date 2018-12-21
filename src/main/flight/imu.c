@@ -107,7 +107,7 @@ static float imuUseFastGains(void) {
 
 #ifndef SITL
 #if (defined(USE_MAG) || defined(USE_GPS))
-static void applyVectorError(float ez_ef, quaternion *vError) {
+static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
     // Rotate mag error vector back to BF and accumulate
     vError->x += (2.0f * (qpAttitude.xz + -qpAttitude.wy)) * ez_ef;
     vError->y += (2.0f * (qpAttitude.yz - -qpAttitude.wx)) * ez_ef;
@@ -115,7 +115,7 @@ static void applyVectorError(float ez_ef, quaternion *vError) {
 }
 #endif
 
-static void accCalculateErrorVector(quaternion *vAcc, quaternion *vError) {
+static void imuCalculateAccErrorVector(quaternion *vAcc, quaternion *vError) {
     quaternionNormalize(vAcc);
     // Error is sum of cross product between estimated direction and measured direction of gravity
     vError->x += (vAcc->y * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) - vAcc->z * (2.0f * (qpAttitude.yz - -qpAttitude.wx)));
@@ -123,7 +123,7 @@ static void accCalculateErrorVector(quaternion *vAcc, quaternion *vError) {
     vError->z += (vAcc->x * (2.0f * (qpAttitude.yz - -qpAttitude.wx)) - vAcc->y * (2.0f * (qpAttitude.xz + -qpAttitude.wy)));
 }
 
-static void gpsMagCorrection(quaternion *vError) {
+static void imuGpsMagCorrection(quaternion *vError) {
 #if (!defined(USE_MAG) && !defined(USE_GPS))
     UNUSED(vError);
 #endif
@@ -153,7 +153,7 @@ static void gpsMagCorrection(quaternion *vError) {
         // (cos(COG), sin(COG)) - reference heading vector (EF)
         // error is cross product between reference heading and estimated heading (calculated in EF)
         courseOverGround = -sinf(courseOverGround) * (1.0f - 2.0f * qpAttitude.yy - 2.0f * qpAttitude.zz) - cosf(courseOverGround) * (2.0f * (qpAttitude.xy - -qpAttitude.wz));
-        applyVectorError(courseOverGround, vError);
+        imuCalculateErrorVector(courseOverGround, vError);
     }
 #endif
 
@@ -174,14 +174,14 @@ static void gpsMagCorrection(quaternion *vError) {
         const float bx = sqrtf(sq(hx) + sq(hy));
 
         // magnetometer error is cross product between estimated magnetic north and measured magnetic north (calculated in EF)
-        applyVectorError(-(float)(hy * bx), vError);
+        imuCalculateErrorVector(-(float)(hy * bx), vError);
       }
     }
 #endif
 }
 #endif
 
-static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError) {
+static void imuAhrsUpdate(float dt, quaternion *vGyro, quaternion *vError) {
     quaternion vKpKi = VECTOR_INITIALIZE;
     static quaternion vIntegralFB = VECTOR_INITIALIZE;
     quaternion qBuff, qDiff;
@@ -239,7 +239,7 @@ static void imuMahonyAHRSupdate(float dt, quaternion *vGyro, quaternion *vError)
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU3, lrintf(vGyroStdDevModulus * 1000));
 }
 
-STATIC_UNIT_TESTED void imuUpdateEulerAngles(void) {
+STATIC_UNIT_TESTED void imuUpdateEuler(void) {
     quaternionProducts buffer;
 
     if (FLIGHT_MODE(HEADFREE_MODE)) {
@@ -264,13 +264,13 @@ STATIC_UNIT_TESTED void imuUpdateEulerAngles(void) {
     }
 }
 
-static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
+static void imuCalculateAttitude(timeUs_t currentTimeUs) {
     static timeUs_t previousIMUUpdateTime;
     const timeDelta_t deltaT = currentTimeUs - previousIMUUpdateTime;
     previousIMUUpdateTime = currentTimeUs;
 
 #if defined(SIMULATOR_BUILD) && defined(SKIP_IMU_CALC)
-    UNUSED(imuMahonyAHRSupdate);
+    UNUSED(imuAhrsUpdate);
 #else
 
 #if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
@@ -290,19 +290,19 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
     accGetVector(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accHealthy(&vAccAverage)) {
-        accCalculateErrorVector(&vAccAverage, &vError);
+        imuCalculateAccErrorVector(&vAccAverage, &vError);
     } else {
         quaternionInitVector(&vError);
     }
 
-    gpsMagCorrection(&vError);
+    imuGpsMagCorrection(&vError);
 
-    imuMahonyAHRSupdate(deltaT * 1e-6f, &vGyroAverage, &vError);
+    imuAhrsUpdate(deltaT * 1e-6f, &vGyroAverage, &vError);
 #ifdef USE_GYRO_IMUF9001
     } else {
         UNUSED(deltaT);
-        UNUSED(accCalculateErrorVector);
-        UNUSED(imuMahonyAHRSupdate);
+        UNUSED(imuCalculateAccErrorVector);
+        UNUSED(imuAhrsUpdate);
 
         qAttitude.w = imufQuat.w;
         qAttitude.x = imufQuat.x;
@@ -316,7 +316,7 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs) {
         quaternionComputeProducts(&qAttitude, &qpAttitude);
     }
 #endif
-    imuUpdateEulerAngles();
+    imuUpdateEuler();
 #endif
 }
 
@@ -330,7 +330,7 @@ void imuUpdateAttitude(timeUs_t currentTimeUs) {
         }
         imuUpdated = false;
 #endif
-        imuCalculateEstimatedAttitude(currentTimeUs);
+        imuCalculateAttitude(currentTimeUs);
         IMU_UNLOCK;
     } else {
         acc.accADC[X] = 0;
@@ -362,7 +362,7 @@ void imuSetAttitudeQuaternion(float w, float x, float y, float z) {
     qAttitude.y = y;
     qAttitude.z = z;
 
-    imuUpdateEulerAngles();
+    imuUpdateEuler();
 
     IMU_UNLOCK;
 }

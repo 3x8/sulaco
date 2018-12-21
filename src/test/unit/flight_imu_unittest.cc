@@ -54,7 +54,7 @@ extern "C" {
     #include "sensors/gyro.h"
     #include "sensors/sensors.h"
 
-    void imuUpdateEulerAngles(void);
+    void imuUpdateEuler(void);
 
     PG_REGISTER(rcControlsConfig_t, rcControlsConfig, PG_RC_CONTROLS_CONFIG, 0);
     PG_REGISTER(barometerConfig_t, barometerConfig, PG_BAROMETER_CONFIG, 0);
