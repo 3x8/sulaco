@@ -289,7 +289,7 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
 
     accGetVector(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
-    if (accHealthy(&vAccAverage)) {
+    if (accIsHealthy(&vAccAverage)) {
         imuCalculateAccErrorVector(&vAccAverage, &vError);
     } else {
         quaternionInitVector(&vError);
