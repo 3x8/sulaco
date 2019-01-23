@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include "common/time.h"
@@ -28,7 +8,7 @@
 
 #ifndef DEFAULT_ACC_SAMPLE_INTERVAL
 #define DEFAULT_ACC_SAMPLE_INTERVAL 1000
-#endif //DEFAULT_ACC_SAMPLE_INTERVAL 1000
+#endif
 
 // Type of accelerometer used/detected
 typedef enum {
@@ -55,7 +35,7 @@ typedef enum {
 typedef struct acc_s {
     accDev_t dev;
     float accADC[XYZ_AXIS_COUNT];
-    bool isAccelUpdatedAtLeastOnce;
+    bool accUpdatedOnce;
 } acc_t;
 
 extern acc_t acc;
@@ -72,9 +52,9 @@ typedef union rollAndPitchTrims_u {
 
 
 typedef struct accelerometerConfig_s {
-    uint16_t acc_lpf_hz;                    // cutoff frequency for the low pass filter used on the acc z-axis for althold in Hz
-    sensor_align_e acc_align;               // acc alignment
-    uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
+    uint16_t acc_lpf_hz;
+    sensor_align_e acc_align;
+    uint8_t acc_hardware;
     bool acc_high_fsr;
     flightDynamicsTrims_t accZero;
     rollAndPitchTrims_t accelerometerTrims;
@@ -83,12 +63,12 @@ typedef struct accelerometerConfig_s {
 PG_DECLARE(accelerometerConfig_t, accelerometerConfig);
 
 bool accInit(void);
-bool accIsCalibrationComplete(void);
+bool accCalibrationComplete(void);
 void accSetCalibrationCycles(uint16_t calibrationCyclesRequired);
 void resetRollAndPitchTrims(rollAndPitchTrims_t *rollAndPitchTrims);
 void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims);
-bool accGetAverage(quaternion *average);
+bool accGetVector(quaternion *average);
 union flightDynamicsTrims_u;
-void setAccelerationTrims(union flightDynamicsTrims_u *accelerationTrimsToUse);
+void accSetTrims(union flightDynamicsTrims_u *accelerationTrimsToUse);
 void accInitFilters(void);
 bool accIsHealthy(quaternion *q);

@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -93,6 +73,8 @@
 #ifdef USE_HARDWARE_REVISION_DETECTION
 #include "hardware_revision.h"
 #endif
+
+#include "flight/imu.h"
 
 #if ((FLASH_SIZE > 128) && (defined(USE_GYRO_SPI_ICM20601) || defined(USE_GYRO_SPI_ICM20689) || defined(USE_GYRO_SPI_MPU6500)))
 #define USE_GYRO_SLEW_LIMITER
@@ -241,7 +223,6 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .imuf_roll_af = IMUF_DEFAULT_ROLL_AF,
     .imuf_pitch_af = IMUF_DEFAULT_PITCH_AF,
     .imuf_yaw_af = IMUF_DEFAULT_YAW_AF,
-    .gyro_offset_yaw = 0,
 );
 #else //USE_GYRO_IMUF9001
 PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
@@ -265,7 +246,6 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .checkOverflow = GYRO_OVERFLOW_CHECK_ALL_AXES,
     .gyro_filter_q = 400,
     .gyro_filter_r = 88,
-    .gyro_offset_yaw = 0,
     .yaw_spin_recovery = true,
     .yaw_spin_threshold = 1950,
     .dyn_notch_quality = 70,
@@ -277,7 +257,9 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
 const busDevice_t *gyroSensorBus(void)
 {
 #ifdef USE_DUAL_GYRO
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
+    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
+        return &gyroSensor2.gyroDev.bus;
+    } else if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
         return &gyroSensor2.gyroDev.bus;
     } else {
         return &gyroSensor1.gyroDev.bus;
@@ -319,7 +301,9 @@ const mpuConfiguration_t *gyroMpuConfiguration(void)
 const mpuDetectionResult_t *gyroMpuDetectionResult(void)
 {
 #ifdef USE_DUAL_GYRO
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
+    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
+        return &gyroSensor2.gyroDev.mpuDetectionResult;
+    } else if (gyroToUse == GYRO_CONFIG_USE_GYRO_2) {
         return &gyroSensor2.gyroDev.mpuDetectionResult;
     } else {
         return &gyroSensor1.gyroDev.mpuDetectionResult;
@@ -694,19 +678,6 @@ bool gyroInit(void)
     }
 #endif // USE_DUAL_GYRO
 
-#ifdef USE_DUAL_GYRO
-    // Only allow using both gyros simultaneously if they are the same hardware type.
-    // If the user selected "BOTH" and they are not the same type, then reset to using only the first gyro.
-    if (gyroToUse == GYRO_CONFIG_USE_GYRO_BOTH) {
-        if (gyroSensor1.gyroDev.gyroHardware != gyroSensor2.gyroDev.gyroHardware) {
-            gyroToUse = GYRO_CONFIG_USE_GYRO_1;
-            gyroConfigMutable()->gyro_to_use = GYRO_CONFIG_USE_GYRO_1;
-            detectedSensors[SENSOR_INDEX_GYRO] = gyroSensor1.gyroDev.gyroHardware;
-            sensorsSet(SENSOR_GYRO);
-
-        }
-    }
-#endif // USE_DUAL_GYRO
     return ret;
 }
 
@@ -973,11 +944,7 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
                 return;
             }
 
-            // please take care with exotic boardalignment !!
             gyroSensor->gyroDev.gyroZero[axis] = gyroSensor->calibration.sum[axis] / gyroCalculateCalibratingCycles();
-            if (axis == Z) {
-              gyroSensor->gyroDev.gyroZero[axis] -= ((float)gyroConfig()->gyro_offset_yaw / 100);
-            }
         }
     }
 
@@ -990,6 +957,7 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
             vStdDev.y =  devStandardDeviation(&gyroSensor->calibration.var[Y]);
             vStdDev.z =  devStandardDeviation(&gyroSensor->calibration.var[Z]);
             vGyroStdDevModulus =  quaternionModulus(&vStdDev) / 1000.0f;
+            quaternionInitQuaternion(&qAttitude);
 
             beeper(BEEPER_GYRO_CALIBRATED);
         }
@@ -1320,7 +1288,7 @@ FAST_CODE_NOINLINE void gyroUpdate(timeUs_t currentTimeUs)
     }
 }
 
-bool gyroGetAverage(quaternion *vAverage) {
+bool gyroGetVector(quaternion *vAverage) {
     if (accumulatedMeasurementTimeUs > 0) {
         vAverage->w = 0;
         vAverage->x = DEGREES_TO_RADIANS(accumulatedMeasurements[X] / accumulatedMeasurementTimeUs);

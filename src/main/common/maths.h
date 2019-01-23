@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include <stdint.h>
@@ -28,8 +8,8 @@
 #define power3(x) ((x)*(x)*(x))
 
 // Undefine this for use libc sinf/cosf. Keep this defined to use fast sin/cos approximations
-#define FAST_MATH             // order 9 approximation
-#define VERY_FAST_MATH      // order 7 approximation
+//#define FAST_MATH             // order 9 approximation
+//#define VERY_FAST_MATH        // order 7 approximation
 
 // Use floating point M_PI instead explicitly.
 #define M_PIf       3.14159265358979323846f
@@ -63,8 +43,7 @@
 
 typedef int32_t fix12_t;
 
-typedef struct stdev_s
-{
+typedef struct stdev_s {
     float m_oldM, m_newM, m_oldS, m_newS;
     int m_n;
 } stdev_t;
@@ -104,6 +83,7 @@ void devPush(stdev_t *dev, float x);
 float devVariance(stdev_t *dev);
 float devStandardDeviation(stdev_t *dev);
 float degreesToRadians(int16_t degrees);
+float deciDegreesToRadians(int16_t degrees);
 
 int scaleRange(int x, int srcFrom, int srcTo, int destFrom, int destTo);
 float scaleRangef(float x, float srcFrom, float srcTo, float destFrom, float destTo);
