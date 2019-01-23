@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 #define TARGET_BOARD_IDENTIFIER "CLR7"
 #define USBD_PRODUCT_STRING "CLRACINGF7"
@@ -26,15 +6,16 @@
 
 #define LED0_PIN                PB0
 #define USE_BEEPER
-#define BEEPER_PIN                  PB4
+#define BEEPER_PIN              PB4
 #define BEEPER_INVERTED
 
 //define camera control
-#define CAMERA_CONTROL_PIN PB3
+#define CAMERA_CONTROL_PIN      PB3
 
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
+
 //MPU-6000
 #define USE_ACC
 #define USE_ACC_SPI_MPU6000
@@ -63,21 +44,13 @@
 #define MAX7456_SPI_CLK         (SPI_CLOCK_STANDARD) // 10MHz
 #define MAX7456_RESTORE_CLK     (SPI_CLOCK_FAST)
 //define use flash
-#define FLASH_CS_PIN          PB12
-#define FLASH_SPI_INSTANCE        SPI2
+#define FLASH_CS_PIN            PB12
+#define FLASH_SPI_INSTANCE      SPI2
 #define USE_FLASHFS
 #define USE_FLASH_M25P16
-//define use SD card
-
-#define USE_SDCARD
-#define SDCARD_DETECT_PIN                     PA8
-#define SDCARD_SPI_INSTANCE                 SPI2
-#define SDCARD_SPI_CS_PIN                       SPI2_NSS_PIN
-#define SDCARD_SPI_INITIALIZATION_CLOCK_DIVIDER 256 // 422kHz
-// Divide to under 25MHz for normal operation:
-#define SDCARD_SPI_FULL_SPEED_CLOCK_DIVIDER 8      // 27MHz
-#define SDCARD_DMA_STREAM_TX_FULL           DMA1_Stream4
-#define SDCARD_DMA_CHANNEL                  0
+#define USE_FLASH_W25M512
+#define USE_FLASH_W25N01G
+#define USE_FLASH_W25M02G
 
 #define USE_VCP
 
@@ -142,7 +115,7 @@
 #define BINDPLUG_PIN            PB2
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 #define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
-#define SERIALRX_UART                 SERIAL_PORT_UART5
+#define SERIALRX_UART           SERIAL_PORT_UART5
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
 #define TARGET_IO_PORTA         0xffff
@@ -152,4 +125,3 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT      6
 #define USED_TIMERS             ( TIM_N(2) | TIM_N(3) | TIM_N(4)  )
-
