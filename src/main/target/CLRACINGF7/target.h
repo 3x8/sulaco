@@ -47,10 +47,10 @@
 #define FLASH_CS_PIN            PB12
 #define FLASH_SPI_INSTANCE      SPI2
 #define USE_FLASHFS
-#define USE_FLASH_M25P16
-#define USE_FLASH_W25M512
+//#define USE_FLASH_M25P16
+//#define USE_FLASH_W25M512
 #define USE_FLASH_W25N01G
-#define USE_FLASH_W25M02G
+//#define USE_FLASH_W25M02G
 
 #define USE_VCP
 
@@ -82,7 +82,7 @@
 #define SERIAL_PORT_COUNT       7 //VCP, USART1, USART2,USART3,USART4,USART5,USART6
 
 #define USE_ESCSERIAL
-#define ESCSERIAL_TIMER_TX_PIN  PB8 // (Hardware=0, PPM)
+//#define ESCSERIAL_TIMER_TX_PIN  PB8 // (Hardware=0, PPM)
 
 #define USE_SPI
 #define USE_SPI_DEVICE_1
