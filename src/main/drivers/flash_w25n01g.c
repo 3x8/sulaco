@@ -152,15 +152,18 @@ bool w25n01g_isReady(flashDevice_t *fdevice) {
     uint8_t status = w25n01g_readRegister(fdevice->busdev, W25N01G_STAT_REG);
 
     if (status & W25N01G_STATUS_PROGRAM_FAIL) {
+        w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** PROGRAM_FAIL\r\n"));
     }
 
     if (status & W25N01G_STATUS_ERASE_FAIL) {
+        w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** ERASE_FAIL\r\n"));
     }
 
     uint8_t eccCode;
     if ((eccCode = W25N01G_STATUS_FLAG_ECC(status))) {
+        w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** ECC %x\r\n", eccCode));
     }
 
@@ -298,21 +301,13 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
-  uint32_t beginTime = millis();
-  DPRINTF(("w25n01g_eraseCompletely begin \r\n"));
-
-  //debug
-  w25n01g_deviceReset(fdevice->busdev);
+    uint32_t beginTime = millis();
 
     for (uint32_t block = 0; block < fdevice->geometry.sectors; block++) {
-        //w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_BLOCK_ERASE_MS);
-
-        // Issue erase block command
-        //w25n01g_writeEnable(fdevice);
         w25n01g_eraseSector(fdevice, W25N01G_BLOCK_TO_LINEAR(block));
     }
 
-  DPRINTF(("w25n01g_eraseCompletely end  millis(%d)\r\n", (millis() - beginTime) ));
+    DPRINTF(("w25n01g_eraseCompletely runtime(%d)ms\r\n", (millis() - beginTime) ));
 }
 
 static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
