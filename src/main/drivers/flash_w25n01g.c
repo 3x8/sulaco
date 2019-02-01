@@ -97,22 +97,17 @@ serialPort_t *debugSerialPort = NULL;
 #define W25N01G_TIMEOUT_BLOCK_ERASE_MS   15   // tBEmax = 10ms
 
 // These will be gone
-
 #define DISABLE(busdev)       IOHi((busdev)->busdev_u.spi.csnPin); __NOP()
 #define ENABLE(busdev)        __NOP(); IOLo((busdev)->busdev_u.spi.csnPin)
 
-/**
- * Send the given command byte to the device.
- */
-static void w25n01g_performOneByteCommand(busDevice_t *busdev, uint8_t command)
-{
+
+static void w25n01g_performOneByteCommand(busDevice_t *busdev, uint8_t command) {
     ENABLE(busdev);
     spiTransferByte(busdev->busdev_u.spi.instance, command);
     DISABLE(busdev);
 }
 
-static uint8_t w25n01g_readRegister(busDevice_t *busdev, uint8_t reg)
-{
+static uint8_t w25n01g_readRegister(busDevice_t *busdev, uint8_t reg) {
     const uint8_t cmd[3] = { W25N01G_INSTRUCTION_READ_STATUS_REG, reg, 0 };
     uint8_t in[3];
 
@@ -123,8 +118,7 @@ static uint8_t w25n01g_readRegister(busDevice_t *busdev, uint8_t reg)
     return in[2];
 }
 
-static void w25n01g_writeRegister(busDevice_t *busdev, uint8_t reg, uint8_t data)
-{
+static void w25n01g_writeRegister(busDevice_t *busdev, uint8_t reg, uint8_t data) {
     const uint8_t cmd[3] = { W25N01G_INSTRUCTION_WRITE_STATUS_REG, reg, data };
 
     ENABLE(busdev);
@@ -132,8 +126,7 @@ static void w25n01g_writeRegister(busDevice_t *busdev, uint8_t reg, uint8_t data
     DISABLE(busdev);
 }
 
-static void w25n01g_deviceReset(busDevice_t *busdev)
-{
+static void w25n01g_deviceReset(busDevice_t *busdev) {
     w25n01g_performOneByteCommand(busdev, W25N01G_INSTRUCTION_DEVICE_RESET);
 
     // Protection for upper 1/32 (BP[3:0] = 0101, TB=0), WP-E on; to protect bad block replacement area
@@ -144,13 +137,10 @@ static void w25n01g_deviceReset(busDevice_t *busdev)
     w25n01g_writeRegister(busdev, W25N01G_PROT_REG, (0 << 3)|(0 << 2)|(1 << 1));
 
     // Buffered read mode (BUF = 1), ECC enabled (ECC = 1)
-    //w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_ECC_ENABLE|W25N01G_CONFIG_BUFFER_READ_MODE);
-    //mmax
-    w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_BUFFER_READ_MODE);
+    w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_ECC_ENABLE|W25N01G_CONFIG_BUFFER_READ_MODE);
 }
 
-bool w25n01g_isReady(flashDevice_t *fdevice)
-{
+bool w25n01g_isReady(flashDevice_t *fdevice) {
     // XXX Study device busy behavior and reinstate couldBeBusy facility.
 
 #if 0
@@ -178,8 +168,7 @@ bool w25n01g_isReady(flashDevice_t *fdevice)
 #endif
 }
 
-bool w25n01g_waitForReady(flashDevice_t *fdevice, uint32_t timeoutMillis)
-{
+bool w25n01g_waitForReady(flashDevice_t *fdevice, uint32_t timeoutMillis) {
     uint32_t time = millis();
     while (!w25n01g_isReady(fdevice)) {
         if (millis() - time > timeoutMillis) {
@@ -296,11 +285,7 @@ bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID) {
     return true;
 }
 
-/**
- * Erase a sector full of bytes to all 1's at the given byte offset in the flash chip.
- */
-void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address)
-{
+void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_BLOCK_ERASE, 0, W25N01G_LINEAR_TO_PAGE(address) >> 8, W25N01G_LINEAR_TO_PAGE(address) & 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_BLOCK_ERASE_MS);
@@ -312,23 +297,17 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address)
     DISABLE(fdevice->busdev);
 }
 
-//
-// W25N01G does not support full chip erase.
-// Call eraseSector repeatedly.
-
-void w25n01g_eraseCompletely(flashDevice_t *fdevice)
-{
+void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
     for (uint32_t block = 0; block < fdevice->geometry.sectors; block++) {
-        w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_BLOCK_ERASE_MS);
+        //w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_BLOCK_ERASE_MS);
 
         // Issue erase block command
-        w25n01g_writeEnable(fdevice);
+        //w25n01g_writeEnable(fdevice);
         w25n01g_eraseSector(fdevice, W25N01G_BLOCK_TO_LINEAR(block));
     }
 }
 
-static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length)
-{
+static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     //DPRINTF(("    load WaitForReady\r\n"));
@@ -342,8 +321,7 @@ static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddre
     //DPRINTF(("    load Done\r\n"));
 }
 
-static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length)
-{
+static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_RANDOM_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     //DPRINTF(("    random WaitForReady\r\n"));
@@ -357,8 +335,7 @@ static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t colum
     //DPRINTF(("    random Done\r\n"));
 }
 
-static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress)
-{
+static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress) {
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_EXECUTE, 0, pageAddress >> 8, pageAddress & 0xff };
 
     //DPRINTF(("    execute WaitForReady\r\n"));
@@ -415,8 +392,7 @@ bool isProgramming = false;
 //#define PAGEPROG_DPRINTF(x) DPRINTF(x)
 #define PAGEPROG_DPRINTF(x)
 
-void w25n01g_pageProgramBegin(flashDevice_t *fdevice, uint32_t address)
-{
+void w25n01g_pageProgramBegin(flashDevice_t *fdevice, uint32_t address) {
     PAGEPROG_DPRINTF(("pageProgramBegin: address 0x%x\r\n", address));
 
     if (bufferDirty) {
@@ -444,8 +420,7 @@ void w25n01g_pageProgramBegin(flashDevice_t *fdevice, uint32_t address)
     }
 }
 
-void w25n01g_pageProgramContinue(flashDevice_t *fdevice, const uint8_t *data, int length)
-{
+void w25n01g_pageProgramContinue(flashDevice_t *fdevice, const uint8_t *data, int length) {
     PAGEPROG_DPRINTF(("pageProgramContinue: length 0x%x (programLoadAddress 0x%x)\r\n", length, programLoadAddress));
 
     // Check for page boundary overrun
@@ -476,8 +451,7 @@ void w25n01g_pageProgramContinue(flashDevice_t *fdevice, const uint8_t *data, in
     programLoadAddress += length;
 }
 
-void w25n01g_pageProgramFinish(flashDevice_t *fdevice)
-{
+void w25n01g_pageProgramFinish(flashDevice_t *fdevice) {
     PAGEPROG_DPRINTF(("pageProgramFinish: (loaded 0x%x bytes)\r\n", programLoadAddress - programStartAddress));
 
     if (bufferDirty && W25N01G_LINEAR_TO_COLUMN(programLoadAddress) == 0) {
@@ -509,15 +483,13 @@ void w25n01g_pageProgramFinish(flashDevice_t *fdevice)
  * break this operation up into one beginProgram call, one or more continueProgram calls, and one finishProgram call.
  */
 
-void w25n01g_pageProgram(flashDevice_t *fdevice, uint32_t address, const uint8_t *data, int length)
-{
+void w25n01g_pageProgram(flashDevice_t *fdevice, uint32_t address, const uint8_t *data, int length) {
     w25n01g_pageProgramBegin(fdevice, address);
     w25n01g_pageProgramContinue(fdevice, data, length);
     w25n01g_pageProgramFinish(fdevice);
 }
 
-void w25n01g_flush(flashDevice_t *fdevice)
-{
+void w25n01g_flush(flashDevice_t *fdevice) {
     PAGEPROG_DPRINTF(("close:\r\n"));
 
     if (bufferDirty) {
@@ -534,8 +506,7 @@ void w25n01g_flush(flashDevice_t *fdevice)
     }
 }
 
-void w25n01g_addError(uint32_t address, uint8_t code)
-{
+void w25n01g_addError(uint32_t address, uint8_t code) {
     UNUSED(address);
     UNUSED(code);
     DPRINTF(("addError: PA %x BA %x code %d\r\n", W25N01G_LINEAR_TO_PAGE(address), W25N01G_LINEAR_TO_BLOCK(address), code));
@@ -564,8 +535,7 @@ void w25n01g_addError(uint32_t address, uint8_t code)
 //#define READBYTES_DPRINTF DPRINTF
 #define READBYTES_DPRINTF(x)
 
-int w25n01g_readBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer, int length)
-{
+int w25n01g_readBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer, int length) {
     static uint32_t currentPage = UINT32_MAX;
     uint8_t cmd[4];
 
@@ -645,8 +615,7 @@ int w25n01g_readBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer,
     return transferLength;
 }
 
-int w25n01g_readExtensionBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer, int length)
-{
+int w25n01g_readExtensionBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer, int length) {
     uint8_t cmd[4];
 
     cmd[0] = W25N01G_INSTRUCTION_PAGE_DATA_READ;
@@ -680,8 +649,7 @@ int w25n01g_readExtensionBytes(flashDevice_t *fdevice, uint32_t address, uint8_t
  *
  * Can be called before calling w25n01g_init() (the result would have totalSize = 0).
  */
-const flashGeometry_t* w25n01g_getGeometry(flashDevice_t *fdevice)
-{
+const flashGeometry_t* w25n01g_getGeometry(flashDevice_t *fdevice) {
     return &fdevice->geometry;
 }
 
@@ -699,8 +667,7 @@ const flashVTable_t w25n01g_vTable = {
     .getGeometry = w25n01g_getGeometry,
 };
 
-void w25n01g_readBBLUT(flashDevice_t *fdevice, bblut_t *bblut, int lutsize)
-{
+void w25n01g_readBBLUT(flashDevice_t *fdevice, bblut_t *bblut, int lutsize) {
     uint8_t cmd[4];
     uint8_t in[4];
 
@@ -720,8 +687,7 @@ void w25n01g_readBBLUT(flashDevice_t *fdevice, bblut_t *bblut, int lutsize)
     DISABLE(fdevice->busdev);
 }
 
-void w25n01g_writeBBLUT(flashDevice_t *fdevice, uint16_t lba, uint16_t pba)
-{
+void w25n01g_writeBBLUT(flashDevice_t *fdevice, uint16_t lba, uint16_t pba) {
     uint8_t cmd[5] = { W25N01G_INSTRUCTION_BB_MANAGEMENT, lba >> 8, lba, pba >> 8, pba };
 
     ENABLE(fdevice->busdev);
