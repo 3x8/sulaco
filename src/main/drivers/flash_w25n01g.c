@@ -152,18 +152,15 @@ bool w25n01g_isReady(flashDevice_t *fdevice) {
     uint8_t status = w25n01g_readRegister(fdevice->busdev, W25N01G_STAT_REG);
 
     if (status & W25N01G_STATUS_PROGRAM_FAIL) {
-        //w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** PROGRAM_FAIL\r\n"));
     }
 
     if (status & W25N01G_STATUS_ERASE_FAIL) {
-        //w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** ERASE_FAIL\r\n"));
     }
 
     uint8_t eccCode;
     if ((eccCode = W25N01G_STATUS_FLAG_ECC(status))) {
-        //w25n01g_deviceReset(fdevice->busdev);
         DPRINTF(("*** ECC %x\r\n", eccCode));
     }
 

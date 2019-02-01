@@ -1527,7 +1527,7 @@ void blackboxUpdate(timeUs_t currentTimeUs)
             blackboxStart();
         }
 #ifdef USE_FLASHFS
-        if (IS_RC_MODE_ACTIVE(BOXBLACKBOXERASE)) {
+        if (IS_RC_MODE_ACTIVE(BOXBLACKBOXERASE) & (! IS_RC_MODE_ACTIVE(BOXARM))) {
             blackboxSetState(BLACKBOX_STATE_START_ERASE);
         }
 #endif
