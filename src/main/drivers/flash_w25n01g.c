@@ -1,22 +1,3 @@
-/*
- * This file is part of Cleanflight.
- *
- * Cleanflight is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Cleanflight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Author: jflyper
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -33,6 +14,7 @@
 #include "drivers/io.h"
 #include "drivers/time.h"
 
+//debug
 #define FLASH_W25N01G_DPRINTF
 
 #ifdef FLASH_W25N01G_DPRINTF
@@ -56,7 +38,6 @@ serialPort_t *debugSerialPort = NULL;
 #define W25N01G_BLOCKS_PER_DIE 1024
 
 // Instructions
-
 #define W25N01G_INSTRUCTION_RDID             0x9F
 #define W25N01G_INSTRUCTION_DEVICE_RESET     0xFF
 #define W25N01G_INSTRUCTION_READ_STATUS_REG  0x05
@@ -163,7 +144,8 @@ static void w25n01g_deviceReset(busDevice_t *busdev)
     w25n01g_writeRegister(busdev, W25N01G_PROT_REG, (0 << 3)|(0 << 2)|(1 << 1));
 
     // Buffered read mode (BUF = 1), ECC enabled (ECC = 1)
-    w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_ECC_ENABLE|W25N01G_CONFIG_BUFFER_READ_MODE);
+    //w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_ECC_ENABLE|W25N01G_CONFIG_BUFFER_READ_MODE);
+    w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_BUFFER_READ_MODE);
 }
 
 bool w25n01g_isReady(flashDevice_t *fdevice)
@@ -229,10 +211,9 @@ const flashVTable_t w25n01g_vTable;
 
 static void w25n01g_deviceInit(flashDevice_t *flashdev);
 
-bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID)
-{
+bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID) {
+
 #ifdef FLASH_W25N01G_DPRINTF
-    // Setup debugSerialPort
     debugSerialPort = openSerialPort(DPRINTF_SERIAL_PORT, FUNCTION_NONE, NULL, NULL, 115200, MODE_RXTX, 0);
 
     if (debugSerialPort) {
