@@ -145,6 +145,7 @@ static void w25n01g_deviceReset(busDevice_t *busdev)
 
     // Buffered read mode (BUF = 1), ECC enabled (ECC = 1)
     //w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_ECC_ENABLE|W25N01G_CONFIG_BUFFER_READ_MODE);
+    //mmax
     w25n01g_writeRegister(busdev, W25N01G_CONF_REG, W25N01G_CONFIG_BUFFER_READ_MODE);
 }
 
