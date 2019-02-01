@@ -298,6 +298,10 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
+
+  //debug
+  w25n01g_deviceReset();
+
     for (uint32_t block = 0; block < fdevice->geometry.sectors; block++) {
         //w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_BLOCK_ERASE_MS);
 
