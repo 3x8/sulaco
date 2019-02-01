@@ -298,6 +298,8 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
+  uint32_t beginTime = millis();
+  DPRINTF(("w25n01g_eraseCompletely begin \r\n"));
 
   //debug
   w25n01g_deviceReset(fdevice->busdev);
@@ -309,6 +311,8 @@ void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
         //w25n01g_writeEnable(fdevice);
         w25n01g_eraseSector(fdevice, W25N01G_BLOCK_TO_LINEAR(block));
     }
+
+  DPRINTF(("w25n01g_eraseCompletely end  millis(%d)\r\n", (millis() - beginTime) ));
 }
 
 static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
