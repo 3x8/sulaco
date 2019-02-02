@@ -236,7 +236,7 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
-    uint32_t beginTime = millis();
+    uint32_t beginTime = micros();
 
     //debug (lost logging data)
     w25n01g_deviceReset(fdevice->busdev);
@@ -245,11 +245,11 @@ void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
         w25n01g_eraseSector(fdevice, W25N01G_BLOCK_TO_LINEAR(block));
     }
 
-    DPRINTF(("w25n01g_eraseCompletely runtime(%d)ms\r\n", (millis() - beginTime) ));
+    DPRINTF(("w25n01g_eraseCompletely runtime(%d)us\r\n", (micros() - beginTime) ));
 }
 
 static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
-    uint32_t beginTime = millis();
+    uint32_t beginTime = micros();
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
@@ -259,11 +259,11 @@ static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddre
     spiTransfer(fdevice->busdev->busdev_u.spi.instance, data, NULL, length);
     w25n01g_disable(fdevice->busdev);
 
-    DPRINTF(("w25n01g_programDataLoad runtime(%d)ms\r\n", (millis() - beginTime) ));
+    DPRINTF(("w25n01g_programDataLoad runtime(%d)us\r\n", (micros() - beginTime) ));
 }
 
 static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
-    uint32_t beginTime = millis();
+    uint32_t beginTime = micros();
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_RANDOM_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
@@ -273,11 +273,11 @@ static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t colum
     spiTransfer(fdevice->busdev->busdev_u.spi.instance, data, NULL, length);
     w25n01g_disable(fdevice->busdev);
 
-    DPRINTF(("w25n01g_randomProgramDataLoad runtime(%d)ms\r\n", (millis() - beginTime) ));
+    DPRINTF(("w25n01g_randomProgramDataLoad runtime(%d)us\r\n", (micros() - beginTime) ));
 }
 
 static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress) {
-    uint32_t beginTime = millis();
+    uint32_t beginTime = micros();
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_EXECUTE, 0, pageAddress >> 8, pageAddress & 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
@@ -286,7 +286,7 @@ static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress)
     spiTransfer(fdevice->busdev->busdev_u.spi.instance, cmd, NULL, sizeof(cmd));
     w25n01g_disable(fdevice->busdev);
 
-    DPRINTF(("w25n01g_programExecute runtime(%d)ms\r\n", (millis() - beginTime) ));
+    DPRINTF(("w25n01g_programExecute runtime(%d)us\r\n", (micros() - beginTime) ));
 }
 
 
