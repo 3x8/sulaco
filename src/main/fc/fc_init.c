@@ -749,11 +749,6 @@ void init(void)
     rcdeviceInit();
 #endif // USE_RCDEVICE
 
-/*
-#ifdef USE_FLASH_W25N01G
-    flashResetInit();
-#endif */
-
     // Latch active features AGAIN since some may be modified by init().
     latchActiveFeatures();
     pwmEnableMotors();

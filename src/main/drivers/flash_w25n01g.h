@@ -24,6 +24,8 @@ typedef struct w25nDevData_s {
 
 bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID);
 
+
+
 // Upper 4MB (32 blocks * 128KB/block) will be used for bad block replacement area.
 
 // Blocks in this area are only written through bad block LUT,

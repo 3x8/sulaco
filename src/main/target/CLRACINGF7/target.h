@@ -11,13 +11,13 @@
 
 #define CAMERA_CONTROL_PIN      PB3
 
-#define USE_EXTI
-#define MPU_INT_EXTI            PC4
-#define USE_MPU_DATA_READY_SIGNAL
-
 // ICM-20602
 #define USE_ACC
 #define USE_GYRO
+
+#define USE_EXTI
+#define MPU_INT_EXTI            PC4
+#define USE_MPU_DATA_READY_SIGNAL
 
 #define USE_ACC_MPU6500
 #define USE_ACC_SPI_MPU6500
@@ -109,6 +109,7 @@
 #define SERIALRX_UART           SERIAL_PORT_UART5
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
+
 #define TARGET_IO_PORTA         0xffff
 #define TARGET_IO_PORTB         0xffff
 #define TARGET_IO_PORTC         0xffff
