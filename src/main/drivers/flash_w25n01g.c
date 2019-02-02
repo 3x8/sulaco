@@ -15,7 +15,7 @@
 #include "drivers/time.h"
 
 //debug
-#define FLASH_W25N01G_DPRINTF
+//#define FLASH_W25N01G_DPRINTF
 
 #ifdef FLASH_W25N01G_DPRINTF
 #include "common/printf.h"
@@ -216,9 +216,9 @@ bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID) {
     fdevice->geometry.sectorSize = fdevice->geometry.pagesPerSector * fdevice->geometry.pageSize;
     fdevice->geometry.totalSize = fdevice->geometry.sectorSize * fdevice->geometry.sectors;
 
-    w25n01g_deviceReset(fdevice->busdev);
-
     fdevice->vTable = &w25n01g_vTable;
+
+    w25n01g_deviceReset(fdevice->busdev);
 
     return (true);
 }
