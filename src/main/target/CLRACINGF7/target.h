@@ -50,12 +50,14 @@
 // FLASH
 #define FLASH_CS_PIN            PB12
 #define FLASH_SPI_INSTANCE      SPI2
+
 #define USE_FLASH
 #define USE_FLASHFS
 #define USE_FLASH_W25N01G
 
 #define USE_VCP
 
+// UARTS
 #define USE_UART1
 #define UART1_RX_PIN            PA10
 #define UART1_TX_PIN            PA9
