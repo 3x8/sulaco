@@ -78,7 +78,7 @@ bool flashInit(const flashConfig_t *flashConfig)
 
     delay(50); // short delay required after initialisation of SPI device instance.
 
-    /* 
+    /*
      * Some newer chips require one dummy byte to be read; we can read
      * 4 bytes for these chips while retaining backward compatibility.
      */
@@ -121,6 +121,10 @@ bool flashInit(const flashConfig_t *flashConfig)
     spiPreinitCsByTag(flashConfig->csTag);
 
     return false;
+}
+
+void flashResetInit(void){
+    flashDevice.vTable->init(&flashDevice);
 }
 
 bool flashIsReady(void)

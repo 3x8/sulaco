@@ -656,6 +656,9 @@ void init(void)
 #endif
 
 #ifdef USE_FLASHFS
+#ifdef USE_FLASH_W25N01G
+    flashResetInit();
+#endif
 #if defined(USE_FLASH)
     flashInit(flashConfig());
 #endif
