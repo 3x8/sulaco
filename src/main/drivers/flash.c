@@ -123,9 +123,11 @@ bool flashInit(const flashConfig_t *flashConfig)
     return false;
 }
 
+#ifdef USE_FLASH_W25N01G
 void flashResetInit(void){
     flashDevice.vTable->init(&flashDevice);
 }
+#endif
 
 bool flashIsReady(void)
 {

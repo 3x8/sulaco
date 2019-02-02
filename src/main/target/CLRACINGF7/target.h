@@ -40,9 +40,9 @@
 #define FLASH_CS_PIN            PB12
 #define FLASH_SPI_INSTANCE      SPI2
 
-//#define USE_FLASH
-#define USE_FLASHFS
+#define USE_FLASH
 #define USE_FLASH_W25N01G
+#define USE_FLASHFS
 
 #define USE_VCP
 

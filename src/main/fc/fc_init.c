@@ -656,13 +656,14 @@ void init(void)
 #endif
 
 #ifdef USE_FLASHFS
-#ifdef USE_FLASH_W25N01G
-    flashResetInit();
-#endif
 #if defined(USE_FLASH)
     flashInit(flashConfig());
 #endif
     flashfsInit();
+#endif
+
+#ifdef USE_FLASH_W25N01G
+    flashResetInit();
 #endif
 
 #ifdef USE_SDCARD
@@ -747,6 +748,11 @@ void init(void)
 #ifdef USE_RCDEVICE
     rcdeviceInit();
 #endif // USE_RCDEVICE
+
+/*
+#ifdef USE_FLASH_W25N01G
+    flashResetInit();
+#endif */
 
     // Latch active features AGAIN since some may be modified by init().
     latchActiveFeatures();
