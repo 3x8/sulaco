@@ -15,21 +15,10 @@
 #define MPU_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
 
-//MPU-6000
+// ICM-20602
 #define USE_ACC
 #define USE_GYRO
 
-/*
-#define USE_ACC_SPI_MPU6000
-#define USE_GYRO_SPI_MPU6000
-
-#define GYRO_MPU6000_ALIGN      CW0_DEG
-#define ACC_MPU6000_ALIGN       CW0_DEG
-#define MPU6000_CS_PIN          PA4
-#define MPU6000_SPI_INSTANCE    SPI1
-*/
-
-// ICM-20602
 #define USE_ACC_MPU6500
 #define USE_ACC_SPI_MPU6500
 #define USE_GYRO_MPU6500
@@ -51,7 +40,7 @@
 #define FLASH_CS_PIN            PB12
 #define FLASH_SPI_INSTANCE      SPI2
 
-#define USE_FLASH
+//#define USE_FLASH
 #define USE_FLASHFS
 #define USE_FLASH_W25N01G
 

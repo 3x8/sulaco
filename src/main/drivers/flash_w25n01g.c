@@ -520,7 +520,14 @@ const flashGeometry_t* w25n01g_getGeometry(flashDevice_t *fdevice) {
     return (&fdevice->geometry);
 }
 
+void w25n01g_init(flashDevice_t *fdevice) {
+    w25n01g_deviceReset(fdevice->busdev);
+}
+
 const flashVTable_t w25n01g_vTable = {
+#ifdef USE_FLASH_W25N01G
+    .init = w25n01g_init,
+#endif
     .isReady = w25n01g_isReady,
     .waitForReady = w25n01g_waitForReady,
     .eraseSector = w25n01g_eraseSector,
@@ -563,5 +570,7 @@ void w25n01g_writeBBLUT(flashDevice_t *fdevice, uint16_t lba, uint16_t pba) {
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
 }
+
+
 
 #endif
