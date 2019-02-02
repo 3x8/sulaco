@@ -15,7 +15,7 @@
 #include "drivers/time.h"
 
 //debug
-//#define FLASH_W25N01G_DPRINTF
+#define FLASH_W25N01G_DPRINTF
 
 #ifdef FLASH_W25N01G_DPRINTF
 #include "common/printf.h"
