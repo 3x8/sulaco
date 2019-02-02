@@ -9,7 +9,6 @@
 #define BEEPER_PIN              PB4
 #define BEEPER_INVERTED
 
-//define camera control
 #define CAMERA_CONTROL_PIN      PB3
 
 #define USE_EXTI
@@ -18,14 +17,17 @@
 
 //MPU-6000
 #define USE_ACC
-#define USE_ACC_SPI_MPU6000
 #define USE_GYRO
+
+/*
+#define USE_ACC_SPI_MPU6000
 #define USE_GYRO_SPI_MPU6000
 
 #define GYRO_MPU6000_ALIGN      CW0_DEG
 #define ACC_MPU6000_ALIGN       CW0_DEG
 #define MPU6000_CS_PIN          PA4
 #define MPU6000_SPI_INSTANCE    SPI1
+*/
 
 // ICM-20602
 #define USE_ACC_MPU6500
@@ -38,19 +40,19 @@
 #define MPU6500_CS_PIN          SPI1_NSS_PIN
 #define MPU6500_SPI_INSTANCE    SPI1
 
+// OSD
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE    SPI3
 #define MAX7456_SPI_CS_PIN      PA15
 #define MAX7456_SPI_CLK         (SPI_CLOCK_STANDARD) // 10MHz
 #define MAX7456_RESTORE_CLK     (SPI_CLOCK_FAST)
-//define use flash
+
+// FLASH
 #define FLASH_CS_PIN            PB12
 #define FLASH_SPI_INSTANCE      SPI2
+#define USE_FLASH
 #define USE_FLASHFS
-//#define USE_FLASH_M25P16
-//#define USE_FLASH_W25M512
 #define USE_FLASH_W25N01G
-//#define USE_FLASH_W25M02G
 
 #define USE_VCP
 
@@ -78,11 +80,9 @@
 #define UART6_RX_PIN            PC7
 #define UART6_TX_PIN            PC6
 
-//#define USE_SOFTSERIAL1
 #define SERIAL_PORT_COUNT       7 //VCP, USART1, USART2,USART3,USART4,USART5,USART6
 
 #define USE_ESCSERIAL
-//#define ESCSERIAL_TIMER_TX_PIN  PB8 // (Hardware=0, PPM)
 
 #define USE_SPI
 #define USE_SPI_DEVICE_1
