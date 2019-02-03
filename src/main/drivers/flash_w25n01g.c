@@ -236,7 +236,9 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
+#ifdef FLASH_W25N01G_DPRINTF
     uint32_t beginTime = micros();
+#endif
 
     //debug (lost logging data)
     w25n01g_deviceReset(fdevice->busdev);
@@ -249,7 +251,9 @@ void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
 }
 
 static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
+#ifdef FLASH_W25N01G_DPRINTF
     uint32_t beginTime = micros();
+#endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
@@ -263,7 +267,9 @@ static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddre
 }
 
 static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
+#ifdef FLASH_W25N01G_DPRINTF
     uint32_t beginTime = micros();
+#endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_RANDOM_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
@@ -277,7 +283,9 @@ static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t colum
 }
 
 static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress) {
+#ifdef FLASH_W25N01G_DPRINTF
     uint32_t beginTime = micros();
+#endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_EXECUTE, 0, pageAddress >> 8, pageAddress & 0xff };
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
