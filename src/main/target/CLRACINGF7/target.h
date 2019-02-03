@@ -18,6 +18,7 @@
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
+#define ENSURE_MPU_DATA_READY_IS_LOW
 
 #define USE_ACC_MPU6500
 #define USE_ACC_SPI_MPU6500
