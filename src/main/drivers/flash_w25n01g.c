@@ -80,10 +80,10 @@ serialPort_t *debugSerialPort = NULL;
 
 // defs and macros
 #define W25N01G_LINEAR_TO_COLUMN(laddr) ((laddr) % W25N01G_PAGE_SIZE)
-#define W25N01G_LINEAR_TO_PAGE(laddr) ((laddr) / W25N01G_PAGE_SIZE)
-#define W25N01G_LINEAR_TO_BLOCK(laddr) (W25N01G_LINEAR_TO_PAGE(laddr) / W25N01G_PAGES_PER_BLOCK)
-#define W25N01G_BLOCK_TO_PAGE(block) ((block) * W25N01G_PAGES_PER_BLOCK)
-#define W25N01G_BLOCK_TO_LINEAR(block) (W25N01G_BLOCK_TO_PAGE(block) * W25N01G_PAGE_SIZE)
+#define W25N01G_LINEAR_TO_PAGE(laddr)   ((laddr) / W25N01G_PAGE_SIZE)
+#define W25N01G_LINEAR_TO_BLOCK(laddr)  (W25N01G_LINEAR_TO_PAGE(laddr) / W25N01G_PAGES_PER_BLOCK)
+#define W25N01G_BLOCK_TO_PAGE(block)    ((block) * W25N01G_PAGES_PER_BLOCK)
+#define W25N01G_BLOCK_TO_LINEAR(block)  (W25N01G_BLOCK_TO_PAGE(block) * W25N01G_PAGE_SIZE)
 
 // BB replacement area
 #define W25N01G_BB_MARKER_BLOCKS           1
