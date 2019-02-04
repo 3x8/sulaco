@@ -408,7 +408,6 @@ void w25n01g_addError(uint32_t address, uint8_t code) {
     DPRINTF(("addError: PA %x BA %x code %d\r\n", W25N01G_LINEAR_TO_PAGE(address), W25N01G_LINEAR_TO_BLOCK(address), code));
 }
 
-
 //#define READBYTES_DPRINTF DPRINTF
 #define READBYTES_DPRINTF(x)
 
@@ -515,7 +514,6 @@ int w25n01g_readExtensionBytes(flashDevice_t *fdevice, uint32_t address, uint8_t
     return (length);
 }
 
-
 const flashGeometry_t* w25n01g_getGeometry(flashDevice_t *fdevice) {
     return (&fdevice->geometry);
 }
@@ -568,6 +566,5 @@ void w25n01g_writeBBLUT(flashDevice_t *fdevice, uint16_t lba, uint16_t pba) {
 
     w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_PROGRAM_MS);
 }
-
 
 #endif
