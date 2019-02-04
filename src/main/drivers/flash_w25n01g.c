@@ -467,14 +467,7 @@ int w25n01g_readBytes(flashDevice_t *fdevice, uint32_t address, uint8_t *buffer,
     spiTransfer(fdevice->busdev->busdev_u.spi.instance, NULL, buffer, length);
     w25n01g_disable(fdevice->busdev);
 
-    // XXX Don't need this?
-    /*
-    if (!w25n01g_waitForReady(fdevice, W25N01G_TIMEOUT_PAGE_READ_MS)) {
-        return (0);
-    }*/
-
     // Check ECC
-
     uint8_t statReg = w25n01g_readRegister(fdevice->busdev, W25N01G_STAT_REG);
     uint8_t eccCode = W25N01G_STATUS_FLAG_ECC(statReg);
 
