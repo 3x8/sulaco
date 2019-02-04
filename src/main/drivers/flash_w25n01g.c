@@ -338,7 +338,6 @@ void w25n01g_pageProgramContinue(flashDevice_t *fdevice, const uint8_t *data, in
     PAGEPROG_DPRINTF(("pageProgramContinue: length 0x%x (programLoadAddress 0x%x)\r\n", length, programLoadAddress));
 
     // Check for page boundary overrun
-
     if (W25N01G_LINEAR_TO_PAGE(programLoadAddress + length - 1) != W25N01G_LINEAR_TO_PAGE(programStartAddress)) {
         PAGEPROG_DPRINTF(("    **** PAGE BOUNDARY OVERRUN **** (page 0x%x)\r\n", W25N01G_LINEAR_TO_PAGE(programLoadAddress)));
     }
