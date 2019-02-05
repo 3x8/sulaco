@@ -147,7 +147,7 @@ struct mpuDetectionResult_s;
 const struct mpuDetectionResult_s *gyroMpuDetectionResult(void);
 void gyroStartCalibration(bool isFirstArmingCalibration);
 bool isFirstArmingGyroCalibrationRunning(void);
-bool isGyroCalibrationComplete(void);
+bool gyroCalibrationComplete(void);
 void gyroReadTemperature(void);
 int16_t gyroGetTemperature(void);
 int16_t gyroRateDps(int axis);

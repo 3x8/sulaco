@@ -853,7 +853,7 @@ FAST_CODE bool isGyroSensorCalibrationComplete(const gyroSensor_t *gyroSensor)
     return gyroSensor->calibration.cyclesRemaining == 0;
 }
 
-FAST_CODE bool isGyroCalibrationComplete(void)
+FAST_CODE bool gyroCalibrationComplete(void)
 {
 #ifdef USE_DUAL_GYRO
     switch (gyroToUse) {
@@ -912,7 +912,7 @@ void gyroStartCalibration(bool isFirstArmingCalibration)
 
 bool isFirstArmingGyroCalibrationRunning(void)
 {
-    return firstArmingCalibrationWasStarted && !isGyroCalibrationComplete();
+    return firstArmingCalibrationWasStarted && !gyroCalibrationComplete();
 }
 
 STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t gyroMovementCalibrationThreshold)

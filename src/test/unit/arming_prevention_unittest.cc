@@ -806,7 +806,7 @@ extern "C" {
     void blackboxFinish(void) {}
     bool accCalibrationComplete(void) { return true; }
     bool isBaroCalibrationComplete(void) { return true; }
-    bool isGyroCalibrationComplete(void) { return gyroCalibDone; }
+    bool gyroCalibrationComplete(void) { return gyroCalibDone; }
     void gyroStartCalibration(bool) {}
     bool isFirstArmingGyroCalibrationRunning(void) { return false; }
     void pidController(const pidProfile_t *, const rollAndPitchTrims_t *, timeUs_t) {}
