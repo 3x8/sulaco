@@ -293,7 +293,7 @@ static int emfat_find_log(emfat_entry_t *entry, int maxCount)
     uint8_t buffer[18];
     int logCount = 0;
 
-    for ( ; currOffset < limit ; currOffset += 2048) { // XXX 2048 = FREE_BLOCK_SIZE in io/flashfs.c
+    for ( ; currOffset < limit ; currOffset += 8192) { // XXX 2048 = FREE_BLOCK_SIZE in io/flashfs.c
 
         flashfsReadAbs(currOffset, buffer, 18);
 

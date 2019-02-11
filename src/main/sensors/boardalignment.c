@@ -55,9 +55,9 @@ void initBoardAlignment(const boardAlignment_t *boardAlignment)
     standardBoardAlignment = false;
 
     fp_angles_t rotationAngles;
-    rotationAngles.angles.roll  = degreesToRadians(boardAlignment->rollDegrees );
-    rotationAngles.angles.pitch = degreesToRadians(boardAlignment->pitchDegrees);
-    rotationAngles.angles.yaw   = degreesToRadians(boardAlignment->yawDegrees  );
+    rotationAngles.angles.roll  = deciDegreesToRadians(boardAlignment->rollDegrees );
+    rotationAngles.angles.pitch = deciDegreesToRadians(boardAlignment->pitchDegrees);
+    rotationAngles.angles.yaw   = deciDegreesToRadians(boardAlignment->yawDegrees  );
 
     buildRotationMatrix(&rotationAngles, boardRotation);
 }

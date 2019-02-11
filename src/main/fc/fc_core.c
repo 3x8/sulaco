@@ -171,7 +171,7 @@ static bool isCalibrating(void)
 
     // Note: compass calibration is handled completely differently, outside of the main loop, see f.CALIBRATE_MAG
 
-    return (!accIsCalibrationComplete() && sensors(SENSOR_ACC)) || (!isGyroCalibrationComplete());
+    return (!accCalibrationComplete() && sensors(SENSOR_ACC)) || (!gyroCalibrationComplete());
 }
 
 void resetArmingDisabled(void)
@@ -384,7 +384,7 @@ void tryArm(void)
             ENABLE_ARMING_FLAG(WAS_ARMED_WITH_PREARM);
         }
         if (sensors(SENSOR_ACC)){
-            imuQuaternionHeadfreeOffsetSet();
+            imuSetHeadfreeOffsetQuaternion();
         }
 
         disarmAt = currentTimeUs + armingConfig()->auto_disarm_delay * 1e6;   // start disarm timeout, will be extended when throttle is nonzero
@@ -417,45 +417,6 @@ void tryArm(void)
                 beeperWarningBeeps(armingDisabledReason);
             }
         }
-    }
-}
-
-// Automatic ACC Offset Calibration
-bool AccInflightCalibrationArmed = false;
-bool AccInflightCalibrationMeasurementDone = false;
-bool AccInflightCalibrationSavetoEEProm = false;
-bool AccInflightCalibrationActive = false;
-uint16_t InflightcalibratingA = 0;
-
-void handleInflightCalibrationStickPosition(void)
-{
-    if (AccInflightCalibrationMeasurementDone) {
-        // trigger saving into eeprom after landing
-        AccInflightCalibrationMeasurementDone = false;
-        AccInflightCalibrationSavetoEEProm = true;
-    } else {
-        AccInflightCalibrationArmed = !AccInflightCalibrationArmed;
-        if (AccInflightCalibrationArmed) {
-            beeper(BEEPER_ACC_CALIBRATION);
-        } else {
-            beeper(BEEPER_ACC_CALIBRATION_FAIL);
-        }
-    }
-}
-
-static void updateInflightCalibrationState(void)
-{
-    if (AccInflightCalibrationArmed && ARMING_FLAG(ARMED) && rcData[THROTTLE] > rxConfig()->mincheck && !IS_RC_MODE_ACTIVE(BOXARM)) {   // Copter is airborne and you are turning it off via boxarm : start measurement
-        InflightcalibratingA = 50;
-        AccInflightCalibrationArmed = false;
-    }
-    if (IS_RC_MODE_ACTIVE(BOXCALIB)) {      // Use the Calib Option to activate : Calib = TRUE measurement started, Land and Calib = 0 measurement stored
-        if (!AccInflightCalibrationActive && !AccInflightCalibrationMeasurementDone)
-            InflightcalibratingA = 50;
-        AccInflightCalibrationActive = true;
-    } else if (AccInflightCalibrationMeasurementDone && !ARMING_FLAG(ARMED)) {
-        AccInflightCalibrationMeasurementDone = false;
-        AccInflightCalibrationSavetoEEProm = true;
     }
 }
 
@@ -716,10 +677,6 @@ bool processRx(timeUs_t currentTimeUs)
 
     processRcStickPositions();
 
-    if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
-        updateInflightCalibrationState();
-    }
-
     updateActivatedModes();
 
 #ifdef USE_DSHOT
@@ -798,7 +755,7 @@ bool processRx(timeUs_t currentTimeUs)
             DISABLE_FLIGHT_MODE(HEADFREE_MODE);
         }
         if (IS_RC_MODE_ACTIVE(BOXHEADADJ)) {
-            if (imuQuaternionHeadfreeOffsetSet()){
+            if (imuSetHeadfreeOffsetQuaternion()){
                beeper(BEEPER_RX_SET);
             }
         }
@@ -1018,7 +975,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     //gyroUpdateSensor in gyro.c is called by gyroUpdate
     gyroUpdate(currentTimeUs);
     DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
-    
+
     if (pidUpdateCountdown) {
         pidUpdateCountdown--;
     } else {

@@ -41,6 +41,9 @@ typedef struct flashDevice_s {
 } flashDevice_t;
 
 typedef struct flashVTable_s {
+#ifdef USE_FLASH_W25N01G
+    void (*init)(flashDevice_t *fdevice);
+#endif
     bool (*isReady)(flashDevice_t *fdevice);
     bool (*waitForReady)(flashDevice_t *fdevice, uint32_t timeoutMillis);
     void (*eraseSector)(flashDevice_t *fdevice, uint32_t address);

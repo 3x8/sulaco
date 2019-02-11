@@ -98,7 +98,6 @@ typedef struct gyroConfig_s {
     uint16_t gyro_soft_notch_cutoff_1;
     uint16_t gyro_soft_notch_hz_2;
     uint16_t gyro_soft_notch_cutoff_2;
-    int16_t  gyro_offset_yaw;
     uint8_t  checkOverflow;
 
     // Lowpass primary/secondary
@@ -137,7 +136,7 @@ void gyroDmaSpiFinishRead(void);
 void gyroDmaSpiStartRead(void);
 #endif
 void gyroUpdate(timeUs_t currentTimeUs);
-bool gyroGetAverage(quaternion *vAverage);
+bool gyroGetVector(quaternion *vAverage);
 const busDevice_t *gyroSensorBus(void);
 struct mpuConfiguration_s;
 const struct mpuConfiguration_s *gyroMpuConfiguration(void);
@@ -145,7 +144,7 @@ struct mpuDetectionResult_s;
 const struct mpuDetectionResult_s *gyroMpuDetectionResult(void);
 void gyroStartCalibration(bool isFirstArmingCalibration);
 bool isFirstArmingGyroCalibrationRunning(void);
-bool isGyroCalibrationComplete(void);
+bool gyroCalibrationComplete(void);
 void gyroReadTemperature(void);
 int16_t gyroGetTemperature(void);
 int16_t gyroRateDps(int axis);

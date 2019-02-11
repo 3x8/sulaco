@@ -510,7 +510,7 @@ int flashfsIdentifyStartOfFreeSpace(void)
         /* We can choose whatever power of 2 size we like, which determines how much wastage of free space we'll have
          * at the end of the last written data. But smaller blocksizes will require more searching.
          */
-        FREE_BLOCK_SIZE = 2048, // XXX This can't be smaller than page size for underlying flash device.
+        FREE_BLOCK_SIZE = 8192, // XXX This can't be smaller than page size for underlying flash device.
 
         /* We don't expect valid data to ever contain this many consecutive uint32_t's of all 1 bits: */
         FREE_BLOCK_TEST_SIZE_INTS = 4, // i.e. 16 bytes

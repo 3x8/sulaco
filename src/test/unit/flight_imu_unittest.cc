@@ -54,7 +54,7 @@ extern "C" {
     #include "sensors/gyro.h"
     #include "sensors/sensors.h"
 
-    void imuUpdateEulerAngles(void);
+    void imuUpdateEuler(void);
 
     PG_REGISTER(rcControlsConfig_t, rcControlsConfig, PG_RC_CONTROLS_CONFIG, 0);
     PG_REGISTER(barometerConfig_t, barometerConfig, PG_BAROMETER_CONFIG, 0);
@@ -114,8 +114,8 @@ bool compassIsHealthy(quaternion *) { return true; }
 bool isBaroCalibrationComplete(void) { return true; }
 void performBaroCalibrationCycle(void) {}
 int32_t baroCalculateAltitude(void) { return 0; }
-bool gyroGetAverage(quaternion *) { return false; }
-bool accGetAverage(quaternion *) { return false; }
+bool gyroGetVector(quaternion *) { return false; }
+bool accGetVector(quaternion *) { return false; }
 bool accIsHealthy(quaternion *) { return false; }
 bool compassGetAverage(quaternion *) { return false; }
 bool isBeeperOn(void){ return true; }

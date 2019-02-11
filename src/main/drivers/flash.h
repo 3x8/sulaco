@@ -46,7 +46,9 @@ typedef struct flashGeometry_s {
 } flashGeometry_t;
 
 bool flashInit(const flashConfig_t *flashConfig);
-
+#ifdef USE_FLASH_W25N01G
+void flashResetInit(void);
+#endif
 bool flashIsReady(void);
 bool flashWaitForReady(uint32_t timeoutMillis);
 void flashEraseSector(uint32_t address);

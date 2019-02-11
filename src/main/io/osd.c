@@ -628,8 +628,8 @@ static bool osdDrawSingleElement(uint8_t item)
                     buff[i] = toupper((unsigned char)pilotConfig()->name[i]);
                 } else {
                     break;
-                }    
-            }    
+                }
+            }
             buff[i] = '\0';
         }
 
@@ -708,7 +708,7 @@ static bool osdDrawSingleElement(uint8_t item)
         {
             float osdGForce = 0;
             for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-                const float a = accAverage[axis];
+                const float a = 0; //accAverage[axis];
                 osdGForce += a * a;
             }
             osdGForce = sqrtf(osdGForce) / acc.dev.acc_1G;
@@ -791,7 +791,7 @@ static bool osdDrawSingleElement(uint8_t item)
             if (feature(FEATURE_ESC_SENSOR) && osdWarnGetState(OSD_WARNING_ESC_FAIL)) {
                 char escWarningMsg[OSD_FORMAT_MESSAGE_BUFFER_SIZE];
                 unsigned pos = 0;
-                
+
                 const char *title = "ESC";
 
                 // center justify message

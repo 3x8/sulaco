@@ -228,7 +228,7 @@ bool baroDetect(baroDev_t *dev, baroSensor_e baroHardwareToUse)
         }
 #endif
         FALLTHROUGH;
-	
+
 	 case BARO_QMP6988:
 #if defined(USE_BARO_QMP6988) || defined(USE_BARO_SPI_QMP6988)
         if (qmp6988Detect(dev)) {
@@ -323,8 +323,7 @@ bool isBaroReady(void) {
     return baroReady;
 }
 
-uint32_t baroUpdate(void)
-{
+uint32_t baroUpdate(void) {
     static barometerState_e state = BAROMETER_NEEDS_SAMPLES;
 
     switch (state) {
@@ -344,7 +343,7 @@ uint32_t baroUpdate(void)
             baro.baroTemperature = baroTemperature;
             baroPressureSum = recalculateBarometerTotal(barometerConfig()->baro_sample_count, baroPressureSum, baroPressure);
             state = BAROMETER_NEEDS_SAMPLES;
-            return baro.dev.ut_delay;
+            return 0;
         break;
     }
 }

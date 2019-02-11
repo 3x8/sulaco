@@ -1291,8 +1291,8 @@ static bool blackboxWriteSysinfo(void)
                                                                             currentPidProfile->pid[PID_PITCH].F,
                                                                             currentPidProfile->pid[PID_YAW].F);
 
-        BLACKBOX_PRINT_HEADER_LINE("acc_limit_yaw", "%d",                   currentPidProfile->yawRateAccelLimit);
-        BLACKBOX_PRINT_HEADER_LINE("acc_limit", "%d",                       currentPidProfile->rateAccelLimit);
+        BLACKBOX_PRINT_HEADER_LINE("rate_acc_limit_yaw", "%d",              currentPidProfile->yawRateAccelLimit);
+        BLACKBOX_PRINT_HEADER_LINE("rate_acc_limit", "%d",                  currentPidProfile->rateAccelLimit);
         BLACKBOX_PRINT_HEADER_LINE("pidsum_limit", "%d",                    currentPidProfile->pidSumLimit);
         // End of Betaflight controller parameters
 
@@ -1527,7 +1527,7 @@ void blackboxUpdate(timeUs_t currentTimeUs)
             blackboxStart();
         }
 #ifdef USE_FLASHFS
-        if (IS_RC_MODE_ACTIVE(BOXBLACKBOXERASE)) {
+        if (IS_RC_MODE_ACTIVE(BOXBLACKBOXERASE) & (! IS_RC_MODE_ACTIVE(BOXARM))) {
             blackboxSetState(BLACKBOX_STATE_START_ERASE);
         }
 #endif
