@@ -5,7 +5,7 @@
 
 #include "build/debug.h"
 
-#ifdef USE_FLASH_W25N01G
+#if (defined(USE_FLASH_W25N01G))
 
 #include "flash.h"
 #include "flash_impl.h"
@@ -17,7 +17,7 @@
 //debug
 //#define FLASH_W25N01G_DPRINTF
 
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
 #include "common/printf.h"
 #include "common/utils.h"
 #include "io/serial.h"
@@ -145,7 +145,7 @@ static void w25n01g_deviceReset(busDevice_t *busdev) {
 bool w25n01g_isReady(flashDevice_t *fdevice) {
     uint8_t status = w25n01g_readRegister(fdevice->busdev, W25N01G_STAT_REG);
 
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     if (status & W25N01G_STATUS_PROGRAM_FAIL) {
         DPRINTF(("*** PROGRAM_FAIL\r\n"));
     }
@@ -185,7 +185,7 @@ const flashVTable_t w25n01g_vTable;
 //read chip id and geometry  (into global `geometry`).
 bool w25n01g_detect(flashDevice_t *fdevice, uint32_t chipID) {
 
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     debugSerialPort = openSerialPort(DPRINTF_SERIAL_PORT, FUNCTION_NONE, NULL, NULL, 115200, MODE_RXTX, 0);
 
     if (debugSerialPort) {
@@ -236,7 +236,7 @@ void w25n01g_eraseSector(flashDevice_t *fdevice, uint32_t address) {
 }
 
 void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     uint32_t beginTime = micros();
 #endif
 
@@ -251,7 +251,7 @@ void w25n01g_eraseCompletely(flashDevice_t *fdevice) {
 }
 
 static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     uint32_t beginTime = micros();
 #endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
@@ -267,7 +267,7 @@ static void w25n01g_programDataLoad(flashDevice_t *fdevice, uint16_t columnAddre
 }
 
 static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t columnAddress, const uint8_t *data, int length) {
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     uint32_t beginTime = micros();
 #endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_RANDOM_PROGRAM_DATA_LOAD, columnAddress >> 8, columnAddress& 0xff };
@@ -283,7 +283,7 @@ static void w25n01g_randomProgramDataLoad(flashDevice_t *fdevice, uint16_t colum
 }
 
 static void w25n01g_programExecute(flashDevice_t *fdevice, uint32_t pageAddress) {
-#ifdef FLASH_W25N01G_DPRINTF
+#if (defined(FLASH_W25N01G_DPRINTF))
     uint32_t beginTime = micros();
 #endif
     const uint8_t cmd[] = { W25N01G_INSTRUCTION_PROGRAM_EXECUTE, 0, pageAddress >> 8, pageAddress & 0xff };
