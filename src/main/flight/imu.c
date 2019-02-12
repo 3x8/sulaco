@@ -105,6 +105,16 @@ static float imuUseFastGains(void) {
     }
 }
 
+#if (defined(USE_ACC))
+static void imuCalculateAccErrorVector(quaternion *vAcc, quaternion *vError) {
+    quaternionNormalize(vAcc);
+    // Error is sum of cross product between estimated direction and measured direction of gravity
+    vError->x += (vAcc->y * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) - vAcc->z * (2.0f * (qpAttitude.yz - -qpAttitude.wx)));
+    vError->y += (vAcc->z * (2.0f * (qpAttitude.xz + -qpAttitude.wy)) - vAcc->x * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy));
+    vError->z += (vAcc->x * (2.0f * (qpAttitude.yz - -qpAttitude.wx)) - vAcc->y * (2.0f * (qpAttitude.xz + -qpAttitude.wy)));
+}
+#endif
+
 #if (defined(USE_MAG) || defined(USE_GPS))
 static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
     // Rotate mag error vector back to BF and accumulate
@@ -113,18 +123,7 @@ static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
     vError->z += (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) * ez_ef;
 }
 
-static void imuCalculateAccErrorVector(quaternion *vAcc, quaternion *vError) {
-    quaternionNormalize(vAcc);
-    // Error is sum of cross product between estimated direction and measured direction of gravity
-    vError->x += (vAcc->y * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) - vAcc->z * (2.0f * (qpAttitude.yz - -qpAttitude.wx)));
-    vError->y += (vAcc->z * (2.0f * (qpAttitude.xz + -qpAttitude.wy)) - vAcc->x * (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy));
-    vError->z += (vAcc->x * (2.0f * (qpAttitude.yz - -qpAttitude.wx)) - vAcc->y * (2.0f * (qpAttitude.xz + -qpAttitude.wy)));
-}
-
 static void imuGpsMagCorrection(quaternion *vError) {
-#if (!defined(USE_MAG) && !defined(USE_GPS))
-    UNUSED(vError);
-#endif
 
 #ifdef USE_GPS
     if (sensors(SENSOR_GPS) && STATE(GPS_FIX) && gpsSol.numSat >= 5 && gpsSol.groundSpeed >= 600) {
@@ -293,7 +292,9 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
         quaternionInitVector(&vError);
     }
 
+#if (defined(USE_MAG) || defined(USE_GPS))
     imuGpsMagCorrection(&vError);
+#endif
 
     imuAhrsUpdate(deltaT * 1e-6f, &vGyroAverage, &vError);
 #ifdef USE_GYRO_IMUF9001
