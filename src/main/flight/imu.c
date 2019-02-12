@@ -39,7 +39,7 @@
 
 static pthread_mutex_t imuUpdateLock;
 
-#if defined(SIMULATOR_IMU_SYNC)
+#if (defined(SIMULATOR_IMU_SYNC))
 static uint32_t imuDeltaT = 0;
 static bool imuUpdated = false;
 #endif
@@ -326,7 +326,7 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
 void imuUpdateAttitude(timeUs_t currentTimeUs) {
     if (sensors(SENSOR_ACC) && acc.accUpdatedOnce) {
         IMU_LOCK;
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
+#if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC))
         if (imuUpdated == false) {
             IMU_UNLOCK;
             return;
@@ -370,7 +370,7 @@ void imuSetAttitudeQuaternion(float w, float x, float y, float z) {
     IMU_UNLOCK;
 }
 #endif
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
+#if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC))
 void imuSetHasNewData(uint32_t dt) {
     IMU_LOCK;
 
