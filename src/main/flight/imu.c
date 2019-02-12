@@ -29,7 +29,7 @@
 #include "sensors/gyro.h"
 #include "sensors/sensors.h"
 
-#ifdef USE_ACC_IMUF9001
+#if (defined(USE_ACC_IMUF9001))
 #include "drivers/accgyro/accgyro_imuf9001.h"
 #endif
 
@@ -125,7 +125,7 @@ static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
 
 static void imuGpsMagCorrection(quaternion *vError) {
 
-#ifdef USE_GPS
+#if  (defined(USE_GPS))
     if (sensors(SENSOR_GPS) && STATE(GPS_FIX) && gpsSol.numSat >= 5 && gpsSol.groundSpeed >= 600) {
         float courseOverGround = DECIDEGREES_TO_RADIANS(gpsSol.groundCourse);
         static bool hasInitializedGPSHeading = false;
@@ -154,7 +154,7 @@ static void imuGpsMagCorrection(quaternion *vError) {
     }
 #endif
 
-#ifdef USE_MAG
+#if (defined(USE_MAG))
     if (sensors(SENSOR_MAG)) {
       quaternion vMagAverage;
       // assumption  magnetic field is perpendicular to gravity (ignore Z-component in EF).
@@ -266,16 +266,16 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
     const timeDelta_t deltaT = currentTimeUs - previousIMUUpdateTime;
     previousIMUUpdateTime = currentTimeUs;
 
-#if defined(SIMULATOR_BUILD) && defined(SKIP_IMU_CALC)
+#if (defined(SIMULATOR_BUILD) && defined(SKIP_IMU_CALC))
     UNUSED(imuAhrsUpdate);
 #else
 
-#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC)
+#if (defined(SIMULATOR_BUILD) && defined(SIMULATOR_IMU_SYNC))
 //  printf("[imu]deltaT = %u, imuDeltaT = %u, currentTimeUs = %u, micros64_real = %lu\n", deltaT, imuDeltaT, currentTimeUs, micros64_real());
     deltaT = imuDeltaT;
 #endif
     // get sensor data
-#ifdef USE_GYRO_IMUF9001
+#if (defined(USE_GYRO_IMUF9001))
     if (gyroConfig()->imuf_mode != GTBCM_GYRO_ACC_QUAT_FILTER_F) {
 #endif
     quaternion vError = VECTOR_INITIALIZE;
@@ -301,7 +301,7 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
 #endif
 
     imuAhrsUpdate(deltaT * 1e-6f, &vGyroAverage, &vError);
-#ifdef USE_GYRO_IMUF9001
+#if (defined(USE_GYRO_IMUF9001))
     } else {
         UNUSED(deltaT);
         UNUSED(imuCalculateAccErrorVector);
@@ -346,7 +346,7 @@ float getCosTiltAngle(void) {
     return (1.0f - 2.0f * (qpAttitude.xx + qpAttitude.yy));
 }
 
-#ifdef SIMULATOR_BUILD
+#if (defined(SIMULATOR_BUILD))
 void imuSetAttitudeEuler(float roll, float pitch, float yaw) {
     IMU_LOCK;
 
