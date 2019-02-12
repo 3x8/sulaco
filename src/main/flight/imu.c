@@ -105,7 +105,6 @@ static float imuUseFastGains(void) {
     }
 }
 
-#ifndef SITL
 #if (defined(USE_MAG) || defined(USE_GPS))
 static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
     // Rotate mag error vector back to BF and accumulate
@@ -113,7 +112,6 @@ static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
     vError->y += (2.0f * (qpAttitude.yz - -qpAttitude.wx)) * ez_ef;
     vError->z += (1.0f - 2.0f * qpAttitude.xx - 2.0f * qpAttitude.yy) * ez_ef;
 }
-#endif
 
 static void imuCalculateAccErrorVector(quaternion *vAcc, quaternion *vError) {
     quaternionNormalize(vAcc);

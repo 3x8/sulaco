@@ -955,7 +955,6 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
             vStdDev.y =  devStandardDeviation(&gyroSensor->calibration.var[Y]);
             vStdDev.z =  devStandardDeviation(&gyroSensor->calibration.var[Z]);
             vGyroStdDevModulus =  quaternionModulus(&vStdDev) / 1000.0f;
-            quaternionInitQuaternion(&qAttitude);
 
             beeper(BEEPER_GYRO_CALIBRATED);
         }
