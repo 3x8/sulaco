@@ -280,10 +280,13 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
 #endif
     quaternion vError = VECTOR_INITIALIZE;
     quaternion vGyroAverage;
+#if (defined(USE_ACC))
     quaternion vAccAverage;
+#endif
 
     gyroGetVector(&vGyroAverage);
 
+#if (defined(USE_ACC))
     accGetVector(&vAccAverage);
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU2, lrintf((quaternionModulus(&vAccAverage)/ acc.dev.acc_1G) * 1000));
     if (accIsHealthy(&vAccAverage)) {
@@ -291,6 +294,7 @@ static void imuCalculateAttitude(timeUs_t currentTimeUs) {
     } else {
         quaternionInitVector(&vError);
     }
+#endif
 
 #if (defined(USE_MAG) || defined(USE_GPS))
     imuGpsMagCorrection(&vError);
