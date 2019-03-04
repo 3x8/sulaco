@@ -212,25 +212,23 @@ void kalmanInit(kalman_t *filter, float q, float r, float p, uint32_t w) {
     filter->w     = w;
 }
 
+#pragma GCC push_options
+#pragma GCC optimize("O3")
+
 #define VARIANCE_SCALE 0.3333333f
 FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
+    const float windowSizeInverse = 1.0f/filter->w;
 
-  const float windowSizeInverse = 1.0f/filter->w;
-
-  filter->window[filter->windowIndex] = input;
-  filter->meanSum +=  filter->window[filter->windowIndex];
-  filter->varianceSum =  filter->varianceSum + ( filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
-
-  filter->windowIndex++;
-  if (filter->windowIndex >= filter->w) {
-      filter->windowIndex = 0;
-  }
-
-  filter->mean =  filter->meanSum * windowSizeInverse;
-  filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
-
-  filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
-
+    // variance update
+    filter->window[filter->windowIndex] = input;
+    filter->meanSum +=  filter->window[filter->windowIndex];
+    filter->varianceSum =  filter->varianceSum + ( filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+    if (filter->windowIndex++ >= filter->w) {
+        filter->windowIndex = 0;
+    }
+    filter->mean =  filter->meanSum * windowSizeInverse;
+    filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
+    filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
 
 
     // project the state ahead using acceleration
@@ -249,3 +247,5 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
 
     return(filter->x);
 }
+
+#pragma GCC pop_options

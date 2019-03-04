@@ -63,6 +63,7 @@ typedef enum {
 
 #define MAX_WINDOW_SIZE 256
 typedef struct kalman_s {
+    uint32_t w;    // window size
     float q;       // process noise covariance
     float r;       // measurement noise covariance
     float p;       // estimation error covariance matrix
@@ -76,7 +77,6 @@ typedef struct kalman_s {
     float mean;
     float meanSum;
     uint32_t windowIndex;
-    uint32_t w;    // window size
 } kalman_t;
 
 typedef float (*filterApplyFnPtr)(filter_t *filter, float input);
