@@ -203,44 +203,36 @@ FAST_CODE float biquadFilterApply(biquadFilter_t *filter, float input)
     return result;
 }
 
-void laggedMovingAverageInit(laggedMovingAverage_t *filter, uint16_t windowSize, float *buf)
-{
-    filter->movingWindowIndex = 0;
-    filter->windowSize = windowSize;
-    filter->buf = buf;
-    filter->primed = false;
+
+void kalmanInit(kalman_t *filter, float q, float r, float p, uint32_t w) {
+    memset(filter, 0, sizeof(kalman_t));
+    filter->q     = q * 0.001f;
+    filter->r     = r * 0.001f;
+    filter->p     = p * 0.001f;
+    filter->w     = w;
 }
 
-// Proper fast two-state Kalman
-void fastKalmanInit(fastKalman_t *filter, float q, float r)
-{
-    filter->q     = q * 0.000001f; // add multiplier to make tuning easier
-    filter->r     = r * 0.001f;    // add multiplier to make tuning easier
-    filter->p     = q * 0.001f;    // add multiplier to make tuning easier
-    filter->x     = 0.0f;          // set initial value, can be zero if unknown
-    filter->lastX = 0.0f;          // set initial value, can be zero if unknown
-    filter->k     = 0.0f;          // kalman gain
-}
+#define VARIANCE_SCALE 0.3333333f
+FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
 
-#ifndef STM32F7
-FAST_CODE float laggedMovingAverageUpdate(laggedMovingAverage_t *filter, float input)
-{
-    filter->movingSum -= filter->buf[filter->movingWindowIndex];
-    filter->buf[filter->movingWindowIndex] = input;
-    filter->movingSum += input;
+  const float windowSizeInverse = 1.0f/filter->w;
 
-    if (++filter->movingWindowIndex == filter->windowSize) {
-        filter->movingWindowIndex = 0;
-        filter->primed = true;
-    }
+  filter->window[filter->windowIndex] = input;
+  filter->meanSum +=  filter->window[filter->windowIndex];
+  filter->varianceSum =  filter->varianceSum + ( filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
 
-    const uint16_t denom = filter->primed ? filter->windowSize : filter->movingWindowIndex;
-    return filter->movingSum  / denom;
-}
-#endif
+  filter->windowIndex++;
+  if (filter->windowIndex >= filter->w) {
+      filter->windowIndex = 0;
+  }
 
-FAST_CODE float fastKalmanUpdate(fastKalman_t *filter, float input)
-{
+  filter->mean =  filter->meanSum * windowSizeInverse;
+  filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
+
+  filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
+
+
+
     // project the state ahead using acceleration
     filter->x += (filter->x - filter->lastX);
 
@@ -255,5 +247,5 @@ FAST_CODE float fastKalmanUpdate(fastKalman_t *filter, float input)
     filter->x += filter->k * (input - filter->x);
     filter->p = (1.0f - filter->k) * filter->p;
 
-    return filter->x;
+    return(filter->x);
 }

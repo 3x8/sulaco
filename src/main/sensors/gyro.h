@@ -123,6 +123,8 @@ typedef struct gyroConfig_s {
 #else
     uint16_t gyro_filter_q;
     uint16_t gyro_filter_r;
+    uint16_t gyro_filter_p;
+    uint16_t gyro_filter_w;
 #endif
 } gyroConfig_t;
 

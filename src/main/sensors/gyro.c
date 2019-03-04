@@ -117,7 +117,7 @@ bool firstArmingCalibrationWasStarted = false;
 typedef union gyroLowpassFilter_u {
     pt1Filter_t pt1FilterState;
     biquadFilter_t biquadFilterState;
-    fastKalman_t kalmanFilterState;
+    kalman_t kalmanFilterState;
 } gyroLowpassFilter_t;
 
 typedef struct gyroSensor_s {
@@ -242,8 +242,10 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .gyro_soft_notch_hz_2 = 0,
     .gyro_soft_notch_cutoff_2 = 0,
     .checkOverflow = GYRO_OVERFLOW_CHECK_ALL_AXES,
-    .gyro_filter_q = 400,
+    .gyro_filter_q = 50,
     .gyro_filter_r = 88,
+    .gyro_filter_p = 30,
+    .gyro_filter_w = 64,
     .yaw_spin_recovery = true,
     .yaw_spin_threshold = 1950,
     .dyn_notch_quality = 70,
@@ -727,9 +729,9 @@ void gyroInitLowpassFilterLpf(gyroSensor_t *gyroSensor, int slot, int type, uint
             }
             break;
         case FILTER_KALMAN:
-            *lowpassFilterApplyFn = (filterApplyFnPtr) fastKalmanUpdate;
+            *lowpassFilterApplyFn = (filterApplyFnPtr) kalmanUpdate;
             for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-                fastKalmanInit(&lowpassFilter[axis].kalmanFilterState, gyroConfig()->gyro_filter_q, gyroConfig()->gyro_filter_r);
+                kalmanInit(&lowpassFilter[axis].kalmanFilterState, gyroConfig()->gyro_filter_q, gyroConfig()->gyro_filter_r, gyroConfig()->gyro_filter_p , gyroConfig()->gyro_filter_w);
             }
             break;
         }
