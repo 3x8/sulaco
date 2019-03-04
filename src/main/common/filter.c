@@ -211,10 +211,10 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->x += filter->k * (input - filter->x);
     filter->p = (1.0f - filter->k) * filter->p;
 
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000000));
 
     return(filter->x);
 }
