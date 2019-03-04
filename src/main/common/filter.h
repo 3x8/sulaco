@@ -61,7 +61,7 @@ typedef enum {
     FILTER_BPF,
 } biquadFilterType_e;
 
-#define MAX_WINDOW_SIZE 256
+#define MAX_WINDOW_SIZE 512
 typedef struct kalman_s {
     uint32_t w;    // window size
     float q;       // process noise covariance

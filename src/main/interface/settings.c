@@ -524,7 +524,7 @@ const clivalue_t valueTable[] = {
     { "gyro_filter_q",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 16000 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_filter_q) },
     { "gyro_filter_r",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 16000 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_filter_r) },
     { "gyro_filter_p",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 16000 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_filter_p) },
-    { "gyro_filter_w",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 1024 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_filter_w) },
+    { "gyro_filter_w",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, MAX_WINDOW_SIZE }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_filter_w) },
 #endif
 #ifdef USE_GYRO_OVERFLOW_CHECK
     { "gyro_overflow_detect",       VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_GYRO_OVERFLOW_CHECK }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, checkOverflow) },
