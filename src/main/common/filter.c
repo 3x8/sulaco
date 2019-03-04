@@ -5,6 +5,8 @@
 
 #include "platform.h"
 
+#include "build/debug.h"
+
 #include "common/filter.h"
 #include "common/maths.h"
 #include "common/utils.h"
