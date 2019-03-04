@@ -5,6 +5,9 @@
 
 #include "platform.h"
 
+#include "pg/pg.h"
+#include "pg/pg_ids.h"
+
 #include "build/debug.h"
 
 #include "common/filter.h"
@@ -211,10 +214,10 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->x += filter->k * (input - filter->x);
     filter->p = (1.0f - filter->k) * filter->p;
 
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000.0f));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000.0f));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000.0f));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, filter->k);
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
     return(filter->x);
 }
