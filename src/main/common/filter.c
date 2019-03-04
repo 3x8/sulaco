@@ -5,9 +5,6 @@
 
 #include "platform.h"
 
-#include "pg/pg.h"
-#include "pg/pg_ids.h"
-
 #include "build/debug.h"
 
 #include "common/filter.h"
