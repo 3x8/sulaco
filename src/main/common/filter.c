@@ -173,13 +173,9 @@ FAST_CODE float biquadFilterApply(biquadFilter_t *filter, float input) {
 }
 
 // kalman filter
-void kalmanInit(kalman_t *filter, float q, float r, float p, uint32_t w) {
+void kalmanInit(kalman_t *filter, float q, uint32_t w) {
     memset(filter, 0, sizeof(kalman_t));
     filter->q     = q * 0.001f;
-    //filter->r     = r * 0.001f;
-    //filter->p     = p * 0.001f;
-    filter->r     = r;
-    filter->p     = p;
     filter->w     = w;
 }
 

@@ -351,7 +351,7 @@ static long cmsx_menuGyro_onEnter(void)
 
 #ifndef USE_GYRO_IMUF9001
     gyroConfig_gyro_filter_q = gyroConfig()->gyro_filter_q;
-    gyroConfig_gyro_filter_r = gyroConfig()->gyro_filter_r;
+    gyroConfig_gyro_filter_r = gyroConfig()->gyro_filter_w;
 #endif
     return 0;
 }
@@ -369,7 +369,7 @@ static long cmsx_menuGyro_onExit(const OSD_Entry *self)
 
 #ifndef USE_GYRO_IMUF9001
     gyroConfigMutable()->gyro_filter_q = gyroConfig_gyro_filter_q;
-    gyroConfigMutable()->gyro_filter_r = gyroConfig_gyro_filter_r;
+    gyroConfigMutable()->gyro_filter_w = gyroConfig_gyro_filter_w;
 #endif
     return 0;
 }
@@ -388,7 +388,7 @@ static OSD_Entry cmsx_menuFilterGlobalEntries[] =
     { "GYRO NF2C",  OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_soft_notch_cutoff_2, 0, 500, 1 }, 0 },
     #ifndef USE_GYRO_IMUF9001
     { "KALMAN Q",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_filter_q,            0, 16000, 1 }, 0 },
-    { "KALMAN R",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_filter_r,            0, 16000, 1 }, 0 },
+    { "KALMAN R",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_filter_w,            0, 16000, 1 }, 0 },
     #endif
     { "BACK", OME_Back, NULL, NULL, 0 },
     { NULL, OME_END, NULL, NULL, 0 }
@@ -430,7 +430,7 @@ static long cmsx_menuImuf_onEnter(void)
     gyroConfig_imuf_pitch_lpf_cutoff_hz = gyroConfig()->imuf_pitch_lpf_cutoff_hz;
     gyroConfig_imuf_roll_lpf_cutoff_hz = gyroConfig()->imuf_roll_lpf_cutoff_hz;
     gyroConfig_imuf_yaw_lpf_cutoff_hz = gyroConfig()->imuf_yaw_lpf_cutoff_hz;
-    
+
     return 0;
 }
 #endif
@@ -463,7 +463,7 @@ static OSD_Entry cmsx_menuImufEntries[] =
     { "ROLL LPF",  OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_imuf_roll_lpf_cutoff_hz,  0, 450,    1 }, 0 },
     { "PITCH LPF", OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_imuf_pitch_lpf_cutoff_hz, 0, 450,    1 }, 0 },
     { "YAW LPF",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_imuf_yaw_lpf_cutoff_hz,   0, 450,    1 }, 0 },
-    
+
     { "BACK",        OME_Back,            NULL,   NULL,             0},
     { "SAVE&REBOOT", OME_OSD_Exit, cmsMenuExit,   (void *)CMS_EXIT_SAVEREBOOT, 0},
     { NULL, OME_END, NULL, NULL, 0 }
