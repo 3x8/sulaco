@@ -176,8 +176,10 @@ FAST_CODE float biquadFilterApply(biquadFilter_t *filter, float input) {
 void kalmanInit(kalman_t *filter, float q, float r, float p, uint32_t w) {
     memset(filter, 0, sizeof(kalman_t));
     filter->q     = q * 0.001f;
-    filter->r     = r * 0.001f;
-    filter->p     = p * 0.001f;
+    //filter->r     = r * 0.001f;
+    //filter->p     = p * 0.001f;
+    filter->r     = r;
+    filter->p     = p;
     filter->w     = w;
 }
 
@@ -191,7 +193,7 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     // variance update
     filter->window[filter->windowIndex] = input;
     filter->meanSum +=  filter->window[filter->windowIndex];
-    filter->varianceSum =  filter->varianceSum + ( filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+    filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
     if (filter->windowIndex++ >= filter->w) {
         filter->windowIndex = 0;
     }
@@ -215,8 +217,8 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->p = (1.0f - filter->k) * filter->p;
 
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
     return(filter->x);
