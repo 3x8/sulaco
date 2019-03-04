@@ -337,7 +337,7 @@ static uint16_t gyroConfig_gyro_soft_notch_hz_2;
 static uint16_t gyroConfig_gyro_soft_notch_cutoff_2;
 #ifndef USE_GYRO_IMUF9001
 static uint16_t gyroConfig_gyro_filter_q;
-static uint16_t gyroConfig_gyro_filter_r;
+static uint16_t gyroConfig_gyro_filter_w;
 #endif
 
 static long cmsx_menuGyro_onEnter(void)
@@ -351,7 +351,7 @@ static long cmsx_menuGyro_onEnter(void)
 
 #ifndef USE_GYRO_IMUF9001
     gyroConfig_gyro_filter_q = gyroConfig()->gyro_filter_q;
-    gyroConfig_gyro_filter_r = gyroConfig()->gyro_filter_w;
+    gyroConfig_gyro_filter_w = gyroConfig()->gyro_filter_w;
 #endif
     return 0;
 }
