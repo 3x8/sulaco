@@ -206,8 +206,6 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 10));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
-    return(filter->x);
-
     // variance update
     filter->window[filter->windowIndex] = input;
     filter->meanSum +=  filter->window[filter->windowIndex];
@@ -218,6 +216,8 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->mean =  filter->meanSum * windowSizeInverse;
     filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
     filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
+
+    return(filter->x);
 }
 
 #pragma GCC pop_options
