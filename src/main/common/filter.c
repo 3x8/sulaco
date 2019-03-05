@@ -186,18 +186,6 @@ void kalmanInit(kalman_t *filter, float q, uint32_t w) {
 FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     const float windowSizeInverse = 1.0f/filter->w;
 
-    // variance update
-    filter->window[filter->windowIndex] = input;
-    filter->meanSum +=  filter->window[filter->windowIndex];
-    filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
-    if (filter->windowIndex++ >= filter->w) {
-        filter->windowIndex = 0;
-    }
-    filter->mean =  filter->meanSum * windowSizeInverse;
-    filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
-    filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
-
-
     // project the state ahead using acceleration
     filter->x += (filter->x - filter->lastX);
 
@@ -219,6 +207,17 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
     return(filter->x);
+
+    // variance update
+    filter->window[filter->windowIndex] = input;
+    filter->meanSum +=  filter->window[filter->windowIndex];
+    filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+    if (filter->windowIndex++ >= filter->w) {
+        filter->windowIndex = 0;
+    }
+    filter->mean =  filter->meanSum * windowSizeInverse;
+    filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
+    filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
 }
 
 #pragma GCC pop_options
