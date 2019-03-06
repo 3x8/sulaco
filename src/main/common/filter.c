@@ -182,6 +182,7 @@ void kalmanInit(kalman_t *filter, float q, uint32_t w) {
 #define VARIANCE_SCALE 0.001f
 FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     const float windowSizeInverse = 1.0f/filter->w;
+    uint32_t  index;
 
     // project the state ahead using acceleration
     filter->x += (filter->x - filter->lastX);
@@ -205,8 +206,17 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
 
     // variance update
     filter->window[filter->windowIndex] = input;
-    filter->meanSum +=  filter->window[filter->windowIndex];
-    filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+
+    filter->meanSum = 0;
+    for (index = 0; index < filter->w; index++){
+      filter->meanSum +=  filter->window[index];
+    }
+
+    filter->varianceSum = 0;
+    for (index = 0; index < filter->w; index++){
+      filter->varianceSum =  filter->varianceSum + (filter->window[index] *  filter->window[index]);
+    }
+
     if (filter->windowIndex++ >= filter->w) {
         filter->windowIndex = 0;
     }
