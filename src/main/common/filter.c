@@ -179,10 +179,10 @@ void kalmanInit(kalman_t *filter, float q, uint32_t w) {
 #pragma GCC push_options
 #pragma GCC optimize("O3")
 
-#define VARIANCE_SCALE 0.001f
+//#define VARIANCE_SCALE 0.001f
+#define VARIANCE_SCALE 0.333f
 FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     const float windowSizeInverse = 1.0f/filter->w;
-    uint32_t  index;
 
     // project the state ahead using acceleration
     filter->x += (filter->x - filter->lastX);
@@ -199,27 +199,24 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->p = (1.0f - filter->k) * filter->p;
 
     //DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf((input - filter->x)  * 10));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 10));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 10));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf((input - filter->x)  * 100));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
-    // variance update
+    // push new walue to circular buffer
     filter->window[filter->windowIndex] = input;
-
-    filter->meanSum = 0;
-    for (index = 0; index < filter->w; index++){
-      filter->meanSum +=  filter->window[index];
-    }
-
-    filter->varianceSum = 0;
-    for (index = 0; index < filter->w; index++){
-      filter->varianceSum =  filter->varianceSum + (filter->window[index] *  filter->window[index]);
-    }
-
+    // process new walue
+    filter->meanSum +=  filter->window[filter->windowIndex];
+    filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+    // increment data pointer
     if (filter->windowIndex++ >= filter->w) {
         filter->windowIndex = 0;
     }
+    // remove outdated walue
+    filter->meanSum -=  filter->window[filter->windowIndex];
+    filter->varianceSum =  filter->varianceSum - (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
+
     filter->mean =  filter->meanSum * windowSizeInverse;
     filter->variance =  ABS(filter->varianceSum *  windowSizeInverse - (filter->mean *  filter->mean));
     filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
