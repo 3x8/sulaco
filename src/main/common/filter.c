@@ -199,21 +199,18 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->p = (1.0f - filter->k) * filter->p;
 
     //DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(filter->q * 1000));
-    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf(input - filter->x));
+    DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_Q, lrintf((input - filter->x) * 10));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_R, lrintf(filter->r * 1000));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_P, lrintf(filter->p * 1000));
     DEBUG_SET(DEBUG_KALMAN, DEBUG_KALMAN_K, lrintf(filter->k * 1000));
 
-    // push new walue to circular buffer
+    // update variance
     filter->window[filter->windowIndex] = input;
-    // process new walue
     filter->meanSum +=  filter->window[filter->windowIndex];
     filter->varianceSum =  filter->varianceSum + (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
-    // increment data pointer
     if (filter->windowIndex++ >= filter->w) {
         filter->windowIndex = 0;
     }
-    // remove outdated walue
     filter->meanSum -=  filter->window[filter->windowIndex];
     filter->varianceSum =  filter->varianceSum - (filter->window[filter->windowIndex] *  filter->window[filter->windowIndex]);
 
