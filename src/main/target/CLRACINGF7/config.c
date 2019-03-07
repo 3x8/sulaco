@@ -1,6 +1,6 @@
-/*
-#include <stdint.h>
 
+#include <stdint.h>
+/*
 #include <platform.h>
 
 #include "config/config_eeprom.h"
