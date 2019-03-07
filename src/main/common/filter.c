@@ -204,7 +204,7 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     //DEBUG_SET(DEBUG_KALMAN, 3, lrintf(filter->k * 1000));
 
     DEBUG_SET(DEBUG_KALMAN, axisIndex, lrintf((input - filter->x) * 10));
-    if (axisIndex++ >= 3) {
+    if (axisIndex++ >= 2) {
         axisIndex = 0;
     }
 
