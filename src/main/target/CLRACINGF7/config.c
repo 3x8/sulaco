@@ -1,3 +1,4 @@
+/*
 #include <stdint.h>
 
 #include <platform.h>
@@ -40,4 +41,4 @@ void targetConfiguration(void) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
         pidProfile->dterm_notch_cutoff = 0;
     }
-}
+} */
