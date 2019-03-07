@@ -121,8 +121,8 @@ typedef struct gyroConfig_s {
     uint16_t imuf_roll_lpf_cutoff_hz;
     uint16_t imuf_yaw_lpf_cutoff_hz;
 #else
-    uint16_t gyro_filter_q;
-    uint16_t gyro_filter_w;
+    uint16_t gyro_kalman_q;
+    uint16_t gyro_kalman_w;
 #endif
 } gyroConfig_t;
 
