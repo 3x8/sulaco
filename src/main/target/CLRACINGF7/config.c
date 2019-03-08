@@ -2,6 +2,7 @@
 
 #include <platform.h>
 
+#include "config/feature.h"
 #include "config/config_eeprom.h"
 #include "drivers/pwm_output.h"
 #include "common/filter.h"
@@ -15,7 +16,6 @@
 #include "fc/fc_rc.h"
 #include "fc/rc_controls.h"
 #include "rx/rx.h"
-
 
 void targetConfiguration(void) {
     gyroConfigMutable()->gyro_sync_denom  = 4;
