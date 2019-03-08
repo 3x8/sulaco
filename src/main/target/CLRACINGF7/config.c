@@ -1,6 +1,5 @@
-
 #include <stdint.h>
-/*
+
 #include <platform.h>
 
 #include "config/config_eeprom.h"
@@ -37,8 +36,10 @@ void targetConfiguration(void) {
     rcControlsConfigMutable()->deadband = 7;
     rcControlsConfigMutable()->yaw_deadband = 11;
 
+    featureSet(FEATURE_DYNAMIC_FILTER | FEATURE_AIRMODE | FEATURE_TELEMETRY);
+
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
         pidProfile->dterm_notch_cutoff = 0;
     }
-} */
+}

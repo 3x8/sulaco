@@ -2,6 +2,8 @@
 #define TARGET_BOARD_IDENTIFIER "CLR7"
 #define USBD_PRODUCT_STRING "CLRACINGF7"
 
+#define USE_TARGET_CONFIG
+
 #define ENABLE_DSHOT_DMAR       true
 
 #define LED0_PIN                PB0
