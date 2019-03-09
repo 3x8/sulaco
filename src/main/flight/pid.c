@@ -284,6 +284,11 @@ void pidInitFilters(const pidProfile_t *pidProfile)
                     dtermLowpassApplyFn = (filterApplyFnPtr)pt1FilterApply;
                     pt1FilterInit(&dtermLowpass[axis].pt1Filter, pt1FilterGain(pidProfile->dterm_lowpass_hz, dT));
                 break;
+
+            case FILTER_KALMAN:
+                dtermLowpassApplyFn = (filterApplyFnPtr) kalmanUpdate;
+                kalmanInit(&dtermLowpass[axis].kalmanFilterState, pidProfile->dterm_kalman_q, pidProfile->dterm_kalman_w);
+                break;
             case FILTER_BIQUAD:
             default:
                     dtermLowpassApplyFn = (filterApplyFnPtr)biquadFilterApply;
