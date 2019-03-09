@@ -223,6 +223,7 @@ const angle_index_t rcAliasToAngleIndexMap[] = { AI_ROLL, AI_PITCH };
 typedef union dtermLowpass_u {
     pt1Filter_t pt1Filter;
     biquadFilter_t biquadFilter;
+    kalman_t kalmanFilterState;
 } dtermLowpass_t;
 
 static FAST_RAM filterApplyFnPtr dtermNotchApplyFn = nullFilterApply;
