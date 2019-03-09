@@ -144,11 +144,11 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .yaw_lowpass_hz = 0,
         .dterm_kalman_q = 2503,
         .dterm_kalman_w = 7,
-        .dterm_lowpass_hz = 65,    // filtering ON by default
-        .dterm_lowpass2_hz = 200,   // second Dterm LPF ON by default
+        .dterm_lowpass_hz = 90,
+        .dterm_lowpass2_hz = 0,
         .dterm_notch_hz = 260,
         .dterm_notch_cutoff = 160,
-        .dterm_filter_type = FILTER_BIQUAD,
+        .dterm_filter_type = FILTER_KALMAN,
         .itermWindupPointPercent = 50,
         .vbatPidCompensation = 0,
         .pidAtMinThrottle = PID_STABILISATION_ON,
@@ -292,6 +292,7 @@ void pidInitFilters(const pidProfile_t *pidProfile)
                 dtermLowpassApplyFn = (filterApplyFnPtr) kalmanUpdate;
                 kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->dterm_kalman_q / 10), pidProfile->dterm_kalman_w);
                 break;
+
             case FILTER_BIQUAD:
             default:
                     dtermLowpassApplyFn = (filterApplyFnPtr)biquadFilterApply;
