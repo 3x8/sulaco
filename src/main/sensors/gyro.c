@@ -591,6 +591,7 @@ bool gyroInit(void)
     case DEBUG_GYRO_RAW:
     case DEBUG_GYRO_SCALED:
     case DEBUG_GYRO_FILTER:
+    case DEBUG_GYRO_FILTER_DIFF:
         gyroDebugMode = debugMode;
         break;
     default:

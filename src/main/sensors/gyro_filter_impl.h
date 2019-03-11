@@ -5,7 +5,6 @@ static FAST_CODE void GYRO_FILTER_FUNCTION_NAME(gyroSensor_t *gyroSensor)
         // scale gyro output to degrees per second
         float gyroADCf = gyroSensor->gyroDev.gyroADC[axis] * gyroSensor->gyroDev.scale;
         const float gyroADCfNoFilter = gyroADCf;
-        UNUSED(gyroADCfNoFilter);
         // DEBUG_GYRO_SCALED records the unfiltered, scaled gyro output
         GYRO_FILTER_DEBUG_SET(DEBUG_GYRO_SCALED, axis, lrintf(gyroADCf));
 
@@ -36,6 +35,7 @@ static FAST_CODE void GYRO_FILTER_FUNCTION_NAME(gyroSensor_t *gyroSensor)
 
         GYRO_FILTER_DEBUG_SET(DEBUG_GYRO_FILTER, axis, lrintf(gyroADCf));
         GYRO_FILTER_DEBUG_SET(DEBUG_GYRO_FILTER_DIFF, axis, lrintf(gyroADCf - gyroADCfNoFilter));
+        UNUSED(gyroADCfNoFilter);
 
         gyroSensor->gyroDev.gyroADCf[axis] = gyroADCf;
     }
