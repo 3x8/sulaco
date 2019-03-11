@@ -855,7 +855,10 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     }
 
     // use measurement and apply filters. mmmm gimme that butter.
-    float dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT));
+    const float dDeltaNoFilter = -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT);
+    float dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
+    DEBUG_SET(DEBUG_DTERM_FILTER, axis, lrintf(dDelta - dDeltaNoFilter));
+
     previousRateError[axis] = gyro.gyroADCf[axis];
     pidData[axis].D = (pidCoefficient[axis].Kd * dDelta);
 
@@ -867,7 +870,7 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     pidData[axis].P = pidData[axis].P * getThrottlePIDAttenuation();
     pidData[axis].D = pidData[axis].D * getThrottlePIDAttenuation();
 #endif
-    return dDelta;
+    return (dDelta);
 }
 
 // Betaflight pid controller, which will be maintained in the future with additional features specialised for current (mini) multirotor usage.
@@ -975,8 +978,11 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     }
 
     // -----calculate D component
+    const float gyroRateNoFilter = gyroRate;
     gyroRateDterm[axis] = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
     gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
+    DEBUG_SET(DEBUG_DTERM_FILTER, axis, lrintf(gyroRateDterm[axis] - gyroRateNoFilter));
+
     const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     if (pidCoefficient[axis].Kd > 0) {
 

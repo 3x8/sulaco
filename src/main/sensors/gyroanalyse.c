@@ -156,7 +156,7 @@ void gyroDataAnalyse(gyroAnalyseState_t *state, biquadFilter_t *notchFilterDyn)
 
             state->downsampledGyroData[axis][state->circularBufferIdx] = sample;
             if (axis == 0) {
-                DEBUG_SET(DEBUG_FFT, 2, lrintf(sample));
+                DEBUG_SET(DEBUG_DYNAMIC_NOTCH, 2, lrintf(sample));
             }
 
             state->oversampledGyroAccumulator[axis] = 0;
@@ -200,11 +200,11 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
     arm_cfft_instance_f32 *Sint = &(state->fftInstance.Sint);
 
     uint32_t startTime = 0;
-    if (debugMode == (DEBUG_FFT_TIME)) {
+    if (debugMode == (DEBUG_DYNAMIC_NOTCH_TIME)) {
         startTime = micros();
     }
 
-    DEBUG_SET(DEBUG_FFT_TIME, 0, state->updateStep);
+    DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 0, state->updateStep);
     switch (state->updateStep) {
         case STEP_ARM_CFFT_F32:
         {
@@ -222,14 +222,14 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
                 arm_radix8_butterfly_f32(state->fftData, FFT_BIN_COUNT, Sint->pTwiddle, 1);
                 break;
             }
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
             break;
         }
         case STEP_BITREVERSAL:
         {
             // 6us
             arm_bitreversal_32((uint32_t*) state->fftData, Sint->bitRevLength, Sint->pBitRevTable);
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
             state->updateStep++;
             FALLTHROUGH;
         }
@@ -238,14 +238,14 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
             // 14us
             // this does not work in place => fftData AND rfftData needed
             stage_rfft_f32(&state->fftInstance, state->fftData, state->rfftData);
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
             break;
         }
         case STEP_ARM_CMPLX_MAG_F32:
         {
             // 8us
             arm_cmplx_mag_f32(state->rfftData, state->fftData, FFT_BIN_COUNT);
-            DEBUG_SET(DEBUG_FFT_TIME, 2, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 2, micros() - startTime);
             state->updateStep++;
             FALLTHROUGH;
         }
@@ -295,10 +295,10 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
             state->centerFreq[state->updateAxis] = centerFreq;
 
             if (state->updateAxis == 0) {
-               DEBUG_SET(DEBUG_FFT, 3, lrintf(fftMeanIndex * 100));
+               DEBUG_SET(DEBUG_DYNAMIC_NOTCH, 3, lrintf(fftMeanIndex * 100));
             }
-            DEBUG_SET(DEBUG_FFT_FREQ, state->updateAxis, state->centerFreq[state->updateAxis]);
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_FREQ, state->updateAxis, state->centerFreq[state->updateAxis]);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
             break;
         }
         case STEP_UPDATE_FILTERS:
@@ -308,7 +308,7 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
             const float cutoffFreq = fmax(state->centerFreq[state->updateAxis] * dynamicNotchCutoff, DYN_NOTCH_MIN_CUTOFF_HZ);
             const float notchQ = filterGetNotchQ(state->centerFreq[state->updateAxis], cutoffFreq);
             biquadFilterUpdate(&notchFilterDyn[state->updateAxis], state->centerFreq[state->updateAxis], gyro.targetLooptime, notchQ, FILTER_NOTCH);
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
 
             state->updateAxis = (state->updateAxis + 1) % XYZ_AXIS_COUNT;
             state->updateStep++;
@@ -325,7 +325,7 @@ static FAST_CODE_NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state, 
                 arm_mult_f32(&state->downsampledGyroData[state->updateAxis][0], &hanningWindow[ringBufIdx], &state->fftData[ringBufIdx], state->circularBufferIdx);
             }
 
-            DEBUG_SET(DEBUG_FFT_TIME, 1, micros() - startTime);
+            DEBUG_SET(DEBUG_DYNAMIC_NOTCH_TIME, 1, micros() - startTime);
         }
     }
 
