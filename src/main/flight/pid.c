@@ -978,12 +978,12 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     }
 
     // -----calculate D component
-    const float gyroRateNoFilter = gyroRate;
+    const float deltaNoFilter = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     gyroRateDterm[axis] = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
     gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
-    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(gyroRateDterm[axis] - gyroRateNoFilter));
 
     const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
+    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(delta - deltaNoFilter));
     if (pidCoefficient[axis].Kd > 0) {
 
         // Divide rate change by dT to get differential (ie dr/dt).
