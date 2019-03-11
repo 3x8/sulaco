@@ -856,7 +856,8 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
 
     // use measurement and apply filters. mmmm gimme that butter.
     const float dDeltaNoFilter = -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT);
-    float dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
+    float dDelta = dtermNotchApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
+    dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
     DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
 
     previousRateError[axis] = gyro.gyroADCf[axis];
