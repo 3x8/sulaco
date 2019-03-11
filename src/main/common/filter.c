@@ -18,14 +18,14 @@
 // NULL filter
 FAST_CODE float nullFilterApply(filter_t *filter, float input) {
     UNUSED(filter);
-    return input;
+    return (input);
 }
 
 
 // PT1 Low Pass filter
 float pt1FilterGain(uint16_t f_cut, float dT) {
     float RC = 1 / ( 2 * M_PI_FLOAT * f_cut);
-    return dT / (RC + dT);
+    return (dT / (RC + dT));
 }
 
 void pt1FilterInit(pt1Filter_t *filter, float k) {
@@ -39,7 +39,7 @@ void pt1FilterUpdateCutoff(pt1Filter_t *filter, float k) {
 
 FAST_CODE float pt1FilterApply(pt1Filter_t *filter, float input) {
     filter->state = filter->state + filter->k * (input - filter->state);
-    return filter->state;
+    return (filter->state);
 }
 
 // Slew filter with limit
@@ -61,13 +61,13 @@ FAST_CODE float slewFilterApply(slewFilter_t *filter, float input) {
     } else {
         filter->state = input;
     }
-    return filter->state;
+    return (filter->state);
 }
 
 // get notch filter Q given center frequency (f0) and lower cutoff frequency (f1)
 // Q = f0 / (f2 - f1) ; f2 = f0^2 / f1
 float filterGetNotchQ(float centerFreq, float cutoffFreq) {
-    return centerFreq * cutoffFreq / (centerFreq * centerFreq - cutoffFreq * cutoffFreq);
+    return (centerFreq * cutoffFreq / (centerFreq * centerFreq - cutoffFreq * cutoffFreq));
 }
 
 // biquad Filter
@@ -158,7 +158,7 @@ FAST_CODE float biquadFilterApplyDF1(biquadFilter_t *filter, float input) {
     filter->y2 = filter->y1;
     filter->y1 = result;
 
-    return result;
+    return (result);
 }
 
 /* Computes a biquadFilter_t filter in direct form 2 on a sample (higher precision but can't handle changes in coefficients */
@@ -166,7 +166,7 @@ FAST_CODE float biquadFilterApply(biquadFilter_t *filter, float input) {
     const float result = filter->b0 * input + filter->x1;
     filter->x1 = filter->b1 * input - filter->a1 * result + filter->x2;
     filter->x2 = filter->b2 * input - filter->a2 * result;
-    return result;
+    return (result);
 }
 
 // kalman filter
@@ -219,7 +219,7 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->variance = ABS(filter->varianceSum * windowSizeInverse - (filter->mean * filter->mean));
     filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
 
-    return(filter->x);
+    return (filter->x);
 }
 
 #pragma GCC pop_options
