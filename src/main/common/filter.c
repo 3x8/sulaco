@@ -197,6 +197,11 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
     filter->x += filter->k * (input - filter->x);
     filter->p = (1.0f - filter->k) * filter->p;
 
+    DEBUG_SET(DEBUG_KALMAN, 0, lrintf(filter->q * 1000));
+    DEBUG_SET(DEBUG_KALMAN, 1, lrintf(filter->r * 1000));
+    DEBUG_SET(DEBUG_KALMAN, 2, lrintf(filter->p * 1000));
+    DEBUG_SET(DEBUG_KALMAN, 3, lrintf(filter->k * 1000));
+
     // update variance
     filter->window[filter->windowIndex] = input;
 

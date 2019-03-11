@@ -59,4 +59,5 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "ANTI_GRAVITY",
     "IMU",
     "DTERM_FILTER_DIFF",
+    "KALMAN",
 };
