@@ -76,7 +76,7 @@ typedef enum {
     DEBUG_RC_SMOOTHING_RATE,
     DEBUG_ANTI_GRAVITY,
     DEBUG_IMU,
-    DEBUG_DTERM_FILTER,
+    DEBUG_DTERM_FILTER_DIFF,
     DEBUG_COUNT
 } debugType_e;
 

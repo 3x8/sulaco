@@ -857,7 +857,7 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     // use measurement and apply filters. mmmm gimme that butter.
     const float dDeltaNoFilter = -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT);
     float dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
-    DEBUG_SET(DEBUG_DTERM_FILTER, axis, lrintf(dDelta - dDeltaNoFilter));
+    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
 
     previousRateError[axis] = gyro.gyroADCf[axis];
     pidData[axis].D = (pidCoefficient[axis].Kd * dDelta);
@@ -981,7 +981,7 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     const float gyroRateNoFilter = gyroRate;
     gyroRateDterm[axis] = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
     gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
-    DEBUG_SET(DEBUG_DTERM_FILTER, axis, lrintf(gyroRateDterm[axis] - gyroRateNoFilter));
+    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(gyroRateDterm[axis] - gyroRateNoFilter));
 
     const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     if (pidCoefficient[axis].Kd > 0) {
