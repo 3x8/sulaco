@@ -29,8 +29,8 @@
 
 #define ACC_MPU6500_ALIGN       CW0_DEG
 #define GYRO_MPU6500_ALIGN      CW0_DEG
-#define MPU6500_CS_PIN          SPI1_NSS_PIN
 #define MPU6500_SPI_INSTANCE    SPI1
+#define MPU6500_CS_PIN          SPI1_NSS_PIN
 
 // OSD
 #define USE_MAX7456
