@@ -32,12 +32,6 @@
 #define MPU6500_CS_PIN          SPI1_NSS_PIN
 #define MPU6500_SPI_INSTANCE    SPI1
 
-// MAG
-#define USE_MAG
-#define USE_MAG_HMC5883
-#define USE_MAG_QMC5883
-#define MAG_I2C_INSTANCE        (I2CDEV_2)
-
 // OSD
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE    SPI3
@@ -83,11 +77,6 @@
 #define SERIAL_PORT_COUNT       7 //VCP, USART1, USART2,USART3,USART4,USART5,USART6
 
 #define USE_ESCSERIAL
-
-// External I2C
-#define USE_I2C
-#define USE_I2C_DEVICE_2
-#define I2C_DEVICE               (I2CDEV_2)
 
 #define USE_SPI
 #define USE_SPI_DEVICE_1
