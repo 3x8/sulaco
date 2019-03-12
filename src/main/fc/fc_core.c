@@ -896,7 +896,8 @@ void subTaskTelemetryPollSensors(timeUs_t currentTimeUs)
     UNUSED(currentTimeUs);
 
     // Read out gyro temperature if used for telemmetry
-    gyroReadTemperature();
+    // ToDo breaks scheduler CYCLETIME
+    // gyroReadTemperature();
 }
 #endif
 

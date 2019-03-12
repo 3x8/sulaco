@@ -559,8 +559,8 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
     [TASK_TELEMETRY] = {
         .taskName = "TELEMETRY",
         .taskFunc = taskTelemetry,
-        .desiredPeriod = TASK_PERIOD_HZ(51),
-        .staticPriority = TASK_PRIORITY_MEDIUM,
+        .desiredPeriod = TASK_PERIOD_HZ(101),
+        .staticPriority = TASK_PRIORITY_LOW,
     },
 #endif
 
