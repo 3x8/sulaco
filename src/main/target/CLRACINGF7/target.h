@@ -40,7 +40,6 @@
 #define MAX7456_RESTORE_CLK     (SPI_CLOCK_FAST)
 
 // FLASH
-/*
 #define FLASH_SPI_INSTANCE      SPI2
 #define FLASH_CS_PIN            SPI2_NSS_PIN
 
@@ -48,7 +47,7 @@
 #define USE_FLASH_W25N01G
 #define USE_FLASHFS
 
-#define USE_VCP */
+#define USE_VCP
 
 // UARTS
 #define USE_UART1
