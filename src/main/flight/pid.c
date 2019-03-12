@@ -122,8 +122,8 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         .pidSumLimit = PIDSUM_LIMIT_MAX,
         .yaw_lowpass_hz = 0,
-        .dterm_kalman_q = 2503,
-        .dterm_kalman_w = 7,
+        .dterm_kalman_q = 2500,
+        .dterm_kalman_w = 16,
         .dterm_lowpass_hz = 90,
         .dterm_lowpass2_hz = 0,
         .dterm_notch_hz = 260,
@@ -229,8 +229,7 @@ static FAST_RAM_ZERO_INIT uint8_t rcSmoothingFilterType;
 
 static FAST_RAM_ZERO_INIT pt1Filter_t antiGravityThrottleLpf;
 
-void pidInitFilters(const pidProfile_t *pidProfile)
-{
+void pidInitFilters(const pidProfile_t *pidProfile) {
     BUILD_BUG_ON(FD_YAW != 2); // ensure yaw axis is 2
     dtermNotchApplyFn = nullFilterApply;
     dtermLowpassApplyFn = nullFilterApply;
@@ -255,32 +254,28 @@ void pidInitFilters(const pidProfile_t *pidProfile)
         }
     }
 
-
-
-    if (pidProfile->dterm_lowpass_hz && pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist)
-    {
-        for (int axis = FD_ROLL; axis <= FD_YAW; axis++)
-        {
-            switch (pidProfile->dterm_filter_type)
-            {
-            case FILTER_PT1:
+    if (pidProfile->dterm_lowpass_hz && pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist) {
+        for (int axis = FD_ROLL; axis <= FD_YAW; axis++) {
+            switch (pidProfile->dterm_filter_type) {
+                case FILTER_PT1:
                     dtermLowpassApplyFn = (filterApplyFnPtr)pt1FilterApply;
                     pt1FilterInit(&dtermLowpass[axis].pt1Filter, pt1FilterGain(pidProfile->dterm_lowpass_hz, dT));
                 break;
 
-            case FILTER_KALMAN:
-                dtermLowpassApplyFn = (filterApplyFnPtr) kalmanUpdate;
-                kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->dterm_kalman_q / 10.0f), pidProfile->dterm_kalman_w);
+                case FILTER_KALMAN:
+                    dtermLowpassApplyFn = (filterApplyFnPtr) kalmanUpdate;
+                    kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->dterm_kalman_q / 10.0f), pidProfile->dterm_kalman_w);
                 break;
 
-            case FILTER_BIQUAD:
-            default:
-                    dtermLowpassApplyFn = (filterApplyFnPtr)biquadFilterApply;
-                    biquadFilterInitLPF(&dtermLowpass[axis].biquadFilter, pidProfile->dterm_lowpass_hz, targetPidLooptime);
+                case FILTER_BIQUAD:
+                default:
+                  dtermLowpassApplyFn = (filterApplyFnPtr)biquadFilterApply;
+                  biquadFilterInitLPF(&dtermLowpass[axis].biquadFilter, pidProfile->dterm_lowpass_hz, targetPidLooptime);
                 break;
             }
         }
     }
+
 #if defined(USE_THROTTLE_BOOST)
     pt1FilterInit(&throttleLpf, pt1FilterGain(pidProfile->throttle_boost_cutoff, dT));
 #endif
