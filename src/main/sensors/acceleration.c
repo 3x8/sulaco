@@ -416,14 +416,14 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        DEBUG_SET(DEBUG_ACC_RAW, axis, acc.dev.ADCRaw[axis]);
+        DEBUG_SET(DEBUG_ACC, axis, acc.dev.ADCRaw[axis]);
         acc.accADC[axis] = acc.dev.ADCRaw[axis];
 
         if (accLpfCutHz) {
             acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
         }
     }
-    DEBUG_SET(DEBUG_ACC_RAW, 3, acc.dev.acc_1G);
+    DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
 
     #ifndef USE_ACC_IMUF9001
     alignSensors(acc.accADC, acc.dev.accAlign);
@@ -434,10 +434,10 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        DEBUG_SET(DEBUG_ACC, axis, lrintf(acc.accADC[axis]));
+        DEBUG_SET(DEBUG_ACC_FILTER, axis, lrintf(acc.accADC[axis]));
         acc.accADC[axis] = (acc.accADC[axis] - (float)accelerationTrims->raw[axis]) * ((float)acc.dev.acc_1G / (float)accelerationTrims->raw[axis + 3]);
     }
-    DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
+    DEBUG_SET(DEBUG_ACC_FILTER, 3, acc.dev.acc_1G);
 
     acc.accUpdatedOnce = true;
 }
