@@ -6,7 +6,7 @@
 
 #define ENABLE_DSHOT_DMAR       true
 
-#define LED0_PIN                PB0
+#define LED0_PIN                PB1
 #define USE_BEEPER
 #define BEEPER_PIN              PB4
 #define BEEPER_INVERTED
