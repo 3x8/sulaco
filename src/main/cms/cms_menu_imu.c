@@ -328,17 +328,14 @@ static CMS_Menu cmsx_menuProfileOther = {
     .entries = cmsx_menuProfileOtherEntries,
 };
 
-
 static uint16_t gyroConfig_gyro_lowpass_hz;
 static uint16_t gyroConfig_gyro_lowpass2_hz;
 static uint16_t gyroConfig_gyro_soft_notch_hz_1;
 static uint16_t gyroConfig_gyro_soft_notch_cutoff_1;
 static uint16_t gyroConfig_gyro_soft_notch_hz_2;
 static uint16_t gyroConfig_gyro_soft_notch_cutoff_2;
-#ifndef USE_GYRO_IMUF9001
 static uint16_t gyroConfig_gyro_kalman_q;
 static uint16_t gyroConfig_gyro_kalman_w;
-#endif
 
 static long cmsx_menuGyro_onEnter(void)
 {
@@ -349,11 +346,10 @@ static long cmsx_menuGyro_onEnter(void)
     gyroConfig_gyro_soft_notch_hz_2 = gyroConfig()->gyro_soft_notch_hz_2;
     gyroConfig_gyro_soft_notch_cutoff_2 = gyroConfig()->gyro_soft_notch_cutoff_2;
 
-#ifndef USE_GYRO_IMUF9001
     gyroConfig_gyro_kalman_q = gyroConfig()->gyro_kalman_q;
     gyroConfig_gyro_kalman_w = gyroConfig()->gyro_kalman_w;
-#endif
-    return 0;
+
+    return (0);
 }
 
 static long cmsx_menuGyro_onExit(const OSD_Entry *self)
@@ -367,20 +363,17 @@ static long cmsx_menuGyro_onExit(const OSD_Entry *self)
     gyroConfigMutable()->gyro_soft_notch_hz_2 = gyroConfig_gyro_soft_notch_hz_2;
     gyroConfigMutable()->gyro_soft_notch_cutoff_2 = gyroConfig_gyro_soft_notch_cutoff_2;
 
-#ifndef USE_GYRO_IMUF9001
     gyroConfigMutable()->gyro_kalman_q = gyroConfig_gyro_kalman_q;
     gyroConfigMutable()->gyro_kalman_w = gyroConfig_gyro_kalman_w;
-#endif
-    return 0;
+
+    return (0);
 }
 
 static OSD_Entry cmsx_menuFilterGlobalEntries[] =
 {
     { "-- FILTER GLB  --", OME_Label, NULL, NULL, 0 },
-#ifndef USE_GYRO_IMUF9001
     { "GYRO KALMAN W",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_kalman_w, 0, 16000, 1 }, 0 },
     { "GYRO KALMAN Q",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_kalman_q, 0, 16000, 1 }, 0 },
-#endif
     { "GYRO LPF",   OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_lowpass_hz, 0, 16000, 1 }, 0 },
 #ifdef USE_GYRO_LPF2
     { "GYRO LPF2",  OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_gyro_lowpass2_hz,  0, 16000, 1 }, 0 },
