@@ -829,8 +829,7 @@ void gyroInitFilters(void) {
 #endif
 }
 
-FAST_CODE bool isGyroSensorCalibrationComplete(const gyroSensor_t *gyroSensor)
-{
+FAST_CODE bool gyroSensorCalibrationComplete(const gyroSensor_t *gyroSensor) {
     return (gyroSensor->calibration.cyclesRemaining == 0);
 }
 
@@ -839,21 +838,21 @@ FAST_CODE bool gyroCalibrationComplete(void) {
     switch (gyroToUse) {
         default:
         case GYRO_CONFIG_USE_GYRO_1: {
-            return isGyroSensorCalibrationComplete(&gyroSensor1);
+            return (gyroSensorCalibrationComplete(&gyroSensor1));
         }
         case GYRO_CONFIG_USE_GYRO_2: {
-            return isGyroSensorCalibrationComplete(&gyroSensor2);
+            return (gyroSensorCalibrationComplete(&gyroSensor2));
         }
         case GYRO_CONFIG_USE_GYRO_BOTH: {
-            return isGyroSensorCalibrationComplete(&gyroSensor1) && isGyroSensorCalibrationComplete(&gyroSensor2);
+            return (gyroSensorCalibrationComplete(&gyroSensor1) && gyroSensorCalibrationComplete(&gyroSensor2));
         }
     }
 #else
-    return (isGyroSensorCalibrationComplete(&gyroSensor1));
+    return (gyroSensorCalibrationComplete(&gyroSensor1));
 #endif
 }
 
-static bool isOnFinalGyroCalibrationCycle(const gyroCalibration_t *gyroCalibration) {
+static bool gyroLastCalibrationCycle(const gyroCalibration_t *gyroCalibration) {
     return (gyroCalibration->cyclesRemaining == 1);
 }
 
@@ -861,14 +860,11 @@ static int32_t gyroCalculateCalibratingCycles(void) {
     return ((gyroConfig()->gyroCalibrationDuration * 10000) / gyro.targetLooptime);
 }
 
-static bool isOnFirstGyroCalibrationCycle(const gyroCalibration_t *gyroCalibration) {
+static bool gyroFirstCalibrationCycle(const gyroCalibration_t *gyroCalibration) {
     return (gyroCalibration->cyclesRemaining == gyroCalculateCalibratingCycles());
 }
 
 static void gyroSetCalibrationCycles(gyroSensor_t *gyroSensor) {
-    #ifdef USE_GYRO_IMUF9001
-    imufStartCalibration();
-    #endif
     gyroSensor->calibration.cyclesRemaining = gyroCalculateCalibratingCycles();
 }
 
@@ -892,7 +888,10 @@ bool isFirstArmingGyroCalibrationRunning(void) {
 STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t gyroMovementCalibrationThreshold) {
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         // Reset g[axis] at start of calibration
-        if (isOnFirstGyroCalibrationCycle(&gyroSensor->calibration)) {
+        if (gyroFirstCalibrationCycle(&gyroSensor->calibration)) {
+#ifdef USE_GYRO_IMUF9001
+          imufStartCalibration();
+#endif
             gyroSensor->calibration.sum[axis] = 0.0f;
             devClear(&gyroSensor->calibration.var[axis]);
             // gyroZero is set to zero until calibration complete
@@ -903,7 +902,7 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
         gyroSensor->calibration.sum[axis] += gyroSensor->gyroDev.gyroADCRaw[axis];
         devPush(&gyroSensor->calibration.var[axis], gyroSensor->gyroDev.gyroADCRaw[axis]);
 
-        if (isOnFinalGyroCalibrationCycle(&gyroSensor->calibration)) {
+        if (gyroLastCalibrationCycle(&gyroSensor->calibration)) {
             const float stddev = devStandardDeviation(&gyroSensor->calibration.var[axis]);
             // DEBUG_GYRO_CALIBRATION records the standard deviation of roll
             // into the spare field - debug[3], in DEBUG_GYRO_RAW
@@ -911,17 +910,21 @@ STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t
                 DEBUG_SET(DEBUG_GYRO_RAW, DEBUG_GYRO_CALIBRATION, lrintf(stddev));
             }
 
+#ifndef USE_GYRO_IMUF9001
             // check deviation and startover in case the model was moved
             if (gyroMovementCalibrationThreshold && stddev > gyroMovementCalibrationThreshold) {
                 gyroSetCalibrationCycles(gyroSensor);
                 return;
             }
+#else
+UNUSED(gyroMovementCalibrationThreshold);
+#endif
 
             gyroSensor->gyroDev.gyroZero[axis] = gyroSensor->calibration.sum[axis] / gyroCalculateCalibratingCycles();
         }
     }
 
-    if (isOnFinalGyroCalibrationCycle(&gyroSensor->calibration)) {
+    if (gyroLastCalibrationCycle(&gyroSensor->calibration)) {
         schedulerResetTaskStatistics(TASK_SELF); // so calibration cycles do not pollute tasks statistics
         if (!firstArmingCalibrationWasStarted || (getArmingDisableFlags() & ~ARMING_DISABLED_CALIBRATING) == 0) {
             // calculate gyro noise standard deviation modulus
@@ -1066,26 +1069,17 @@ static FAST_CODE_NOINLINE void gyroUpdateSensor(gyroSensor_t* gyroSensor, timeUs
     accumulationLastTimeSampledUs = currentTimeUs;
     accumulatedMeasurementTimeUs += sampleDeltaUs;
 #ifdef USE_GYRO_IMUF9001
-  /*
-    for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        // NOTE: this branch optimized for when there is no gyro debugging, ensure it is kept in step with non-optimized branch
-        //DEBUG_SET(DEBUG_GYRO_SCALED, axis, lrintf(gyroSensor->gyroDev.gyroADCf[axis]));
-        if (!gyroSensor->overflowDetected) {
-            // integrate using trapezium rule to avoid bias
-            accumulatedMeasurements[axis] += 0.5f * (gyroPrevious[axis] + gyroSensor->gyroDev.gyroADCf[axis]) * sampleDeltaUs;
-            gyroPrevious[axis] = gyroSensor->gyroDev.gyroADCf[axis];
-        }
-    }*/
-    if (!isGyroSensorCalibrationComplete(gyroSensor)) {
+    if (!gyroSensorCalibrationComplete(gyroSensor)) {
         performGyroCalibration(gyroSensor, gyroConfig()->gyroMovementCalibrationThreshold);
-        // Reset gyro values to zero to prevent other code from using uncalibrated data
+        gyroSensor->gyroDev.gyroADCRaw[X] = 0.0f;
+        gyroSensor->gyroDev.gyroADCRaw[Y] = 0.0f;
+        gyroSensor->gyroDev.gyroADCRaw[Z] = 0.0f;
         gyroSensor->gyroDev.gyroADCf[X] = 0.0f;
         gyroSensor->gyroDev.gyroADCf[Y] = 0.0f;
         gyroSensor->gyroDev.gyroADCf[Z] = 0.0f;
-        // still calibrating, so no need to further process gyro data
     }
 #else
-    if (isGyroSensorCalibrationComplete(gyroSensor)) {
+    if (gyroSensorCalibrationComplete(gyroSensor)) {
         // move 16-bit gyro data into 32-bit variables to avoid overflows in calculations
 
 #if defined(USE_GYRO_SLEW_LIMITER)
@@ -1156,7 +1150,7 @@ FAST_CODE_NOINLINE void gyroUpdate(timeUs_t currentTimeUs) {
     switch (gyroToUse) {
     case GYRO_CONFIG_USE_GYRO_1:
         gyroUpdateSensor(&gyroSensor1, currentTimeUs);
-        if (isGyroSensorCalibrationComplete(&gyroSensor1)) {
+        if (gyroSensorCalibrationComplete(&gyroSensor1)) {
             gyro.gyroADCf[X] = gyroSensor1.gyroDev.gyroADCf[X];
             gyro.gyroADCf[Y] = gyroSensor1.gyroDev.gyroADCf[Y];
             gyro.gyroADCf[Z] = gyroSensor1.gyroDev.gyroADCf[Z];
@@ -1176,7 +1170,7 @@ FAST_CODE_NOINLINE void gyroUpdate(timeUs_t currentTimeUs) {
         break;
     case GYRO_CONFIG_USE_GYRO_2:
         gyroUpdateSensor(&gyroSensor2, currentTimeUs);
-        if (isGyroSensorCalibrationComplete(&gyroSensor2)) {
+        if (gyroSensorCalibrationComplete(&gyroSensor2)) {
             gyro.gyroADCf[X] = gyroSensor2.gyroDev.gyroADCf[X];
             gyro.gyroADCf[Y] = gyroSensor2.gyroDev.gyroADCf[Y];
             gyro.gyroADCf[Z] = gyroSensor2.gyroDev.gyroADCf[Z];
@@ -1197,7 +1191,7 @@ FAST_CODE_NOINLINE void gyroUpdate(timeUs_t currentTimeUs) {
     case GYRO_CONFIG_USE_GYRO_BOTH:
         gyroUpdateSensor(&gyroSensor1, currentTimeUs);
         gyroUpdateSensor(&gyroSensor2, currentTimeUs);
-        if (isGyroSensorCalibrationComplete(&gyroSensor1) && isGyroSensorCalibrationComplete(&gyroSensor2)) {
+        if (gyroSensorCalibrationComplete(&gyroSensor1) && gyroSensorCalibrationComplete(&gyroSensor2)) {
             gyro.gyroADCf[X] = (gyroSensor1.gyroDev.gyroADCf[X] + gyroSensor2.gyroDev.gyroADCf[X]) / 2.0f;
             gyro.gyroADCf[Y] = (gyroSensor1.gyroDev.gyroADCf[Y] + gyroSensor2.gyroDev.gyroADCf[Y]) / 2.0f;
             gyro.gyroADCf[Z] = (gyroSensor1.gyroDev.gyroADCf[Z] + gyroSensor2.gyroDev.gyroADCf[Z]) / 2.0f;
