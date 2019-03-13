@@ -1068,7 +1068,7 @@ static FAST_CODE_NOINLINE void gyroUpdateSensor(gyroSensor_t* gyroSensor, timeUs
 #ifdef USE_GYRO_IMUF9001
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         // NOTE: this branch optimized for when there is no gyro debugging, ensure it is kept in step with non-optimized branch
-        DEBUG_SET(DEBUG_GYRO_SCALED, axis, lrintf(gyroSensor->gyroDev.gyroADCf[axis]));
+        //DEBUG_SET(DEBUG_GYRO_SCALED, axis, lrintf(gyroSensor->gyroDev.gyroADCf[axis]));
         if (!gyroSensor->overflowDetected) {
             // integrate using trapezium rule to avoid bias
             accumulatedMeasurements[axis] += 0.5f * (gyroPrevious[axis] + gyroSensor->gyroDev.gyroADCf[axis]) * sampleDeltaUs;
