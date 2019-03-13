@@ -165,10 +165,8 @@ STATIC_UNIT_TESTED gyroSensor_t * const gyroSensorPtr = &gyroSensor1;
 STATIC_UNIT_TESTED gyroDev_t * const gyroDevPtr = &gyroSensor1.gyroDev;
 #endif
 
-#ifndef USE_GYRO_IMUF9001
 static void gyroInitSensorFilters(gyroSensor_t *gyroSensor);
 static void gyroInitLowpassFilterLpf(gyroSensor_t *gyroSensor, int slot, int type, uint16_t lpfHz);
-#endif
 
 #define DEBUG_GYRO_CALIBRATION 3
 
@@ -561,14 +559,12 @@ static bool gyroInitSensor(gyroSensor_t *gyroSensor) {
         gyroSensor->gyroDev.gyroHasOverflowProtection = false;  // default catch for newly added gyros until proven to be unaffected
         break;
     }
-#ifndef USE_GYRO_IMUF9001
+
     gyroInitSensorFilters(gyroSensor);
 
 #ifdef USE_GYRO_DATA_ANALYSE
     gyroDataAnalyseStateInit(&gyroSensor->gyroAnalyseState, gyro.targetLooptime);
 #endif
-
-#endif //USE_GYRO_IMUF9001
 
     return (true);
 }
@@ -673,7 +669,7 @@ bool gyroInit(void) {
     return (ret);
 }
 
-#ifndef USE_GYRO_IMUF9001
+
 void gyroInitLowpassFilterLpf(gyroSensor_t *gyroSensor, int slot, int type, uint16_t lpfHz) {
     filterApplyFnPtr *lowpassFilterApplyFn;
     gyroLowpassFilter_t *lowpassFilter = NULL;
@@ -830,7 +826,6 @@ void gyroInitFilters(void) {
     gyroInitSensorFilters(&gyroSensor2);
 #endif
 }
-#endif //USE_GYRO_IMUF9001
 
 FAST_CODE bool isGyroSensorCalibrationComplete(const gyroSensor_t *gyroSensor)
 {
