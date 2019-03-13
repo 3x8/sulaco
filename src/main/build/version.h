@@ -1,31 +1,11 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include "common/utils.h"
 
 #define FC_FIRMWARE_NAME            "ButterFlight"
-#define FC_VERSION_MAJOR            3  // increment when a major release is made (big new feature, etc)
-#define FC_VERSION_MINOR            6  // increment when a minor release is made (small new feature, change etc)
-#define FC_VERSION_PATCH_LEVEL      4  // increment when a bug is fixed
+#define FC_VERSION_MAJOR            4  // increment when a major release is made (big new feature, etc)
+#define FC_VERSION_MINOR            0  // increment when a minor release is made (small new feature, change etc)
+#define FC_VERSION_PATCH_LEVEL      1  // increment when a bug is fixed
 
 
 #define FC_VERSION_STRING STR(FC_VERSION_MAJOR) "." STR(FC_VERSION_MINOR) "." STR(FC_VERSION_PATCH_LEVEL)
