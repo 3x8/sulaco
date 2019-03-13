@@ -99,6 +99,8 @@ typedef struct gyroConfig_s {
     uint16_t gyro_soft_notch_hz_2;
     uint16_t gyro_soft_notch_cutoff_2;
     uint8_t  checkOverflow;
+    uint16_t gyro_kalman_q;
+    uint16_t gyro_kalman_w;
 
     // Lowpass primary/secondary
     uint8_t  gyro_lowpass_type;
@@ -120,9 +122,6 @@ typedef struct gyroConfig_s {
     uint16_t imuf_pitch_lpf_cutoff_hz;
     uint16_t imuf_roll_lpf_cutoff_hz;
     uint16_t imuf_yaw_lpf_cutoff_hz;
-#else
-    uint16_t gyro_kalman_q;
-    uint16_t gyro_kalman_w;
 #endif
 } gyroConfig_t;
 
