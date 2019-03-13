@@ -1045,7 +1045,6 @@ static FAST_CODE void checkForYawSpin(gyroSensor_t *gyroSensor, timeUs_t current
 }
 #endif // USE_YAW_SPIN_RECOVERY
 
-#ifndef USE_GYRO_IMUF9001
 #define GYRO_FILTER_FUNCTION_NAME filterGyro
 #define GYRO_FILTER_DEBUG_SET(...)
 #include "gyro_filter_impl.h"
@@ -1057,7 +1056,6 @@ static FAST_CODE void checkForYawSpin(gyroSensor_t *gyroSensor, timeUs_t current
 #include "gyro_filter_impl.h"
 #undef GYRO_FILTER_FUNCTION_NAME
 #undef GYRO_FILTER_DEBUG_SET
-#endif
 
 static FAST_CODE_NOINLINE void gyroUpdateSensor(gyroSensor_t* gyroSensor, timeUs_t currentTimeUs) {
     #ifndef USE_DMA_SPI_DEVICE
@@ -1110,13 +1108,11 @@ static FAST_CODE_NOINLINE void gyroUpdateSensor(gyroSensor_t* gyroSensor, timeUs
     }
 #endif
 
-#ifndef USE_GYRO_IMUF9001
     if (gyroDebugMode == DEBUG_NONE) {
         filterGyro(gyroSensor);
     } else {
         filterGyroDebug(gyroSensor);
     }
-#endif // USE_GYRO_IMUF9001
 
 #ifdef USE_GYRO_OVERFLOW_CHECK
     if (gyroConfig()->checkOverflow && !gyroHasOverflowProtection) {
