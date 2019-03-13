@@ -65,8 +65,8 @@
 #include "sensors/gyroanalyse.h"
 #endif
 #include "sensors/sensors.h"
-#ifdef USE_GYRO_IMUF9001
 
+#ifdef USE_GYRO_IMUF9001
 #include "drivers/accgyro/accgyro_imuf9001.h"
 #endif
 
