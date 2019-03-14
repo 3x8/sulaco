@@ -73,7 +73,6 @@ static uint16_t accCalibrationCyclesToDo = 0;
 
 static flightDynamicsTrims_t *accelerationTrims;
 
-//ToDo
 static uint16_t accLpfCutHz = 0;
 static biquadFilter_t accFilter[XYZ_AXIS_COUNT];
 
@@ -356,7 +355,6 @@ bool accInit(void) {
     acc.dev.acc_1G = 256;
     acc.dev.initFn(&acc.dev);
 
-    //ToDo
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
@@ -431,7 +429,6 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
         DEBUG_SET(DEBUG_ACC, axis, acc.dev.ADCRaw[axis]);
         acc.accADC[axis] = acc.dev.ADCRaw[axis];
 
-        //ToDo
         if (accLpfCutHz) {
             acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
         } else {
@@ -477,7 +474,6 @@ void accSetTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
 void accInitFilters(void) {
     accLpfCutHz = accelerometerConfig()->acc_lpf_hz;
 
-    //ToDo
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
