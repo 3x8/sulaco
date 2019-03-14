@@ -2509,11 +2509,10 @@ static void cliSignature(char *cmdline)
 
 #endif // USE_BOARD_INFO
 
-static void cliMcuId(char *cmdline)
-{
+static void cliMcuId(char *cmdline){
     UNUSED(cmdline);
 
-    cliPrintLinef("mcu_id %08x%08x%08x", U_ID_0, U_ID_1, U_ID_2);
+    cliPrintLinef("mcu_id %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
 }
 
 static void printFeature(uint8_t dumpMask, const featureConfig_t *featureConfig, const featureConfig_t *featureConfigDefault)
@@ -2735,7 +2734,7 @@ static void printMap(uint8_t dumpMask, const rxConfig_t *rxConfig, const rxConfi
     if (defaultRxConfig) {
         bufDefault[i] = '\0';
         cliDefaultPrintLinef(dumpMask, equalsDefault, formatMap, bufDefault);
-    }   
+    }
     cliDumpPrintLinef(dumpMask, equalsDefault, formatMap, buf);
 }
 
