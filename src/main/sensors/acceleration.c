@@ -73,17 +73,14 @@ static uint16_t accCalibrationCyclesToDo = 0;
 
 static flightDynamicsTrims_t *accelerationTrims;
 
-
 //ToDo
 static uint16_t accLpfCutHz = 0;
-//static biquadFilter_t accFilter[XYZ_AXIS_COUNT];
+static biquadFilter_t accFilter[XYZ_AXIS_COUNT];
 
 typedef union accLowpass_u {
     kalman_t kalmanFilterState;
 } accLowpass_t;
-
 static accLowpass_t accLowpass[XYZ_AXIS_COUNT];
-
 
 
 PG_REGISTER_WITH_RESET_FN(accelerometerConfig_t, accelerometerConfig, PG_ACCELEROMETER_CONFIG, 0);
@@ -359,12 +356,12 @@ bool accInit(void) {
     acc.dev.acc_1G = 256;
     acc.dev.initFn(&acc.dev);
 
-
-    if (accLpfCutHz) {
-        for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-          //ToDo
-            //biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q, accelerometerConfig()->acc_kalman_w);
+    //ToDo
+    for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
+        if (accLpfCutHz) {
+            biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
+        } else {
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q / 1000.0f, accelerometerConfig()->acc_kalman_w);
         }
     }
 
@@ -434,11 +431,13 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
         DEBUG_SET(DEBUG_ACC, axis, acc.dev.ADCRaw[axis]);
         acc.accADC[axis] = acc.dev.ADCRaw[axis];
 
+        //ToDo
         if (accLpfCutHz) {
-          //ToDo
-            //acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
+            acc.accADC[axis] = biquadFilterApply(&accFilter[axis], (float)acc.accADC[axis]);
+        } else {
             acc.accADC[axis] = kalmanUpdate(&accLowpass[axis].kalmanFilterState, (float)acc.accADC[axis]);
         }
+        DEBUG_SET(DEBUG_ACC_FILTER, axis, lrintf(acc.accADC[axis]));
     }
     DEBUG_SET(DEBUG_ACC, 3, acc.dev.acc_1G);
 
@@ -451,7 +450,6 @@ void accUpdate(timeUs_t currentTimeUs, rollAndPitchTrims_t *rollAndPitchTrims) {
     }
 
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-        DEBUG_SET(DEBUG_ACC_FILTER, axis, lrintf(acc.accADC[axis]));
         acc.accADC[axis] = (acc.accADC[axis] - (float)accelerationTrims->raw[axis]) * ((float)acc.dev.acc_1G / (float)accelerationTrims->raw[axis + 3]);
     }
     DEBUG_SET(DEBUG_ACC_FILTER, 3, acc.dev.acc_1G);
@@ -478,11 +476,13 @@ void accSetTrims(flightDynamicsTrims_t *accelerationTrimsToUse) {
 
 void accInitFilters(void) {
     accLpfCutHz = accelerometerConfig()->acc_lpf_hz;
-    if (accLpfCutHz) {
-        for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-          //ToDo
-            //biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q, accelerometerConfig()->acc_kalman_w);
+
+    //ToDo
+    for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
+        if (accLpfCutHz) {
+            biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
+        } else {
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q / 1000.0f, accelerometerConfig()->acc_kalman_w);
         }
     }
 }
