@@ -548,6 +548,7 @@ const clivalue_t valueTable[] = {
 #if defined(USE_GYRO_SPI_ICM20649)
     { "acc_high_range",             VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OFF_ON }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_high_fsr) },
 #endif
+    { "acc_acc_healthy",            VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 99 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_healthy) },
     { "acc_lpf_hz",                 VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 400 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_lpf_hz) },
     { "acc_kalman_w",               VAR_UINT16 | MASTER_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_kalman_w) },
     { "acc_kalman_q",               VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 16000 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_kalman_q) },

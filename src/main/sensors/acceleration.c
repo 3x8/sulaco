@@ -110,6 +110,7 @@ void accResetFlightDynamicsTrims(void) {
 
 void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance) {
     RESET_CONFIG_2(accelerometerConfig_t, instance,
+        .acc_healthy = 10,
         .acc_lpf_hz = 0,
         .acc_kalman_w = 32,
         .acc_kalman_q = 500,
@@ -484,8 +485,8 @@ void accInitFilters(void) {
 }
 
 bool accIsHealthy(quaternion *q) {
-    // accept 7% deviation
+    // accept acc_healthy% deviation
     float accModulus = quaternionModulus(q);
     accModulus = accModulus / acc.dev.acc_1G;
-    return ((0.93f < accModulus) && (accModulus < 1.07f));
+    return (((1.0f - accelerometerConfig()->acc_healthy * 0.01) < accModulus) && (accModulus < (1.0f + accelerometerConfig()->acc_healthy * 0.01)));
 }

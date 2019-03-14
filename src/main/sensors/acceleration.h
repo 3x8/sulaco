@@ -52,6 +52,7 @@ typedef union rollAndPitchTrims_u {
 
 
 typedef struct accelerometerConfig_s {
+    uint16_t acc_healthy;
     uint16_t acc_lpf_hz;
     uint16_t acc_kalman_w;
     uint16_t acc_kalman_q;
