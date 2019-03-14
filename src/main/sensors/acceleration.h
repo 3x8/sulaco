@@ -53,6 +53,8 @@ typedef union rollAndPitchTrims_u {
 
 typedef struct accelerometerConfig_s {
     uint16_t acc_lpf_hz;
+    uint16_t acc_kalman_w;
+    uint16_t acc_kalman_q;
     sensor_align_e acc_align;
     uint8_t acc_hardware;
     bool acc_high_fsr;
