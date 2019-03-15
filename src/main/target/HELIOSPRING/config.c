@@ -2,6 +2,7 @@
 
 #include <platform.h>
 
+#include "config/feature.h"
 #include "config/config_eeprom.h"
 #include "drivers/pwm_output.h"
 #include "common/filter.h"
