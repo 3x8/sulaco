@@ -2403,13 +2403,13 @@ static void cliBoardName(char *cmdline)
 {
     const unsigned int len = strlen(cmdline);
     if (len > 0 && boardInformationIsSet() && (len != strlen(getBoardName()) || strncmp(getBoardName(), cmdline, len))) {
-        cliPrintErrorLinef(ERROR_MESSAGE, "board_name", getBoardName());
+        cliPrintErrorLinef(ERROR_MESSAGE, "# board_name", getBoardName());
     } else {
         if (len > 0) {
             setBoardName(cmdline);
             boardInformationUpdated = true;
         }
-        cliPrintLinef("board_name %s", getBoardName());
+        cliPrintLinef("# board_name %s", getBoardName());
     }
 }
 
@@ -2417,13 +2417,13 @@ static void cliManufacturerId(char *cmdline)
 {
     const unsigned int len = strlen(cmdline);
     if (len > 0 && boardInformationIsSet() && (len != strlen(getManufacturerId()) || strncmp(getManufacturerId(), cmdline, len))) {
-        cliPrintErrorLinef(ERROR_MESSAGE, "manufacturer_id", getManufacturerId());
+        cliPrintErrorLinef(ERROR_MESSAGE, "# manufacturer_id", getManufacturerId());
     } else {
         if (len > 0) {
             setManufacturerId(cmdline);
             boardInformationUpdated = true;
         }
-        cliPrintLinef("manufacturer_id %s", getManufacturerId());
+        cliPrintLinef("# manufacturer_id %s", getManufacturerId());
     }
 }
 
