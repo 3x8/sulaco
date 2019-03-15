@@ -36,7 +36,7 @@ void targetConfiguration(void) {
     rcControlsConfigMutable()->deadband = 7;
     rcControlsConfigMutable()->yaw_deadband = 11;
 
-    featureSet((FEATURE_AIRMODE | FEATURE_TELEMETRY) ^ DYNAMIC_FILTER);
+    featureSet((FEATURE_AIRMODE | FEATURE_TELEMETRY) ^ FEATURE_DYNAMIC_FILTER);
 
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
