@@ -72,7 +72,8 @@ PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
     .dcm_kp = 7013,
     .dcm_ki = 13,
-    .small_angle = 25
+    .small_angle = 25,
+    .dcm_fastgain = 17
 );
 
 void imuConfigure(void) {
@@ -93,12 +94,12 @@ void imuInit(void) {
 
 static float imuUseFastGains(void) {
    if (!ARMING_FLAG(ARMED)) {
-        return (17.0f);
+        return (imuConfig()->dcm_fastgain);
     }
     else {
         //onboard beeper influences vAcc
         if (isBeeperOn()) {
-          return (0.17f);
+          return (imuConfig()->dcm_fastgain * 0.1f);
         } else {
           return (1.0f);
         }

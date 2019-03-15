@@ -28,6 +28,7 @@ typedef struct imuConfig_s {
     uint16_t dcm_kp;                        // DCM proportional gain
     uint16_t dcm_ki;                        // DCM integral gain
     uint8_t small_angle;
+    uint8_t dcm_fastgain;
 } imuConfig_t;
 
 PG_DECLARE(imuConfig_t, imuConfig);

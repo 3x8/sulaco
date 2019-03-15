@@ -2512,7 +2512,7 @@ static void cliSignature(char *cmdline)
 static void cliMcuId(char *cmdline){
     UNUSED(cmdline);
 
-    cliPrintLinef("mcu_id %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
+    cliPrintLinef("# mcu_id %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
 }
 
 static void printFeature(uint8_t dumpMask, const featureConfig_t *featureConfig, const featureConfig_t *featureConfigDefault)
@@ -4244,6 +4244,7 @@ static void cliVersion(char *cmdline)
 #ifdef USE_GYRO_IMUF9001
     cliPrintLinef("# IMU-F Version: %lu", imufCurrentVersion);
 #endif
+    cliMcuId(NULL);
 }
 
 #ifdef USE_RC_SMOOTHING_FILTER
