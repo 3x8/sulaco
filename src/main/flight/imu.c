@@ -70,10 +70,10 @@ attitudeEulerAngles_t attitude = EULER_INITIALIZE;
 PG_REGISTER_WITH_RESET_TEMPLATE(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
 
 PG_RESET_TEMPLATE(imuConfig_t, imuConfig,
-    .dcm_kp = 4013,
+    .dcm_kp = 2013,
     .dcm_ki = 13,
     .small_angle = 25,
-    .dcm_fastgain = 17
+    .dcm_fastgain = 11
 );
 
 void imuConfigure(void) {
