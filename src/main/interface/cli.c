@@ -2512,7 +2512,7 @@ static void cliSignature(char *cmdline)
 static void cliMcuId(char *cmdline){
     UNUSED(cmdline);
 
-    cliPrintLinef("# mcu_id %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
+    cliPrintLinef("# MCU UID %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
 }
 
 static void printFeature(uint8_t dumpMask, const featureConfig_t *featureConfig, const featureConfig_t *featureConfigDefault)
