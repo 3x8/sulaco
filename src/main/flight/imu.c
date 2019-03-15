@@ -126,7 +126,7 @@ static void imuCalculateErrorVector(float ez_ef, quaternion *vError) {
 
 static void imuGpsMagCorrection(quaternion *vError) {
 
-#if  (defined(USE_GPS))
+#if (defined(USE_GPS))
     if (sensors(SENSOR_GPS) && STATE(GPS_FIX) && gpsSol.numSat >= 5 && gpsSol.groundSpeed >= 600) {
         float courseOverGround = DECIDEGREES_TO_RADIANS(gpsSol.groundCourse);
         static bool hasInitializedGPSHeading = false;
