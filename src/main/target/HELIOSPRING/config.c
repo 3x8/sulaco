@@ -23,9 +23,11 @@ void targetConfiguration(void) {
     rxConfigMutable()->rcInterpolationInterval = 14;
     rxConfigMutable()->rcInterpolationChannels = INTERPOLATION_CHANNELS_RPYT;
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_MULTISHOT;
-    gyroConfigMutable()->gyro_sync_denom  = 4; // 16KHZ GYRO
-    pidConfigMutable()->pid_process_denom = 1; // 16KHZ PID
-    //systemConfigMutable()->cpu_overclock  = 1; //192MHz makes Multishot run a little better because of maths.
+    gyroConfigMutable()->gyro_sync_denom  = 4;
+    pidConfigMutable()->pid_process_denom = 1;
+    //systemConfigMutable()->cpu_overclock  = 1;
+
+    featureClear(FEATURE_DYNAMIC_FILTER);
 
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
