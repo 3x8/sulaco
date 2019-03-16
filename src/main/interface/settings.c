@@ -822,8 +822,8 @@ const clivalue_t valueTable[] = {
 
 // PG_PID_PROFILE
     { "dterm_lowpass_type",         VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_FILTER_TYPE }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_filter_type) },
-    { "dterm_kalman_w",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_kalman_w) },
-    { "dterm_kalman_q",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 1, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_kalman_q) },
+    { "pid_kalman_w",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_PID_PROFILE, offsetof(pidProfile_t, pid_kalman_w) },
+    { "pid_kalman_q",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 1, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, pid_kalman_q) },
     { "dterm_lowpass_hz",           VAR_INT16  | PROFILE_VALUE, .config.minmax = { 0, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_lowpass_hz) },
     { "dterm_lowpass2_hz",          VAR_INT16  | PROFILE_VALUE, .config.minmax = { 0, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_lowpass2_hz) },
     { "dterm_notch_hz",             VAR_UINT16 | PROFILE_VALUE, .config.minmax = { 0, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_notch_hz) },
