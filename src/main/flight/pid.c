@@ -833,7 +833,7 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     float dDelta = dtermNotchApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
     //ToDo
     //dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
-    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
+    //DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
 
     previousRateError[axis] = gyro.gyroADCf[axis];
     pidData[axis].D = (pidCoefficient[axis].Kd * dDelta);
@@ -1090,6 +1090,8 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         pidData[axis].Sum = pidData[axis].P + pidData[axis].I + pidData[axis].D + pidData[axis].F;
         //ToDo
         pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
+        const float pidDataAxisSumOld = pidData[axis].Sum;
+        DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumOld));
     }
 }
 
