@@ -833,7 +833,7 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     float dDelta = dtermNotchApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
     //ToDo
     //dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
-    //DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
+    //DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
 
     previousRateError[axis] = gyro.gyroADCf[axis];
     pidData[axis].D = (pidCoefficient[axis].Kd * dDelta);
@@ -960,7 +960,7 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     //gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
 
     const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
-    DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(delta - deltaNoFilter));
+    //DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(delta - deltaNoFilter));
     if (pidCoefficient[axis].Kd > 0) {
 
         // Divide rate change by dT to get differential (ie dr/dt).
@@ -1091,7 +1091,8 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         //ToDo
         pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
         const float pidDataAxisSumOld = pidData[axis].Sum;
-        DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumOld));
+        DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(pidData[axis].Sum));
+        DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumOld));
     }
 }
 

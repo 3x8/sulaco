@@ -58,6 +58,7 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "RC_SMOOTHING_RATE",
     "ANTI_GRAVITY",
     "IMU",
-    "DTERM_FILTER_DIFF",
+    "PID_FILTER",
+    "PID_FILTER_DIFF",
     "KALMAN",
 };
