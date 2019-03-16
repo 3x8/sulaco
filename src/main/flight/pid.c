@@ -832,6 +832,13 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     const float dDeltaNoFilter = -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT);
     float dDelta = dtermNotchApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
 
+    //new
+    if(pidProfile->dterm_filter_type != FILTER_KALMAN) {
+        dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
+        DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(dDelta));
+        DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
+    }
+
     previousRateError[axis] = gyro.gyroADCf[axis];
     pidData[axis].D = (pidCoefficient[axis].Kd * dDelta);
 
@@ -951,8 +958,17 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     }
 
     // -----calculate D component
+    const float deltaNoFilter = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     gyroRateDterm[axis] = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
-    const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
+    float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
+
+    //new
+    if(pidProfile->dterm_filter_type != FILTER_KALMAN) {
+        gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
+        delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
+        DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(delta));
+        DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(delta - deltaNoFilter));
+    }
 
     if (pidCoefficient[axis].Kd > 0) {
         // Divide rate change by dT to get differential (ie dr/dt).
@@ -970,7 +986,7 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
         pidData[axis].D = 0;
     }
     previousGyroRateDterm[axis] = gyroRateDterm[axis];
-    return delta;
+    return (delta);
 }
 
 void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *angleTrim, timeUs_t currentTimeUs)
@@ -1082,9 +1098,13 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         pidData[axis].Sum = pidData[axis].P + pidData[axis].I + pidData[axis].D + pidData[axis].F;
         // filter pid sum
         const float pidDataAxisSumNoFilter = pidData[axis].Sum;
-        pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
-        DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(pidData[axis].Sum));
-        DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumNoFilter));
+
+        //new
+        if(pidProfile->dterm_filter_type == FILTER_KALMAN) {
+            pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
+            DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(pidData[axis].Sum));
+            DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumNoFilter));
+        }
     }
 }
 
