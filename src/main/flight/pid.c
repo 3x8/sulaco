@@ -956,7 +956,8 @@ FAST_CODE float classicPids(const pidProfile_t* pidProfile, int axis, float erro
     // -----calculate D component
     const float deltaNoFilter = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     gyroRateDterm[axis] = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
-    gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
+    //ToDo
+    //gyroRateDterm[axis] = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], gyroRateDterm[axis]);
 
     const float delta = - (gyroRateDterm[axis] - previousGyroRateDterm[axis]) * pidFrequency;
     DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(delta - deltaNoFilter));
