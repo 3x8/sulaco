@@ -122,7 +122,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         .pidSumLimit = PIDSUM_LIMIT_MAX,
         .yaw_lowpass_hz = 0,
-        .pid_kalman_q = 500,
+        .pid_kalman_q = 2500,
         .pid_kalman_w = 32,
         .dterm_lowpass_hz = 90,
         .dterm_lowpass2_hz = 0,
@@ -264,7 +264,7 @@ void pidInitFilters(const pidProfile_t *pidProfile) {
 
                 case FILTER_KALMAN:
                     dtermLowpassApplyFn = (filterApplyFnPtr)kalmanUpdate;
-                    kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->pid_kalman_q * 0.01f), pidProfile->pid_kalman_w);
+                    kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->pid_kalman_q * 0.002f), pidProfile->pid_kalman_w);
                 break;
 
                 case FILTER_BIQUAD:
