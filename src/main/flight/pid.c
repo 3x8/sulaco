@@ -263,7 +263,7 @@ void pidInitFilters(const pidProfile_t *pidProfile) {
                 break;
 
                 case FILTER_KALMAN:
-                    dtermLowpassApplyFn = (filterApplyFnPtr) kalmanUpdate;
+                    dtermLowpassApplyFn = (filterApplyFnPtr)kalmanUpdate;
                     kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->dterm_kalman_q / 10.0f), pidProfile->dterm_kalman_w);
                 break;
 
@@ -831,7 +831,8 @@ FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float err
     // use measurement and apply filters. mmmm gimme that butter.
     const float dDeltaNoFilter = -((gyro.gyroADCf[axis] - previousRateError[axis]) * iDT);
     float dDelta = dtermNotchApplyFn((filter_t *) &dtermLowpass[axis], dDeltaNoFilter);
-    dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
+    //ToDo
+    //dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
     DEBUG_SET(DEBUG_DTERM_FILTER_DIFF, axis, lrintf(dDelta - dDeltaNoFilter));
 
     previousRateError[axis] = gyro.gyroADCf[axis];
@@ -1086,6 +1087,8 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         }
         // calculating the PID sum
         pidData[axis].Sum = pidData[axis].P + pidData[axis].I + pidData[axis].D + pidData[axis].F;
+        //ToDo
+        pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
     }
 }
 
