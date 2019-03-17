@@ -485,8 +485,8 @@ static long cmsx_FilterPerProfileRead(void)
 {
     const pidProfile_t *pidProfile = pidProfiles(pidProfileIndex);
 
-    cmsx_pid_kalman_w     = pidProfile->pid_kalman_w;
-    cmsx_pid_kalman_q     = pidProfile->pid_kalman_q;
+    cmsx_pid_kalman_w       = pidProfile->pid_kalman_w;
+    cmsx_pid_kalman_q       = pidProfile->pid_kalman_q;
     cmsx_dterm_lowpass_hz   = pidProfile->dterm_lowpass_hz;
     cmsx_dterm_lowpass2_hz  = pidProfile->dterm_lowpass2_hz;
     cmsx_dterm_notch_hz     = pidProfile->dterm_notch_hz;
@@ -502,8 +502,8 @@ static long cmsx_FilterPerProfileWriteback(const OSD_Entry *self)
 
     pidProfile_t *pidProfile = currentPidProfile;
 
-    pidProfile->pid_kalman_w     = cmsx_pid_kalman_w;
-    pidProfile->pid_kalman_q     = cmsx_pid_kalman_q;
+    pidProfile->pid_kalman_w       = cmsx_pid_kalman_w;
+    pidProfile->pid_kalman_q       = cmsx_pid_kalman_q;
     pidProfile->dterm_lowpass_hz   = cmsx_dterm_lowpass_hz;
     pidProfile->dterm_lowpass2_hz  = cmsx_dterm_lowpass2_hz;
     pidProfile->dterm_notch_hz     = cmsx_dterm_notch_hz;
