@@ -421,7 +421,7 @@ void init(void)
         if (mscStart() == 0) {
              mscWaitForButton();
         } else {
-             NVIC_SystemReset();
+            systemResetFromMsc();
         }
     }
 #endif
@@ -673,8 +673,6 @@ void init(void)
         }
     }
 #endif
-
-#ifdef USE_BLACKBOX
     blackboxInit();
 #endif
 

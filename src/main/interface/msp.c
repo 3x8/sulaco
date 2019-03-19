@@ -1624,7 +1624,7 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
                 mac->range.startStep = sbufReadU8(src);
                 mac->range.endStep = sbufReadU8(src);
 
-                useRcControlsConfig(currentPidProfile);
+                rcControlsInit();
             } else {
                 return MSP_RESULT_ERROR;
             }
