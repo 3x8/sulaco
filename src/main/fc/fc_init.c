@@ -662,6 +662,7 @@ void init(void)
     flashResetInit();
 #endif
 
+#ifdef USE_BLACKBOX
 #ifdef USE_SDCARD
     if (blackboxConfig()->device == BLACKBOX_DEVICE_SDCARD) {
         if (sdcardConfig()->enabled) {
