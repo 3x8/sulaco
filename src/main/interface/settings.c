@@ -521,7 +521,7 @@ const clivalue_t valueTable[] = {
     { "imuf_roll_lpf_cutoff_hz",    VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 450   }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, imuf_roll_lpf_cutoff_hz) },
     { "imuf_yaw_lpf_cutoff_hz",     VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 450   }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, imuf_yaw_lpf_cutoff_hz) },
 #endif
-    { "gyro_kalman_w",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_kalman_w) },
+    { "gyro_kalman_w",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_kalman_w) },
     { "gyro_kalman_q",              VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 16000 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_kalman_q) },
 #ifdef USE_GYRO_OVERFLOW_CHECK
     { "gyro_overflow_detect",       VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_GYRO_OVERFLOW_CHECK }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, checkOverflow) },
@@ -550,7 +550,7 @@ const clivalue_t valueTable[] = {
 #endif
     { "acc_healthy",                VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 99 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_healthy) },
     { "acc_lpf_hz",                 VAR_UINT16 | MASTER_VALUE, .config.minmax = { 0, 400 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_lpf_hz) },
-    { "acc_kalman_w",               VAR_UINT16 | MASTER_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_kalman_w) },
+    { "acc_kalman_w",               VAR_UINT16 | MASTER_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_kalman_w) },
     { "acc_kalman_q",               VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 16000 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_kalman_q) },
     { "acc_trim_pitch",             VAR_INT16  | MASTER_VALUE, .config.minmax = { -300, 300 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, accelerometerTrims.values.pitch) },
     { "acc_trim_roll",              VAR_INT16  | MASTER_VALUE, .config.minmax = { -300, 300 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, accelerometerTrims.values.roll) },
@@ -822,7 +822,7 @@ const clivalue_t valueTable[] = {
 
 // PG_PID_PROFILE
     { "dterm_lowpass_type",         VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_FILTER_TYPE }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_filter_type) },
-    { "pid_kalman_w",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE - 1 }, PG_PID_PROFILE, offsetof(pidProfile_t, pid_kalman_w) },
+    { "pid_kalman_w",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 3, MAX_WINDOW_SIZE }, PG_PID_PROFILE, offsetof(pidProfile_t, pid_kalman_w) },
     { "pid_kalman_q",             VAR_INT16  | PROFILE_VALUE, .config.minmax = { 1, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, pid_kalman_q) },
     { "dterm_lowpass_hz",           VAR_INT16  | PROFILE_VALUE, .config.minmax = { 0, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_lowpass_hz) },
     { "dterm_lowpass2_hz",          VAR_INT16  | PROFILE_VALUE, .config.minmax = { 0, 16000 }, PG_PID_PROFILE, offsetof(pidProfile_t, dterm_lowpass2_hz) },
