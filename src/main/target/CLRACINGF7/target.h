@@ -13,7 +13,10 @@
 
 #define CAMERA_CONTROL_PIN      PB3
 
-// ICM-20602
+// ICM20601
+#define USE_GYRO_SPI_ICM20649
+
+// ICM20602
 #define USE_ACC
 #define USE_GYRO
 
