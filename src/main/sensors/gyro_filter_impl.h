@@ -6,7 +6,7 @@ static FAST_CODE void GYRO_FILTER_FUNCTION_NAME(gyroSensor_t *gyroSensor)
 #if defined(USE_GYRO_IMUF9001)
         float gyroADCf = gyroSensor->gyroDev.gyroADCf[axis];
 #else
-        if (gyro->gyro_high_fsr) {
+        if (gyroSensor->gyro_high_fsr) {
             float gyroADCf = gyroSensor->gyroDev.gyroADC[axis] * gyroSensor->gyroDev.scale * 2;
         } else {
             float gyroADCf = gyroSensor->gyroDev.gyroADC[axis] * gyroSensor->gyroDev.scale;
