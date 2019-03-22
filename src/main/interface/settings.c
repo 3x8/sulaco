@@ -492,7 +492,7 @@ const clivalue_t valueTable[] = {
 #ifdef USE_32K_CAPABLE_GYRO
     { "gyro_32khz_hardware_lpf",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_GYRO_32KHZ_HARDWARE_LPF }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_32khz_hardware_lpf) },
 #endif
-#if (defined(USE_GYRO_SPI_ICM20649)  | defined(USE_GYRO_SPI_ICM20601) )
+#if (defined(USE_GYRO_SPI_ICM20649)  ||  defined(USE_GYRO_SPI_ICM20601))
     { "gyro_high_range",            VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OFF_ON }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_high_fsr) },
 #endif
     { "gyro_sync_denom",            VAR_UINT8  | MASTER_VALUE, .config.minmax = { 1, 32 }, PG_GYRO_CONFIG, offsetof(gyroConfig_t, gyro_sync_denom) },

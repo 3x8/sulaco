@@ -108,7 +108,6 @@ bool mpu6500GyroDetect(gyroDev_t *gyro)
 
     // 16.4 dps/lsb scalefactor
     gyro->scale = 1.0f / (gyro->gyro_high_fsr ? 8.2f : 16.4f);
-    //gyro->scale = 1.0f / 16.4f;
 
     return true;
 }
