@@ -60,8 +60,10 @@ void mpu6500GyroInit(gyroDev_t *gyro)
     int accel_range = INV_FSR_16G;
 
     if (gyro->mpuDetectionResult.sensor == ICM_20601_SPI) {
-        gyro_range = gyro->gyro_high_fsr ? ICM_HIGH_RANGE_FSR_4000DPS : ICM_HIGH_RANGE_FSR_2000DPS;
-        accel_range = ICM_HIGH_RANGE_FSR_16G;
+        if (gyro->gyro_high_fsr) {
+            gyro_range  = ICM_HIGH_RANGE_FSR_4000DPS;
+            accel_range = ICM_HIGH_RANGE_FSR_32G;
+        }
     }
 
     busWriteRegister(&gyro->bus, MPU_RA_PWR_MGMT_1, MPU6500_BIT_RESET);
