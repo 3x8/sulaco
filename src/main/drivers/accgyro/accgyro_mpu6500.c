@@ -16,15 +16,14 @@
 #include "accgyro_mpu6500.h"
 
 void mpu6500AccInit(accDev_t *acc) {
-    int accel_range;
+    int accel_range = INV_FSR_16G;
+    acc->acc_1G = 512 * 4;
+
     if (acc->mpuDetectionResult.sensor == ICM_20601_SPI) {
         if (acc->acc_high_fsr) {
             acc->acc_1G = 512 * 2;
             accel_range = ICM_HIGH_RANGE_FSR_32G;
         }
-    } else {
-        acc->acc_1G = 512 * 4;
-        accel_range = INV_FSR_16G;
     }
 
     busWriteRegister(&acc->bus, MPU_RA_ACCEL_CONFIG, accel_range << 3);
