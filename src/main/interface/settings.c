@@ -545,7 +545,7 @@ const clivalue_t valueTable[] = {
 // PG_ACCELEROMETER_CONFIG
     { "align_acc",                  VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_ALIGNMENT }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_align) },
     { "acc_hardware",               VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_ACC_HARDWARE }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_hardware) },
-#if defined(USE_GYRO_SPI_ICM20649)
+#if (defined(USE_GYRO_SPI_ICM20649)  ||  defined(USE_GYRO_SPI_ICM20601))
     { "acc_high_range",             VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OFF_ON }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_high_fsr) },
 #endif
     { "acc_healthy",                VAR_UINT16 | MASTER_VALUE, .config.minmax = { 1, 99 }, PG_ACCELEROMETER_CONFIG, offsetof(accelerometerConfig_t, acc_healthy) },
