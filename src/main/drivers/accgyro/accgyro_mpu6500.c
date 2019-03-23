@@ -45,12 +45,10 @@ void mpu6500GyroInit(gyroDev_t *gyro) {
     mpuGyroInit(gyro);
 
     int gyro_range = INV_FSR_2000DPS;
-  //  int accel_range = INV_FSR_16G;
 
     if (gyro->mpuDetectionResult.sensor == ICM_20601_SPI) {
         if (gyro->gyro_high_fsr) {
             gyro_range  = ICM_HIGH_RANGE_FSR_4000DPS;
-          //  accel_range = ICM_HIGH_RANGE_FSR_32G;
         }
     }
 
@@ -64,8 +62,6 @@ void mpu6500GyroInit(gyroDev_t *gyro) {
     delay(15);
     busWriteRegister(&gyro->bus, MPU_RA_GYRO_CONFIG, gyro_range << 3 | mpuGyroFCHOICE(gyro));
     delay(15);
-  //  busWriteRegister(&gyro->bus, MPU_RA_ACCEL_CONFIG, accel_range << 3);
-  //  delay(15);
     busWriteRegister(&gyro->bus, MPU_RA_CONFIG, mpuGyroDLPF(gyro));
     delay(15);
     busWriteRegister(&gyro->bus, MPU_RA_SMPLRT_DIV, gyro->mpuDividerDrops); // Get Divider Drops
