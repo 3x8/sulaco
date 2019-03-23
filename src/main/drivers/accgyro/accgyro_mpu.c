@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -82,8 +62,7 @@ mpuResetFnPtr mpuResetFn;
 #define MPU_INQUIRY_MASK   0x7E
 
 #if defined(USE_I2C) && !defined(USE_DMA_SPI_DEVICE)
-static void mpu6050FindRevision(gyroDev_t *gyro)
-{
+static void mpu6050FindRevision(gyroDev_t *gyro) {
     // There is a map of revision contained in the android source tree which is quite comprehensive and may help to understand this code
     // See https://android.googlesource.com/kernel/msm.git/+/eaf36994a3992b8f918c18e4f7411e8b2320a35f/drivers/misc/mpu6050/mldl_cfg.c
 
@@ -117,12 +96,8 @@ static void mpu6050FindRevision(gyroDev_t *gyro)
 }
 #endif
 
-/*
- * Gyro interrupt service routine
- */
 #if defined(MPU_INT_EXTI)
-FAST_CODE static void mpuIntExtiHandler(extiCallbackRec_t *cb)
-{
+FAST_CODE static void mpuIntExtiHandler(extiCallbackRec_t *cb) {
 #ifdef USE_DMA_SPI_DEVICE
     //start dma read
     (void)(cb);
@@ -143,8 +118,7 @@ FAST_CODE static void mpuIntExtiHandler(extiCallbackRec_t *cb)
 #endif // USE_DMA_SPI_DEVICE
 }
 
-static void mpuIntExtiInit(gyroDev_t *gyro)
-{
+static void mpuIntExtiInit(gyroDev_t *gyro) {
     if (gyro->mpuIntExtiTag == IO_TAG_NONE) {
         return;
     }
@@ -173,25 +147,23 @@ static void mpuIntExtiInit(gyroDev_t *gyro)
 }
 #endif // MPU_INT_EXTI
 
-bool mpuAccRead(accDev_t *acc)
-{
+bool mpuAccRead(accDev_t *acc) {
     uint8_t data[6];
 
     const bool ack = busReadRegisterBuffer(&acc->bus, MPU_RA_ACCEL_XOUT_H, data, 6);
     if (!ack) {
-        return false;
+        return (false);
     }
 
     acc->ADCRaw[X] = (int16_t)((data[0] << 8) | data[1]);
     acc->ADCRaw[Y] = (int16_t)((data[2] << 8) | data[3]);
     acc->ADCRaw[Z] = (int16_t)((data[4] << 8) | data[5]);
 
-    return true;
+    return (true);
 }
 
 #ifdef USE_DMA_SPI_DEVICE
-FAST_CODE bool mpuGyroDmaSpiReadStart(gyroDev_t * gyro)
-{
+FAST_CODE bool mpuGyroDmaSpiReadStart(gyroDev_t * gyro) {
     (void)(gyro); ///not used at this time
     //no reason not to get acc and gyro data at the same time
 #ifdef USE_GYRO_IMUF9001
@@ -234,11 +206,10 @@ FAST_CODE bool mpuGyroDmaSpiReadStart(gyroDev_t * gyro)
     dmaTxBuffer[0] = MPU_RA_ACCEL_XOUT_H | 0x80;
     dmaSpiTransmitReceive(dmaTxBuffer, dmaRxBuffer, 15, 0);
 #endif // USE_GYRO_IMUF9001
-    return true;
+    return (true);
 }
 
-FAST_CODE void mpuGyroDmaSpiReadFinish(gyroDev_t * gyro)
-{
+FAST_CODE void mpuGyroDmaSpiReadFinish(gyroDev_t * gyro) {
     //spi rx dma callback
 #ifdef USE_GYRO_IMUF9001
     memcpy(&imufData, dmaRxBuffer, sizeof(imufData_t));
@@ -269,42 +240,39 @@ FAST_CODE void mpuGyroDmaSpiReadFinish(gyroDev_t * gyro)
 #endif
 
 
-FAST_CODE bool mpuGyroRead(gyroDev_t *gyro)
-{
+FAST_CODE bool mpuGyroRead(gyroDev_t *gyro) {
     uint8_t data[6];
 
     const bool ack = busReadRegisterBuffer(&gyro->bus, MPU_RA_GYRO_XOUT_H, data, 6);
     if (!ack) {
-        return false;
+        return (false);
     }
 
     gyro->gyroADCRaw[X] = (int16_t)((data[0] << 8) | data[1]);
     gyro->gyroADCRaw[Y] = (int16_t)((data[2] << 8) | data[3]);
     gyro->gyroADCRaw[Z] = (int16_t)((data[4] << 8) | data[5]);
 
-    return true;
+    return (true);
 }
 
-FAST_CODE bool mpuGyroReadSPI(gyroDev_t *gyro)
-{
+FAST_CODE bool mpuGyroReadSPI(gyroDev_t *gyro) {
     static const uint8_t dataToSend[7] = {MPU_RA_GYRO_XOUT_H | 0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     uint8_t data[7];
 
     const bool ack = spiBusTransfer(&gyro->bus, dataToSend, data, 7);
     if (!ack) {
-        return false;
+        return (false);
     }
 
     gyro->gyroADCRaw[X] = (int16_t)((data[1] << 8) | data[2]);
     gyro->gyroADCRaw[Y] = (int16_t)((data[3] << 8) | data[4]);
     gyro->gyroADCRaw[Z] = (int16_t)((data[5] << 8) | data[6]);
 
-    return true;
+    return (true);
 }
 
 #ifdef USE_SPI
-static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
-{
+static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro) {
     UNUSED(gyro); // since there are FCs which have gyro on I2C but other devices on SPI
 
     uint8_t sensor = MPU_NONE;
@@ -322,7 +290,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     sensor = mpu6000SpiDetect(&gyro->bus);
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
@@ -337,7 +305,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     // some targets using MPU_9250_SPI, ICM_20608_SPI or ICM_20602_SPI state sensor is MPU_65xx_SPI
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
@@ -361,7 +329,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     // some targets using MPU_9250_SPI, ICM_20608_SPI or ICM_20602_SPI state sensor is MPU_65xx_SPI
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
@@ -376,7 +344,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
         gyro->mpuConfiguration.resetFn = mpu9250SpiResetGyro;
-        return true;
+        return (true);
     }
 #endif
 
@@ -390,7 +358,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     sensor = icm20649SpiDetect(&gyro->bus);
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
@@ -405,7 +373,7 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     // icm20689SpiDetect detects ICM20602 and ICM20689
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
@@ -419,16 +387,15 @@ static bool detectSPISensorsAndUpdateDetectionResult(gyroDev_t *gyro)
     sensor = bmi160Detect(&gyro->bus);
     if (sensor != MPU_NONE) {
         gyro->mpuDetectionResult.sensor = sensor;
-        return true;
+        return (true);
     }
 #endif
 
-    return false;
+    return (false);
 }
 #endif
 
-void mpuDetect(gyroDev_t *gyro)
-{
+void mpuDetect(gyroDev_t *gyro) {
     // MPU datasheet specifies 30ms.
     delay(35);
 
@@ -473,8 +440,7 @@ void mpuDetect(gyroDev_t *gyro)
 #endif
 }
 
-void mpuGyroInit(gyroDev_t *gyro)
-{
+void mpuGyroInit(gyroDev_t *gyro) {
 #ifdef MPU_INT_EXTI
     mpuIntExtiInit(gyro);
 #else
@@ -482,8 +448,7 @@ void mpuGyroInit(gyroDev_t *gyro)
 #endif
 }
 
-uint8_t mpuGyroDLPF(gyroDev_t *gyro)
-{
+uint8_t mpuGyroDLPF(gyroDev_t *gyro) {
     uint8_t ret;
     if (gyro->gyroRateKHz > GYRO_RATE_8_kHz) {
         ret = 0;  // If gyro is in 32KHz mode then the DLPF bits aren't used - set to 0
@@ -503,19 +468,18 @@ uint8_t mpuGyroDLPF(gyroDev_t *gyro)
                 break;
         }
     }
-    return ret;
+    return (ret);
 }
 
-uint8_t mpuGyroFCHOICE(gyroDev_t *gyro)
-{
+uint8_t mpuGyroFCHOICE(gyroDev_t *gyro) {
     if (gyro->gyroRateKHz > GYRO_RATE_8_kHz) {
         if (gyro->hardware_32khz_lpf == GYRO_32KHZ_HARDWARE_LPF_EXPERIMENTAL) {
-            return FCB_8800_32;
+            return (FCB_8800_32);
         } else {
-            return FCB_3600_32;
+            return (FCB_3600_32);
         }
     } else {
-        return FCB_DISABLED;  // Not in 32KHz mode, set FCHOICE to select 8KHz sampling
+        return (FCB_DISABLED);  // Not in 32KHz mode, set FCHOICE to select 8KHz sampling
     }
 }
 
@@ -525,9 +489,9 @@ uint8_t mpuGyroReadRegister(const busDevice_t *bus, uint8_t reg)
     uint8_t data;
     const bool ack = busReadRegisterBuffer(bus, reg, &data, 1);
     if (ack) {
-        return data;
+        return (data);
     } else {
-        return 0;
+        return (0);
     }
 
 }
