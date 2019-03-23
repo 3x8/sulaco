@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -35,25 +15,28 @@
 #include "accgyro_mpu.h"
 #include "accgyro_mpu6500.h"
 
-void mpu6500AccInit(accDev_t *acc)
-{
-    acc->acc_1G = 512 * 4;
+void mpu6500AccInit(accDev_t *acc) {
+    if (gyro->mpuDetectionResult.sensor == ICM_20601_SPI) {
+        if (gyro->gyro_high_fsr) {
+            acc->acc_1G = 512 * 2;
+        }
+    } else {
+        acc->acc_1G = 512 * 4;
+    }
 }
 
-bool mpu6500AccDetect(accDev_t *acc)
-{
+bool mpu6500AccDetect(accDev_t *acc) {
     if (acc->mpuDetectionResult.sensor != MPU_65xx_I2C) {
-        return false;
+        return (false);
     }
 
     acc->initFn = mpu6500AccInit;
     acc->readFn = mpuAccRead;
 
-    return true;
+    return (true);
 }
 
-void mpu6500GyroInit(gyroDev_t *gyro)
-{
+void mpu6500GyroInit(gyroDev_t *gyro) {
     mpuGyroInit(gyro);
 
     int gyro_range = INV_FSR_2000DPS;
@@ -97,10 +80,9 @@ void mpu6500GyroInit(gyroDev_t *gyro)
     delay(15);
 }
 
-bool mpu6500GyroDetect(gyroDev_t *gyro)
-{
+bool mpu6500GyroDetect(gyroDev_t *gyro) {
     if (gyro->mpuDetectionResult.sensor != MPU_65xx_I2C) {
-        return false;
+        return (false);
     }
 
     gyro->initFn = mpu6500GyroInit;
@@ -109,5 +91,5 @@ bool mpu6500GyroDetect(gyroDev_t *gyro)
     // 16.4 dps/lsb scalefactor
     gyro->scale = 1.0f / (gyro->gyro_high_fsr ? 8.2f : 16.4f);
 
-    return true;
+    return (true);
 }
