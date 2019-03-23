@@ -99,8 +99,7 @@ static void mpu6050FindRevision(gyroDev_t *gyro) {
 #if defined(MPU_INT_EXTI)
 FAST_CODE static void mpuIntExtiHandler(extiCallbackRec_t *cb) {
 #ifdef USE_DMA_SPI_DEVICE
-    //start dma read
-    (void)(cb);
+    UNUSED(cb);
     gyroDmaSpiStartRead();
 #else
 #ifdef DEBUG_MPU_DATA_READY_INTERRUPT
