@@ -13,8 +13,8 @@
 
 #define CAMERA_CONTROL_PIN      PB3
 
-// allways 125us -> 8kHz (at 16K and 32K ... also)
-// #define DEBUG_MPU_DATA_READY_INTERRUPT
+// EXTI ICM20601 allways 125us -> 8kHz (at 16K and 32K gyro rate ... also)
+#define DEBUG_MPU_DATA_READY_INTERRUPT
 
 // ICM20601
 #define USE_GYRO_SPI_ICM20601
