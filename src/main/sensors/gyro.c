@@ -1238,8 +1238,6 @@ FAST_CODE_NOINLINE void gyroUpdate(timeUs_t currentTimeUs) {
 #endif
 #endif
 
-
-
     if (!overflowDetected) {
         for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
             // integrate using trapezium rule to avoid bias
