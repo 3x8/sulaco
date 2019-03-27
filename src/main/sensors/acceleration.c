@@ -112,7 +112,7 @@ void pgResetFn_accelerometerConfig(accelerometerConfig_t *instance) {
     RESET_CONFIG_2(accelerometerConfig_t, instance,
         .acc_healthy = 10,
         .acc_lpf_hz = 0,
-        .acc_kalman_w = 64,
+        .acc_kalman_w = 16,
         .acc_kalman_q = 2500,
         .acc_align = ALIGN_DEFAULT,
         .acc_hardware = ACC_DEFAULT,
@@ -360,7 +360,7 @@ bool accInit(void) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
         } else {
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.0001f, accelerometerConfig()->acc_kalman_w);
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.001f, accelerometerConfig()->acc_kalman_w);
         }
     }
 
@@ -479,7 +479,7 @@ void accInitFilters(void) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
         } else {
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.0001f, accelerometerConfig()->acc_kalman_w);
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.001f, accelerometerConfig()->acc_kalman_w);
         }
     }
 }
