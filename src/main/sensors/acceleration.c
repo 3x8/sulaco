@@ -360,7 +360,7 @@ bool accInit(void) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
         } else {
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.00004f, accelerometerConfig()->acc_kalman_w);
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.0001f, accelerometerConfig()->acc_kalman_w);
         }
     }
 
@@ -479,7 +479,7 @@ void accInitFilters(void) {
         if (accLpfCutHz) {
             biquadFilterInitLPF(&accFilter[axis], accLpfCutHz, DEFAULT_ACC_SAMPLE_INTERVAL);
         } else {
-            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.00004f, accelerometerConfig()->acc_kalman_w);
+            kalmanInit(&accLowpass[axis].kalmanFilterState, accelerometerConfig()->acc_kalman_q * 0.0001f, accelerometerConfig()->acc_kalman_w);
         }
     }
 }
