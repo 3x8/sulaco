@@ -93,15 +93,19 @@ void imuInit(void) {
 }
 
 static float imuUseFastGains(void) {
-   if (!ARMING_FLAG(ARMED)) {
-        return (imuConfig()->dcm_fastgain);
-    }
-    else {
-        //onboard beeper influences vAcc
-        if (isBeeperOn()) {
-          return (imuConfig()->dcm_fastgain * 0.1f);
+   if (ARMING_FLAG(ARMED)) {
+     // onboard beeper influences vAcc
+     if (isBeeperOn()) {
+       return (0.1f);
+     } else {
+       return (1.0f);
+     }
+    } else {
+        if (getArmingDisabled(ARMING_DISABLED_MSP)){
+            // on MSP behave like ARMED
+            return (1.0f);
         } else {
-          return (1.0f);
+            return (imuConfig()->dcm_fastgain);
         }
     }
 }

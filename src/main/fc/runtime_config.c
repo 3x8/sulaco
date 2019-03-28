@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -58,70 +38,58 @@ const char *armingDisableFlagNames[]= {
 
 static armingDisableFlags_e armingDisableFlags = 0;
 
-void setArmingDisabled(armingDisableFlags_e flag)
-{
+void setArmingDisabled(armingDisableFlags_e flag) {
     armingDisableFlags = armingDisableFlags | flag;
 }
 
-void unsetArmingDisabled(armingDisableFlags_e flag)
-{
+void unsetArmingDisabled(armingDisableFlags_e flag) {
     armingDisableFlags = armingDisableFlags & ~flag;
 }
 
-bool isArmingDisabled(void)
-{
-    return armingDisableFlags;
+bool getArmingDisabled(armingDisableFlags_e flag) {
+    return(armingDisableFlags & flag);
 }
 
-armingDisableFlags_e getArmingDisableFlags(void)
-{
-    return armingDisableFlags;
+bool isArmingDisabled(void) {
+    return (armingDisableFlags);
 }
 
-/**
- * Enables the given flight mode.  A beep is sounded if the flight mode
- * has changed.  Returns the new 'flightModeFlags' value.
- */
-uint16_t enableFlightMode(flightModeFlags_e mask)
-{
+armingDisableFlags_e getArmingDisableFlags(void) {
+    return (armingDisableFlags);
+}
+
+uint16_t enableFlightMode(flightModeFlags_e mask) {
     uint16_t oldVal = flightModeFlags;
 
     flightModeFlags |= (mask);
-    if (flightModeFlags != oldVal)
+    if (flightModeFlags != oldVal) {
         beeperConfirmationBeeps(1);
-    return flightModeFlags;
+    }
+    return (flightModeFlags);
 }
 
-/**
- * Disables the given flight mode.  A beep is sounded if the flight mode
- * has changed.  Returns the new 'flightModeFlags' value.
- */
-uint16_t disableFlightMode(flightModeFlags_e mask)
-{
+uint16_t disableFlightMode(flightModeFlags_e mask) {
     uint16_t oldVal = flightModeFlags;
 
     flightModeFlags &= ~(mask);
-    if (flightModeFlags != oldVal)
+    if (flightModeFlags != oldVal){
         beeperConfirmationBeeps(1);
-    return flightModeFlags;
+    }
+    return (flightModeFlags);
 }
 
-bool sensors(uint32_t mask)
-{
-    return enabledSensors & mask;
+bool sensors(uint32_t mask) {
+    return (enabledSensors & mask);
 }
 
-void sensorsSet(uint32_t mask)
-{
+void sensorsSet(uint32_t mask) {
     enabledSensors |= mask;
 }
 
-void sensorsClear(uint32_t mask)
-{
+void sensorsClear(uint32_t mask) {
     enabledSensors &= ~(mask);
 }
 
-uint32_t sensorsMask(void)
-{
-    return enabledSensors;
+uint32_t sensorsMask(void) {
+    return (enabledSensors);
 }

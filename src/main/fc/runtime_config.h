@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 // FIXME some of these are flight modes, some of these are general status indicators
@@ -66,6 +46,7 @@ extern const char *armingDisableFlagNames[ARMING_DISABLE_FLAGS_COUNT];
 
 void setArmingDisabled(armingDisableFlags_e flag);
 void unsetArmingDisabled(armingDisableFlags_e flag);
+bool getArmingDisabled(armingDisableFlags_e flag);
 bool isArmingDisabled(void);
 armingDisableFlags_e getArmingDisableFlags(void);
 
