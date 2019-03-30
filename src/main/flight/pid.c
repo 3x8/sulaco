@@ -265,6 +265,7 @@ void pidInitFilters(const pidProfile_t *pidProfile) {
                 case FILTER_KALMAN:
                     dtermLowpassApplyFn = (filterApplyFnPtr)kalmanUpdate;
                     kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->pid_kalman_q * 0.002f), pidProfile->pid_kalman_w);
+                    biquadFilterInitLPF(&dtermLowpass[axis].biquadFilter, pidProfile->dterm_lowpass_hz, targetPidLooptime);
                 break;
 
                 case FILTER_BIQUAD:
@@ -1104,6 +1105,8 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         //new
         if(pidProfile->dterm_filter_type == FILTER_KALMAN) {
             pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
+            //new lpf
+            pidData[axis].Sum = biquadFilterApply(&dtermLowpass[axis].biquadFilter, pidData[axis].Sum);
             DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(pidData[axis].Sum));
             DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumNoFilter));
         }
