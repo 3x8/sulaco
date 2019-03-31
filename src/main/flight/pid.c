@@ -232,12 +232,13 @@ static FAST_RAM_ZERO_INIT uint8_t rcSmoothingFilterType;
 #endif // USE_RC_SMOOTHING_FILTER
 
 static FAST_RAM_ZERO_INIT pt1Filter_t antiGravityThrottleLpf;
+static FAST_RAM_ZERO_INIT uint32_t pidFrequencyNyquist;
 
 void pidInitFilters(const pidProfile_t *pidProfile) {
     BUILD_BUG_ON(FD_YAW != 2); // ensure yaw axis is 2
     dtermNotchApplyFn = nullFilterApply;
     dtermLowpassApplyFn = nullFilterApply;
-    const uint32_t pidFrequencyNyquist = pidFrequency / 2; // No rounding needed
+    pidFrequencyNyquist = pidFrequency / 2; // No rounding needed
 
     uint16_t dTermNotchHz;
     if (pidProfile->dterm_notch_hz <= pidFrequencyNyquist) {
@@ -1112,7 +1113,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         //new
         if(pidProfile->dterm_filter_type == FILTER_KALMAN) {
 
-            if (pidProfile->dterm_lowpass_hz) {
+            if (pidProfile->dterm_lowpass_hz && (pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist)) {
                 //new pid lpf
                 pidData[axis].Sum = biquadFilterApply(&pidLowpass[axis], pidData[axis].Sum);
             }
