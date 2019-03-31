@@ -124,7 +124,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .yaw_lowpass_hz = 0,
         .pid_kalman_q = 2500,
         .pid_kalman_w = 32,
-        .dterm_lowpass_hz = 160,
+        .dterm_lowpass_hz = 150,
         .dterm_lowpass2_hz = 0,
         .dterm_notch_hz = 0,
         .dterm_notch_cutoff = 0,
@@ -258,7 +258,7 @@ void pidInitFilters(const pidProfile_t *pidProfile) {
         }
     }
 
-    if (pidProfile->dterm_lowpass_hz && pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist) {
+    if ((pidProfile->dterm_lowpass_hz && (pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist)) || (pidProfile->dterm_filter_type == FILTER_KALMAN)) {
         for (int axis = FD_ROLL; axis <= FD_YAW; axis++) {
             switch (pidProfile->dterm_filter_type) {
                 case FILTER_PT1:
@@ -270,7 +270,9 @@ void pidInitFilters(const pidProfile_t *pidProfile) {
                     dtermLowpassApplyFn = (filterApplyFnPtr)kalmanUpdate;
                     kalmanInit(&dtermLowpass[axis].kalmanFilterState, (pidProfile->pid_kalman_q * 0.002f), pidProfile->pid_kalman_w);
                     //new pid lpf
-                    biquadFilterInitLPF(&pidLowpass[axis], pidProfile->dterm_lowpass_hz, targetPidLooptime);
+                    if (pidProfile->dterm_lowpass_hz && (pidProfile->dterm_lowpass_hz <= pidFrequencyNyquist)) {
+                        biquadFilterInitLPF(&pidLowpass[axis], pidProfile->dterm_lowpass_hz, targetPidLooptime);
+                    }
                 break;
 
                 case FILTER_BIQUAD:
@@ -1109,9 +1111,15 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
 
         //new
         if(pidProfile->dterm_filter_type == FILTER_KALMAN) {
+
+            if (pidProfile->dterm_lowpass_hz) {
+                //new pid lpf
+                pidData[axis].Sum = biquadFilterApply(&pidLowpass[axis], pidData[axis].Sum);
+            }
+
+            //new kalman after lpf (lpf swings)
             pidData[axis].Sum = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], pidData[axis].Sum);
-            //new pid lpf
-            pidData[axis].Sum = biquadFilterApply(&pidLowpass[axis], pidData[axis].Sum);
+
             DEBUG_SET(DEBUG_PID_FILTER, axis, lrintf(pidData[axis].Sum));
             DEBUG_SET(DEBUG_PID_FILTER_DIFF, axis, lrintf(pidData[axis].Sum - pidDataAxisSumNoFilter));
         }
