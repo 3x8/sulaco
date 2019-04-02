@@ -124,7 +124,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .yaw_lowpass_hz = 0,
         .pid_kalman_q = 2500,
         .pid_kalman_w = 32,
-        .dterm_lowpass_hz = 0,
+        .dterm_lowpass_hz = 150,
         .dterm_lowpass2_hz = 0,
         .dterm_notch_hz = 0,
         .dterm_notch_cutoff = 0,
