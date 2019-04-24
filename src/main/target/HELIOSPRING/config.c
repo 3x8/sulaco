@@ -27,6 +27,7 @@ void targetConfiguration(void) {
     gyroConfigMutable()->gyro_sync_denom  = 4;
     pidConfigMutable()->pid_process_denom = 1;
     //systemConfigMutable()->cpu_overclock  = 1;
+    accelerometerConfigMutable()->acc_lpf_hz  = 10;
 
     featureClear(FEATURE_DYNAMIC_FILTER);
 
