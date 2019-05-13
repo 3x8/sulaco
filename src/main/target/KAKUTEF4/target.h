@@ -1,24 +1,5 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
+
 #if defined(KAKUTEF4V2)
 #define TARGET_BOARD_IDENTIFIER "KTV2"
 #define USBD_PRODUCT_STRING "KakuteF4-V2"
@@ -74,11 +55,11 @@
 
 #if defined(FLYWOOF405)
 //------MPU6000
-#define MPU6000_CS_PIN           PC4 
+#define MPU6000_CS_PIN           PC4
 #define MPU6000_SPI_INSTANCE     SPI1
 #define USE_GYRO_SPI_MPU6000
 #define GYRO_MPU6000_ALIGN      CW270_DEG
-#define USE_ACC_SPI_MPU6000								  
+#define USE_ACC_SPI_MPU6000
 #define ACC_MPU6000_ALIGN       CW270_DEG
 #endif
 
@@ -120,7 +101,7 @@
 #define USE_UART1
 #define UART1_RX_PIN            PA10
 
-#if defined (FLYWOOF405)  
+#if defined (FLYWOOF405)
 #define UART1_TX_PIN            PB6 //SCL/UART1_TX/TIM4_CH1
 #else
 #define UART1_TX_PIN            PA9
@@ -156,11 +137,11 @@
 #define USE_ESCSERIAL
 
 #if defined(FLYWOOF405)
-#define ESCSERIAL_TIMER_TX_PIN  PB8 
+#define ESCSERIAL_TIMER_TX_PIN  PB8
 #else
 #define ESCSERIAL_TIMER_TX_PIN  PC7  // (HARDARE=0,PPM)
-#endif	
-									   
+#endif
+
 #define USE_SPI
 #define USE_SPI_DEVICE_1 //ICM20689
 #define SPI1_NSS_PIN            PC4

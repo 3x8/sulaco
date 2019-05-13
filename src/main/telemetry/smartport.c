@@ -1,27 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
- * SmartPort Telemetry implementation by frank26080115
- * see https://github.com/frank26080115/cleanflight/wiki/Using-Smart-Port
- */
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -479,7 +455,7 @@ void processSmartPortTelemetry(smartPortPayload_t *payload, volatile bool *clear
         // Pass only the payload: skip frameId
         uint8_t *frameStart = (uint8_t *)&payload->valueId;
         smartPortMspReplyPending = handleMspFrame(frameStart, SMARTPORT_MSP_PAYLOAD_SIZE, &skipRequests);
-         
+
         // Don't send MSP response after write to eeprom
         // CPU just got out of suspended state after writeEEPROM()
         // We don't know if the receiver is listening again

@@ -1,37 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
- * Supports the GY-91 MPU9250 and BMP280 development board via SPI1
- *
- * Put the MAX7456 on SPI2 instead of an SDCARD
- *  MAX7456 CS -> PB12 (default)
- *  Uses the default pins for SPI2:
- *    #define SPI2_NSS_PIN    PB12
- *    #define SPI2_SCK_PIN    PB13
- *    #define SPI2_MISO_PIN   PB14
- *    #define SPI2_MOSI_PIN   PB15
- *
- * @author Nathan Tsoi
- */
-
 #pragma once
 
 #define TARGET_BOARD_IDENTIFIER "SDF3" // STM Discovery F3

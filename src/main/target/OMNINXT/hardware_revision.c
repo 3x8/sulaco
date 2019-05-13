@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -94,7 +74,7 @@ static void adcIDDetectInit(void)
     ADC_CommonInit(&ADC_CommonInitStructure);
 
     ADC_InitTypeDef ADC_InitStructure;
-    
+
     ADC_StructInit(&ADC_InitStructure);
     ADC_InitStructure.ADC_ContinuousConvMode       = ENABLE;
     ADC_InitStructure.ADC_Resolution               = ADC_Resolution_12b;
@@ -154,7 +134,7 @@ static uint16_t adcIDDetectReadVrefint(void)
 
 #include "drivers/adc_impl.h"
 
-static adcDevice_t adcIDDetHardware = 
+static adcDevice_t adcIDDetHardware =
     { .ADCx = ADC1, .rccADC = RCC_APB2(ADC1), .DMAy_Streamx = ADC1_DMA_STREAM, .channel = DMA_CHANNEL_0 };
 
 // XXX adcIDDetectInitDevice is an exact copy of adcInitDevice() from adc_stm32f7xx.c. Export and use?
@@ -250,7 +230,7 @@ static uint16_t adcIDDetectReadIDDet(void)
 #endif
 
 void detectHardwareRevision(void)
-{        
+{
     adcIDDetectInit();
 
     uint32_t vrefintValue = 0;

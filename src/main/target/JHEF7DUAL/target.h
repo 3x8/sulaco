@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #define USE_TARGET_CONFIG
@@ -60,7 +40,7 @@
 
 #define ACC_ICM20689_1_ALIGN    CW90_DEG
 #define GYRO_ICM20689_1_ALIGN   CW90_DEG
-#define GYRO_1_ALIGN            GYRO_ICM20689_1_ALIGN 
+#define GYRO_1_ALIGN            GYRO_ICM20689_1_ALIGN
 #define ACC_1_ALIGN             ACC_ICM20689_1_ALIGN
 
 #define ACC_MPU6000_2_ALIGN     CW90_DEG
@@ -140,7 +120,7 @@
 
 #define USE_ADC
 #define ADC_INSTANCE            ADC3
-#define ADC3_DMA_OPT            0  // DMA 2 Stream 0 Channel 2 
+#define ADC3_DMA_OPT            0  // DMA 2 Stream 0 Channel 2
 
 #define CURRENT_METER_ADC_PIN   PC1
 #define VBAT_ADC_PIN            PC2
