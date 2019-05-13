@@ -823,7 +823,7 @@ static FAST_RAM_ZERO_INIT float previousRateError[3];
 static FAST_RAM_ZERO_INIT timeUs_t crashDetectedAtUs;
 static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
 
-// Butterflight pid controller which uses measurement instead of error rate to calculate D
+// sulaco pid controller which uses measurement instead of error rate to calculate D
 FAST_CODE float butteredPids(const pidProfile_t *pidProfile, int axis, float errorRate, float dynCi, float iDT, float currentPidSetpoint) {
     (void)(pidProfile);
     (void)(currentPidSetpoint);

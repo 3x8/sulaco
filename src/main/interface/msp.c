@@ -133,7 +133,7 @@
 #include "drivers/accgyro/accgyro_imuf9001.h"
 #endif //USE_GYRO_IMUF9001
 
-static const char * const flightControllerIdentifier = BUTTERFLIGHT_IDENTIFIER; // 4 UPPER CASE alpha numeric characters that identify the flight controller.
+static const char * const flightControllerIdentifier = SULACO_IDENTIFIER; // 4 UPPER CASE alpha numeric characters that identify the flight controller.
 
 enum {
     MSP_REBOOT_FIRMWARE = 0,
