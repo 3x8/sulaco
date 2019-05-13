@@ -16,7 +16,7 @@
 #
 
 # The target to build, see VALID_TARGETS below
-TARGET    ?= BETAFLIGHTF3
+TARGET    ?= CLRACINGF7
 
 # Compile-time options
 OPTIONS   ?=
