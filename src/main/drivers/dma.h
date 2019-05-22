@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include "resource.h"
@@ -89,7 +69,7 @@ typedef enum {
     .userParam = 0, \
     .owner = 0, \
     .resourceIndex = 0 \
-    } 
+    }
 
 #define DEFINE_DMA_IRQ_HANDLER(d, s, i) void DMA ## d ## _Stream ## s ## _IRQHandler(void) {\
                                                                 const uint8_t index = DMA_IDENTIFIER_TO_INDEX(i); \
@@ -129,8 +109,8 @@ typedef enum {
     DMA2_CH3_HANDLER,
     DMA2_CH4_HANDLER,
     DMA2_CH5_HANDLER,
-    DMA_LAST_HANDLER = DMA2_CH5_HANDLER 
-#else 
+    DMA_LAST_HANDLER = DMA2_CH5_HANDLER
+#else
     DMA_LAST_HANDLER = DMA1_CH7_HANDLER
 #endif
 } dmaIdentifier_e;

@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -677,14 +657,14 @@ static void applyFlipOverAfterCrashModeToMotors(void)
                 signPitch*currentMixer[i].pitch +
                 signRoll*currentMixer[i].roll +
                 signYaw*currentMixer[i].yaw;
-                
+
             if (motorOutput < 0) {
                 if (mixerConfig()->crashflip_motor_percent > 0) {
                     motorOutput = -motorOutput * (float)mixerConfig()->crashflip_motor_percent / 100.0f;
                 } else {
                     motorOutput = disarmMotorOutput;
                 }
-            } 
+            }
             motorOutput = MIN(1.0f, flipPower * motorOutput);
             motorOutput = motorOutputMin + motorOutput * motorOutputRange;
 
@@ -785,7 +765,7 @@ FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs, uint8_t vbatPidCompensa
     // 50% throttle provides the maximum authority for yaw recovery when airmode is not active.
     // When airmode is active the throttle setting doesn't impact recovery authority.
     if (gyroYawSpinDetected() && !isAirmodeActive()) {
-        throttle = 0.5f;   // 
+        throttle = 0.5f;   //
     }
 #endif // USE_YAW_SPIN_RECOVERY
 
@@ -809,7 +789,7 @@ FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs, uint8_t vbatPidCompensa
     }
 
         pidUpdateAntiGravityThrottleFilter(throttle);
-    
+
 #if defined(USE_THROTTLE_BOOST)
     if (throttleBoost > 0.0f) {
         const float throttleHpf = throttle - pt1FilterApply(&throttleLpf, throttle);
