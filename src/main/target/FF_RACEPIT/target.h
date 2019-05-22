@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 #define TARGET_BOARD_IDENTIFIER "RACE"
 #define USBD_PRODUCT_STRING     "RacePit"
@@ -25,7 +5,7 @@
 
 /*--------------LED----------------*/
 #define LED0_PIN                PB5
-#define LED1_PIN                PB4 
+#define LED1_PIN                PB4
 /*---------------------------------*/
 
 /*------------BEEPER---------------*/
@@ -67,8 +47,8 @@
 
 /*-------------OSD-----------------*/
 #define USE_MAX7456
-#define MAX7456_SPI_INSTANCE    SPI2  
-#define MAX7456_SPI_CS_PIN      SPI2_NSS_PIN 
+#define MAX7456_SPI_INSTANCE    SPI2
+#define MAX7456_SPI_CS_PIN      SPI2_NSS_PIN
 #define MAX7456_SPI_CLK         (SPI_CLOCK_STANDARD) // 10MHz
 #define MAX7456_RESTORE_CLK     (SPI_CLOCK_FAST)
 /*---------------------------------*/
@@ -77,7 +57,7 @@
 #define USE_VCP
 
 #define USE_UART1
-#define UART1_RX_PIN            PB7	
+#define UART1_RX_PIN            PB7
 #define UART1_TX_PIN            PA9
 
 #define USE_UART2
@@ -85,8 +65,8 @@
 #define UART2_TX_PIN            PA2
 
 #define USE_UART3
-#define UART3_RX_PIN            PC11 
-#define UART3_TX_PIN            PC10 
+#define UART3_RX_PIN            PC11
+#define UART3_TX_PIN            PC10
 #define INVERTER_PIN_UART3      PC15
 
 #define USE_UART4
@@ -101,7 +81,7 @@
 #define UART6_RX_PIN            PC7
 #define UART6_TX_PIN            PC6
 
-#define SERIAL_PORT_COUNT       7 
+#define SERIAL_PORT_COUNT       7
 /*---------------------------------*/
 
 /*-------------SPIs----------------*/

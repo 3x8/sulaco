@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <string.h>
 #include <sys/_stdint.h>
 
@@ -433,7 +413,7 @@ rx_spi_received_e frSkyXHandlePacket(uint8_t * const packet, uint8_t * const pro
                             frameReceived = true; // no need to process frame again.
                         }
                     }
-                } 
+                }
                 if (!frameReceived) {
                     packetErrors++;
                     DEBUG_SET(DEBUG_RX_FRSKY_SPI, DEBUG_DATA_BAD_FRAME, packetErrors);
@@ -535,7 +515,7 @@ rx_spi_received_e frSkyXHandlePacket(uint8_t * const packet, uint8_t * const pro
             }
             missingPackets++;
             DEBUG_SET(DEBUG_RX_FRSKY_SPI, DEBUG_DATA_MISSING_PACKETS, missingPackets);
-            
+
             *protocolState = STATE_DATA;
         }
         break;

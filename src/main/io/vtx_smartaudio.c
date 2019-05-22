@@ -1,25 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* Created by jflyper */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -514,7 +492,7 @@ typedef struct saCmdQueue_s {
 } saCmdQueue_t;
 
 #define SA_QSIZE 6     // 1 heartbeat (GetSettings) + 2 commands + 1 slack
-#define SA_AKK_MACH2_QSIZE 4     
+#define SA_AKK_MACH2_QSIZE 4
 
 static saCmdQueue_t sa_queue[SA_QSIZE];
 static saCmdQueue_t sa_akk_mach2_queue[SA_AKK_MACH2_QSIZE];

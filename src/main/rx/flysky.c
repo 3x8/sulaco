@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <string.h>
 #include "platform.h"
 
@@ -367,9 +347,9 @@ bool flySkyInit (const rxSpiConfig_t *rxSpiConfig, struct rxRuntimeConfig_s *rxR
     IO_t bindPin = IOGetByTag(IO_TAG(BINDPLUG_PIN));
     IOInit(bindPin, OWNER_RX_BIND, 0);
     IOConfigGPIO(bindPin, IOCFG_IPU);
-#ifdef USE_RX_FLYSKY_SPI_LED	
+#ifdef USE_RX_FLYSKY_SPI_LED
     flySkyLedPin = IOGetByTag(IO_TAG(RX_FLYSKY_SPI_LED_PIN));
-    IOInit(flySkyLedPin, OWNER_LED, 0); 
+    IOInit(flySkyLedPin, OWNER_LED, 0);
     IOConfigGPIO(flySkyLedPin, IOCFG_OUT_PP);
     IOLo(flySkyLedPin);
 #endif /* USE_RX_FLYSKY_SPI_LED */
@@ -466,7 +446,7 @@ rx_spi_received_e flySkyDataReceived (uint8_t *payload)
             IOHi(flySkyLedPin);
         } else {
             if (rxLossCount  < RX_LOSS_COUNT) {
-                rxLossCount++;      
+                rxLossCount++;
             } else {
                 timeMs_t now = millis();
                 if (now - ledLastUpdate > INTERVAL_RX_LOSS_MS) {
