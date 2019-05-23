@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include "platform.h"
@@ -55,7 +35,7 @@
 #define GYRO_LPF_5HZ        6
 #define GYRO_LPF_NONE       7
 
-//This optimizes the frequencies instead of calculating them 
+//This optimizes the frequencies instead of calculating them
 //in the case of 1100 and 9000, they would divide as irrational numbers.
 #define GYRO_RATE_1_kHz     1000.0f
 #define GYRO_RATE_1100_Hz   909.09f

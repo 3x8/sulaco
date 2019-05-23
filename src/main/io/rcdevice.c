@@ -1,23 +1,3 @@
-/*
- * This file is part of Cleanflight and Betaflight.
- *
- * Cleanflight and Betaflight are free software. You can redistribute
- * this software and/or modify this software under the terms of the
- * GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Cleanflight and Betaflight are distributed in the hope that they
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this software.
- *
- * If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -77,7 +57,7 @@ static bool rcdeviceRespCtxQueuePush(rcdeviceWaitingResponseQueue *queue, rcdevi
     }
     queue->itemCount += 1;
     queue->tailPos = newTailPos;
-    
+
     return true;
 }
 
@@ -361,7 +341,7 @@ static rcdeviceResponseParseContext_t* getWaitingResponse(timeMs_t currentTimeMs
     return respCtx;
 }
 
-void rcdeviceReceive(timeUs_t currentTimeUs) 
+void rcdeviceReceive(timeUs_t currentTimeUs)
 {
     UNUSED(currentTimeUs);
     rcdeviceResponseParseContext_t *respCtx = NULL;
@@ -374,10 +354,10 @@ void rcdeviceReceive(timeUs_t currentTimeUs)
                 continue;
             }
         }
-        
+
         respCtx->recvBuf[respCtx->recvRespLen] = c;
         respCtx->recvRespLen += 1;
-        
+
         // if data received done, trigger callback to parse response data, and update rcdevice state
         if (respCtx->recvRespLen == respCtx->expectedRespLen) {
             // verify the crc value
@@ -386,7 +366,7 @@ void rcdeviceReceive(timeUs_t currentTimeUs)
                 for (int i = 0; i < respCtx->recvRespLen; i++) {
                     crc = crc8_dvb_s2(crc, respCtx->recvBuf[i]);
                 }
-                
+
                 respCtx->result = (crc == 0) ? RCDEVICE_RESP_SUCCESS : RCDEVICE_RESP_INCORRECT_CRC;
             } else if (respCtx->protocolVer == RCDEVICE_PROTOCOL_RCSPLIT_VERSION) {
                 // do nothing, just call parserFunc

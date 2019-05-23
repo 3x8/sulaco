@@ -1,20 +1,3 @@
-/*
- * This file is part of Betaflight.
- *
- * Betaflight is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Betaflight is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Betaflight. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <stdint.h>
 #include <math.h>
 
@@ -337,7 +320,7 @@ void idleTasks()
     rescueThrottle = rcCommand[THROTTLE];
 
     //to do: have a default value for hoverThrottle
-    
+
     // FIXME: GPS Rescue throttle handling should take into account min_check as the
     // active throttle is from min_check through PWM_RANGE_MAX. Currently adjusting for this
     // in gpsRescueGetThrottle() but it would be better handled here.
@@ -430,7 +413,7 @@ void setBearing(int16_t desiredHeading)
     }
 
     errorAngle *= -GET_DIRECTION(rcControlsConfig()->yaw_control_reversed);
-        
+
     // Calculate a desired yaw rate based on a maximum limit beyond
     // an error window and then scale the requested rate down inside
     // the window as error approaches 0.
@@ -449,7 +432,7 @@ float gpsRescueGetThrottle(void)
     // is based on the raw rcCommand value commanded by the pilot.
     float commandedThrottle = scaleRangef(rescueThrottle, MAX(rxConfig()->mincheck, PWM_RANGE_MIN), PWM_RANGE_MAX, 0.0f, 1.0f);
     commandedThrottle = constrainf(commandedThrottle, 0.0f, 1.0f);
-    
+
     return commandedThrottle;
 }
 
@@ -458,4 +441,3 @@ bool gpsRescueIsConfigured(void)
     return failsafeConfig()->failsafe_procedure == FAILSAFE_PROCEDURE_GPS_RESCUE || isModeActivationConditionPresent(BOXGPSRESCUE);
 }
 #endif
-
