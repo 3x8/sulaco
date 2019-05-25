@@ -34,5 +34,6 @@ void targetConfiguration(void) {
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
         pidProfile->dterm_notch_cutoff = 0;
+        pidProfile->dterm_filter_type = FILTER_BIQUAD;
     }
 }
