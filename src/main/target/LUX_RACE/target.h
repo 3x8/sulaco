@@ -10,9 +10,9 @@
 //#undef USE_RTC_TIME
 #undef USE_RX_MSP
 //#undef USE_ESC_SENSOR_INFO
+#undef USE_BOARD_INFO
 
 #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
-
 
 #define LED0_PIN                PC15
 #define LED1_PIN                PC14
