@@ -2,6 +2,8 @@
 
 #define USE_TARGET_CONFIG
 
+#undef USE_BOARD_INFO
+
 #if defined(OMNIBUSF4SD)
 #define TARGET_BOARD_IDENTIFIER "OBSD"
 #elif defined(LUXF4OSD)
