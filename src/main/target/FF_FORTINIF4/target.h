@@ -1,4 +1,7 @@
 #pragma once
+
+#undef USE_BOARD_INFO
+
 #if defined(FF_FORTINIF4_REV03)
 #define TARGET_BOARD_IDENTIFIER "FOR3"
 #define USBD_PRODUCT_STRING     "FortiniF4_Rev03"
