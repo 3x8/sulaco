@@ -3024,7 +3024,7 @@ static void cliDumpGyroRegisters(char *cmdline)
 static int parseOutputIndex(char *pch, bool allowAllEscs) {
     int outputIndex = atoi(pch);
     if ((outputIndex >= 0) && (outputIndex < getMotorCount())) {
-        cliPrintLinef("Using output %d.", outputIndex);
+        //cliPrintLinef("Using output %d.", outputIndex);
     } else if (allowAllEscs && outputIndex == ALL_MOTORS) {
         cliPrintLinef("Using all outputs.");
     } else {
@@ -3042,6 +3042,7 @@ static int parseOutputIndex(char *pch, bool allowAllEscs) {
 #define ESC_INFO_KISS_V1_EXPECTED_FRAME_SIZE 15
 #define ESC_INFO_KISS_V2_EXPECTED_FRAME_SIZE 21
 #define ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE 64
+#define ESC_INFO_MAX_FRAME_SIZE 255
 
 enum {
     ESC_INFO_KISS_V1,
@@ -3205,7 +3206,8 @@ void printEscInfo(const uint8_t *escInfoBuffer, uint8_t bytesRead)
     }
 
     if (!escInfoReceived) {
-        cliPrintLine("No Info.");
+        //cliPrintLine("No Info.");
+        cliPrintLinef("%s", escInfoBuffer);
     }
 }
 
@@ -3213,9 +3215,10 @@ static void executeEscInfoCommand(uint8_t escIndex)
 {
     cliPrintLinef("Info for ESC %d:", escIndex);
 
-    uint8_t escInfoBuffer[ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE];
+    uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
+    memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
 
-    startEscDataRead(escInfoBuffer, ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE);
+    startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
 
     pwmWriteDshotCommand(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, true);
 
@@ -3264,7 +3267,12 @@ static void cliDshotProg(char *cmdline)
                     }
 
                     if (command != DSHOT_CMD_ESC_INFO) {
+                        uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
+                        memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
+                        startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
                         pwmWriteDshotCommand(escIndex, getMotorCount(), command, true);
+                        delay(10);
+                        printEscInfo(escInfoBuffer, getNumberEscBytesRead());
                     } else {
 #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
                         if (feature(FEATURE_ESC_SENSOR)) {
@@ -3282,7 +3290,7 @@ static void cliDshotProg(char *cmdline)
                         }
                     }
 
-                    cliPrintLinef("Command Sent: %d", command);
+                    //cliPrintLinef("Command Sent: %d", command);
 
                 } else {
                     cliPrintErrorLinef("Invalid command. Range: 1 - %d.", DSHOT_MIN_THROTTLE - 1);
