@@ -3272,7 +3272,7 @@ static void cliDshotProg(char *cmdline)
                         startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
                         pwmWriteDshotCommand(escIndex, getMotorCount(), command, true);
                         delay(10);
-                        printEscInfo(escInfoBuffer, getNumberEscBytesRead());
+                        cliPrintf("%s", escInfoBuffer);
                     } else {
 #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
                         if (feature(FEATURE_ESC_SENSOR)) {
