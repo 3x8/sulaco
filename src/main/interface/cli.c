@@ -3213,7 +3213,7 @@ void printEscInfo(const uint8_t *escInfoBuffer, uint8_t bytesRead)
 
 static void executeEscInfoCommand(uint8_t escIndex)
 {
-    cliPrintLinef("Info for ESC %d:", escIndex);
+    cliPrintLinef("# Info for ESC %d:", escIndex);
 
     uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
     memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
@@ -3286,14 +3286,14 @@ static void cliDshotProg(char *cmdline)
                         } else
 #endif
                         {
-                            cliPrintLine("Not supported.");
+                            cliPrintLine("# Not supported.");
                         }
                     }
 
                     //cliPrintLinef("Command Sent: %d", command);
 
                 } else {
-                    cliPrintErrorLinef("Invalid command. Range: 1 - %d.", DSHOT_MIN_THROTTLE - 1);
+                    cliPrintErrorLinef("# Invalid command. Range: 1 - %d.", DSHOT_MIN_THROTTLE - 1);
                 }
             }
 

@@ -146,13 +146,14 @@ escSensorData_t *getEscSensorData(uint8_t motorNumber)
             for (int i = 0; i < getMotorCount(); i = i + 1) {
                 combinedEscSensorData.dataAge = MAX(combinedEscSensorData.dataAge, escSensorData[i].dataAge);
                 combinedEscSensorData.temperature = MAX(combinedEscSensorData.temperature, escSensorData[i].temperature);
-                combinedEscSensorData.voltage += escSensorData[i].voltage;
+                combinedEscSensorData.voltage = MAX(combinedEscSensorData.voltage, escSensorData[i].voltage);
+                //combinedEscSensorData.voltage += escSensorData[i].voltage;
                 combinedEscSensorData.current += escSensorData[i].current;
                 combinedEscSensorData.consumption += escSensorData[i].consumption;
                 combinedEscSensorData.rpm += escSensorData[i].rpm;
             }
 
-            combinedEscSensorData.voltage = combinedEscSensorData.voltage / getMotorCount();
+            //combinedEscSensorData.voltage = combinedEscSensorData.voltage / getMotorCount();
             combinedEscSensorData.rpm = combinedEscSensorData.rpm / getMotorCount();
 
             combinedDataNeedsUpdate = false;
