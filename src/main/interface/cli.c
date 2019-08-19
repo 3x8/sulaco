@@ -3026,7 +3026,7 @@ static int parseOutputIndex(char *pch, bool allowAllEscs) {
     if ((outputIndex >= 0) && (outputIndex < getMotorCount())) {
         //cliPrintLinef("Using output %d.", outputIndex);
     } else if (allowAllEscs && outputIndex == ALL_MOTORS) {
-        cliPrintLinef("Using all outputs.");
+        //cliPrintLinef("Using all outputs.");
     } else {
         cliPrintErrorLinef("Invalid output number. Range: 0  %d.", getMotorCount() - 1);
 
