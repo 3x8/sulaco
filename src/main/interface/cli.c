@@ -1841,7 +1841,7 @@ static void cliServo(char *cmdline)
 #ifdef USE_TPA_CURVES
 static void printTPACurve(void)
 {
-    cliPrintf("tpakp ");
+    cliPrintf("tpacurve kp ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
             cliPrintf("%d", currentControlRateProfile->tpaKpCurve[i]);
@@ -1851,7 +1851,7 @@ static void printTPACurve(void)
     }
     cliPrintLinefeed();
 
-    cliPrintf("tpaki ");
+    cliPrintf("tpacurve ki ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
             cliPrintf("%d", currentControlRateProfile->tpaKiCurve[i]);
@@ -1861,7 +1861,7 @@ static void printTPACurve(void)
     }
     cliPrintLinefeed();
 
-    cliPrintf("tpakd ");
+    cliPrintf("tpacurve kd ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
             cliPrintf("%d", currentControlRateProfile->tpaKdCurve[i]);
