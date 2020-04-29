@@ -25,11 +25,9 @@
 #include "drivers/usb_io.h"
 #include "drivers/vtx_common.h"
 #ifdef USB_CDC_HID
-//TODO: Make it platform independent in the future
-#include "vcpf4/usbd_cdc_vcp.h"
-#include "usbd_hid_core.h"
-//TODO: Nicer way to handle this...
-#undef MIN
+  #include "vcpf4/usbd_cdc_vcp.h"
+  #include "usbd_hid_core.h"
+  #undef MIN
 #endif
 
 #include "fc/config.h"
@@ -82,159 +80,147 @@
 #include "telemetry/telemetry.h"
 
 #ifdef USE_USB_CDC_HID
-//TODO: Make it platform independent in the future
-#include "vcpf4/usbd_cdc_vcp.h"
-#include "usbd_hid_core.h"
+  #include "vcpf4/usbd_cdc_vcp.h"
+  #include "usbd_hid_core.h"
 #endif
 
 #ifdef USE_BST
-#include "i2c_bst.h"
+  #include "i2c_bst.h"
 #endif
 
 #ifdef USE_USB_CDC_HID
-//TODO: Make it platform independent in the future
-#ifdef STM32F4
-#include "vcpf4/usbd_cdc_vcp.h"
-#include "usbd_hid_core.h"
-#elif defined(STM32F7)
-#include "usbd_cdc_interface.h"
-#include "usbd_hid.h"
-#endif
+  #ifdef STM32F4
+    #include "vcpf4/usbd_cdc_vcp.h"
+    #include "usbd_hid_core.h"
+  #elif defined(STM32F7)
+    #include "usbd_cdc_interface.h"
+    #include "usbd_hid.h"
+  #endif
 #endif
 
 #include "fc_tasks.h"
 
-static void taskMain(timeUs_t currentTimeUs)
-{
-    UNUSED(currentTimeUs);
+static void taskMain(timeUs_t currentTimeUs) {
+  UNUSED(currentTimeUs);
 
-#ifdef USE_SDCARD
+  #ifdef USE_SDCARD
     afatfs_poll();
-#endif
+  #endif
 }
 
 #ifdef USE_OSD_SLAVE
-static bool taskSerialCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs)
-{
-    UNUSED(currentTimeUs);
-    UNUSED(currentDeltaTimeUs);
+static bool taskSerialCheck(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs) {
+  UNUSED(currentTimeUs);
+  UNUSED(currentDeltaTimeUs);
 
-    return mspSerialWaiting();
+  return (mspSerialWaiting());
 }
 #endif
 
-static void taskHandleSerial(timeUs_t currentTimeUs)
-{
-    UNUSED(currentTimeUs);
+static void taskHandleSerial(timeUs_t currentTimeUs) {
+  UNUSED(currentTimeUs);
 
-#if defined(USE_VCP)
+  #if defined(USE_VCP)
     DEBUG_SET(DEBUG_USB, 0, usbCableIsInserted());
     DEBUG_SET(DEBUG_USB, 1, usbVcpIsConnected());
-#endif
+  #endif
 
-#ifdef USE_CLI
+  #ifdef USE_CLI
     // in cli mode, all serial stuff goes to here. enter cli mode by sending #
     if (cliMode) {
         cliProcess();
         return;
     }
-#endif
-#ifndef OSD_SLAVE
+  #endif
+
+  #ifndef OSD_SLAVE
     bool evaluateMspData = ARMING_FLAG(ARMED) ? MSP_SKIP_NON_MSP_DATA : MSP_EVALUATE_NON_MSP_DATA;
-#else
+  #else
     bool evaluateMspData = osdSlaveIsLocked ?  MSP_SKIP_NON_MSP_DATA : MSP_EVALUATE_NON_MSP_DATA;;
-#endif
-    mspSerialProcess(evaluateMspData, mspFcProcessCommand, mspFcProcessReply);
+  #endif
+
+  mspSerialProcess(evaluateMspData, mspFcProcessCommand, mspFcProcessReply);
 }
 
-static void taskBatteryAlerts(timeUs_t currentTimeUs)
-{
-    if (!ARMING_FLAG(ARMED)) {
-        // the battery *might* fall out in flight, but if that happens the FC will likely be off too unless the user has battery backup.
-        batteryUpdatePresence();
-    }
-    batteryUpdateStates(currentTimeUs);
-    batteryUpdateAlarms();
+static void taskBatteryAlerts(timeUs_t currentTimeUs) {
+  if (!ARMING_FLAG(ARMED)) {
+    // the battery *might* fall out in flight, but if that happens the FC will likely be off too unless the user has battery backup.
+    batteryUpdatePresence();
+  }
+  batteryUpdateStates(currentTimeUs);
+  batteryUpdateAlarms();
 }
 
 #ifndef USE_OSD_SLAVE
-static void taskUpdateAccelerometer(timeUs_t currentTimeUs)
-{
-    accUpdate(currentTimeUs, &accelerometerConfigMutable()->accelerometerTrims);
+static void taskUpdateAccelerometer(timeUs_t currentTimeUs) {
+  accUpdate(currentTimeUs, &accelerometerConfigMutable()->accelerometerTrims);
 }
 
-static void taskUpdateRxMain(timeUs_t currentTimeUs)
-{
-    if (!processRx(currentTimeUs)) {
-        return;
-    }
-#ifdef USE_USB_CDC_HID
+static void taskUpdateRxMain(timeUs_t currentTimeUs) {
+  if (!processRx(currentTimeUs)) {
+      return;
+  }
+  #ifdef USE_USB_CDC_HID
     if (!ARMING_FLAG(ARMED)) {
-        int8_t report[8];
-        for (int i = 0; i < 8; i++) {
-	        	report[i] = scaleRange(constrain(rcData[i], 1000, 2000), 1000, 2000, -127, 127);
-        }
-        USBD_HID_SendReport(&USB_OTG_dev, (uint8_t*)report, sizeof(report));
+      int8_t report[8];
+      for (int i = 0; i < 8; i++) {
+        report[i] = scaleRange(constrain(rcData[i], 1000, 2000), 1000, 2000, -127, 127);
+      }
+      USBD_HID_SendReport(&USB_OTG_dev, (uint8_t*)report, sizeof(report));
     }
-#endif
+  #endif
 
-#ifdef USE_USB_CDC_HID
+  #ifdef USE_USB_CDC_HID
     if (!ARMING_FLAG(ARMED)) {
         sendRcDataToHid();
     }
-#endif
+  #endif
 
-    // updateRcCommands sets rcCommand, which is needed by updateAltHoldState and updateSonarAltHoldState
-    updateRcCommands();
-    updateArmingStatus();
+  // updateRcCommands sets rcCommand, which is needed by updateAltHoldState and updateSonarAltHoldState
+  updateRcCommands();
+  updateArmingStatus();
 }
 #endif
 
 #ifdef USE_BARO
-static void taskUpdateBaro(timeUs_t currentTimeUs)
-{
-    UNUSED(currentTimeUs);
+static void taskUpdateBaro(timeUs_t currentTimeUs) {
+  UNUSED(currentTimeUs);
 
-    if (sensors(SENSOR_BARO)) {
-        const uint32_t newDeadline = baroUpdate();
-        if (newDeadline != 0) {
-            rescheduleTask(TASK_SELF, newDeadline);
-        }
+  if (sensors(SENSOR_BARO)) {
+    const uint32_t newDeadline = baroUpdate();
+    if (newDeadline != 0) {
+      rescheduleTask(TASK_SELF, newDeadline);
     }
+  }
 }
 #endif
 
 #if defined(USE_BARO) || defined(USE_GPS)
-static void taskCalculateAltitude(timeUs_t currentTimeUs)
-{
-    calculateEstimatedAltitude(currentTimeUs);
+static void taskCalculateAltitude(timeUs_t currentTimeUs) {
+  calculateEstimatedAltitude(currentTimeUs);
 }
-#endif // USE_BARO || USE_GPS
+#endif //USE_BARO || USE_GPS
 
 #ifdef USE_TELEMETRY
-static void taskTelemetry(timeUs_t currentTimeUs)
-{
-    if (!cliMode && feature(FEATURE_TELEMETRY)) {
-        subTaskTelemetryPollSensors(currentTimeUs);
-
-        telemetryProcess(currentTimeUs);
-    }
+static void taskTelemetry(timeUs_t currentTimeUs) {
+  if (!cliMode && feature(FEATURE_TELEMETRY)) {
+    subTaskTelemetryPollSensors(currentTimeUs);
+    telemetryProcess(currentTimeUs);
+  }
 }
 #endif
 
 #ifdef USE_CAMERA_CONTROL
-static void taskCameraControl(uint32_t currentTime)
-{
-    if (ARMING_FLAG(ARMED)) {
-        return;
-    }
+static void taskCameraControl(uint32_t currentTime) {
+  if (ARMING_FLAG(ARMED)) {
+    return;
+  }
 
-    cameraControlProcess(currentTime);
+  cameraControlProcess(currentTime);
 }
 #endif
 
-void fcTasksInit(void)
-{
+void fcTasksInit(void) {
     schedulerInit();
 
     setTaskEnabled(TASK_MAIN, true);
