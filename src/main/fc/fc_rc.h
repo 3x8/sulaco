@@ -1,16 +1,16 @@
 #pragma once
 
 typedef enum {
-    INTERPOLATION_CHANNELS_RP,
-    INTERPOLATION_CHANNELS_RPY,
-    INTERPOLATION_CHANNELS_RPYT,
-    INTERPOLATION_CHANNELS_T,
-    INTERPOLATION_CHANNELS_RPT,
+  INTERPOLATION_CHANNELS_RP,
+  INTERPOLATION_CHANNELS_RPY,
+  INTERPOLATION_CHANNELS_RPYT,
+  INTERPOLATION_CHANNELS_T,
+  INTERPOLATION_CHANNELS_RPT,
 } interpolationChannels_e;
 
-#ifdef USE_GYRO_IMUF9001
-extern volatile bool isSetpointNew;
-#endif
+#if defined(USE_GYRO_IMUF9001)
+  extern volatile bool isSetpointNew;
+#endif //USE_GYRO_IMUF9001
 extern volatile uint16_t currentRxRefreshRate;
 
 void processRcCommand(void);
@@ -24,14 +24,14 @@ void resetYawAxis(void);
 void initRcProcessing(void);
 bool isMotorsReversed(void);
 bool rcSmoothingIsEnabled(void);
-#ifdef USE_RC_SMOOTHING_FILTER
-int rcSmoothingGetValue(int whichValue);
-bool rcSmoothingAutoCalculate(void);
-bool rcSmoothingInitializationComplete(void);
-#endif
+#if defined(USE_RC_SMOOTHING_FILTER)
+  int rcSmoothingGetValue(int whichValue);
+  bool rcSmoothingAutoCalculate(void);
+  bool rcSmoothingInitializationComplete(void);
+#endif //USE_RC_SMOOTHING_FILTER
 
 #if defined(USE_TPA_CURVES)
-float getThrottlePIDAttenuationKp(void);
-float getThrottlePIDAttenuationKi(void);
-float getThrottlePIDAttenuationKd(void);
-#endif
+  float getThrottlePIDAttenuationKp(void);
+  float getThrottlePIDAttenuationKi(void);
+  float getThrottlePIDAttenuationKd(void);
+#endif //USE_TPA_CURVES
