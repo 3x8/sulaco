@@ -813,4 +813,4 @@ int rcSmoothingGetValue(int whichValue) {
 bool rcSmoothingInitializationComplete(void) {
   return (rxConfig()->rc_smoothing_type != RC_SMOOTHING_TYPE_FILTER) || rcSmoothingData.filterInitialized;
 }
-#endif // USE_RC_SMOOTHING_FILTER
+#endif //USE_RC_SMOOTHING_FILTER
