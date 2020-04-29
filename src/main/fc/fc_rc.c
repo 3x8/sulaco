@@ -319,9 +319,7 @@ FAST_CODE uint8_t processRcInterpolation(void) {
   }
 
   DEBUG_SET(DEBUG_RC_INTERPOLATION, 2, rcInterpolationStepCount);
-
   return (updatedChannel);
-
 }
 
 #ifdef USE_RC_SMOOTHING_FILTER
