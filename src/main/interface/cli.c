@@ -984,133 +984,127 @@ uint8_t cliMode = 0;
       baudRates[portConfig.telemetry_baudrateIndex], baudRates[portConfig.blackbox_baudrateIndex]);
   }
 
-#ifndef SKIP_SERIAL_PASSTHROUGH
-#ifdef USE_PINIO
-static void cbCtrlLine(void *context, uint16_t ctrl)
-{
-    int pinioDtr = (int)(long)context;
+  #ifndef SKIP_SERIAL_PASSTHROUGH
+    #ifdef USE_PINIO
+      static void cbCtrlLine(void *context, uint16_t ctrl) {
+        int pinioDtr = (int)(long)context;
+        pinioSet(pinioDtr, !(ctrl & CTRL_LINE_STATE_DTR));
+      }
+    #endif //USE_PINIO
 
-    pinioSet(pinioDtr, !(ctrl & CTRL_LINE_STATE_DTR));
-}
-#endif /* USE_PINIO */
-
-static void cliSerialPassthrough(char *cmdline)
-{
+  static void cliSerialPassthrough(char *cmdline) {
     if (isEmpty(cmdline)) {
-        cliShowParseError();
-        return;
+      cliShowParseError();
+      return;
     }
 
     int id = -1;
     uint32_t baud = 0;
     bool enableBaudCb = false;
-#ifdef USE_PINIO
-    int pinioDtr = 0;
-#endif /* USE_PINIO */
+    #ifdef USE_PINIO
+      int pinioDtr = 0;
+    #endif //USE_PINIO
     unsigned mode = 0;
     char *saveptr;
     char* tok = strtok_r(cmdline, " ", &saveptr);
     int index = 0;
 
     while (tok != NULL) {
-        switch (index) {
+      switch (index) {
         case 0:
-            id = atoi(tok);
-            break;
+          id = atoi(tok);
+          break;
         case 1:
-            baud = atoi(tok);
-            break;
+          baud = atoi(tok);
+          break;
         case 2:
-            if (strstr(tok, "rx") || strstr(tok, "RX"))
-                mode |= MODE_RX;
-            if (strstr(tok, "tx") || strstr(tok, "TX"))
-                mode |= MODE_TX;
-            break;
-#ifdef USE_PINIO
-        case 3:
-            pinioDtr = atoi(tok);
-            break;
-#endif /* USE_PINIO */
-        }
-        index++;
-        tok = strtok_r(NULL, " ", &saveptr);
+          if (strstr(tok, "rx") || strstr(tok, "RX"))
+              mode |= MODE_RX;
+          if (strstr(tok, "tx") || strstr(tok, "TX"))
+              mode |= MODE_TX;
+          break;
+          #ifdef USE_PINIO
+            case 3:
+              pinioDtr = atoi(tok);
+              break;
+          #endif //USE_PINIO
+          }
+      index++;
+      tok = strtok_r(NULL, " ", &saveptr);
     }
 
     if (baud == 0) {
-        enableBaudCb = true;
+      enableBaudCb = true;
     }
 
     cliPrintf("Port %d ", id);
     serialPort_t *passThroughPort;
     serialPortUsage_t *passThroughPortUsage = findSerialPortUsageByIdentifier(id);
     if (!passThroughPortUsage || passThroughPortUsage->serialPort == NULL) {
-        if (enableBaudCb) {
-            // Set default baud
-            baud = 57600;
-        }
+      if (enableBaudCb) {
+        // Set default baud
+        baud = 57600;
+      }
 
-        if (!mode) {
-            mode = MODE_RXTX;
-        }
+      if (!mode) {
+        mode = MODE_RXTX;
+      }
 
-        passThroughPort = openSerialPort(id, FUNCTION_NONE, NULL, NULL,
-                                         baud, mode,
-                                         SERIAL_NOT_INVERTED);
-        if (!passThroughPort) {
-            cliPrintLine("could not be opened.");
-            return;
-        }
+      passThroughPort = openSerialPort(id, FUNCTION_NONE, NULL, NULL, baud, mode, SERIAL_NOT_INVERTED);
+      if (!passThroughPort) {
+        cliPrintLine("could not be opened.");
+        return;
+      }
 
-        if (enableBaudCb) {
-            cliPrintf("opened, default baud = %d.\r\n", baud);
-        } else {
-            cliPrintf("opened, baud = %d.\r\n", baud);
-        }
+      if (enableBaudCb) {
+        cliPrintf("opened, default baud = %d.\r\n", baud);
+      } else {
+        cliPrintf("opened, baud = %d.\r\n", baud);
+      }
     } else {
-        passThroughPort = passThroughPortUsage->serialPort;
-        // If the user supplied a mode, override the port's mode, otherwise
-        // leave the mode unchanged. serialPassthrough() handles one-way ports.
-        // Set the baud rate if specified
-        if (baud) {
-            cliPrintf("already open, setting baud = %d.\n\r", baud);
-            serialSetBaudRate(passThroughPort, baud);
-        } else {
-            cliPrintf("already open, baud = %d.\n\r", passThroughPort->baudRate);
-        }
+      passThroughPort = passThroughPortUsage->serialPort;
+      // If the user supplied a mode, override the port's mode, otherwise
+      // leave the mode unchanged. serialPassthrough() handles one-way ports.
+      // Set the baud rate if specified
+      if (baud) {
+        cliPrintf("already open, setting baud = %d.\n\r", baud);
+        serialSetBaudRate(passThroughPort, baud);
+      } else {
+        cliPrintf("already open, baud = %d.\n\r", passThroughPort->baudRate);
+      }
 
-        if (mode && passThroughPort->mode != mode) {
-            cliPrintf("Mode changed from %d to %d.\r\n",
-                   passThroughPort->mode, mode);
-            serialSetMode(passThroughPort, mode);
-        }
+      if (mode && passThroughPort->mode != mode) {
+        cliPrintf("Mode changed from %d to %d.\r\n", passThroughPort->mode, mode);
+        serialSetMode(passThroughPort, mode);
+      }
 
-        // If this port has a rx callback associated we need to remove it now.
-        // Otherwise no data will be pushed in the serial port buffer!
-        if (passThroughPort->rxCallback) {
-            passThroughPort->rxCallback = 0;
-        }
+      // If this port has a rx callback associated we need to remove it now.
+      // Otherwise no data will be pushed in the serial port buffer!
+      if (passThroughPort->rxCallback) {
+        passThroughPort->rxCallback = 0;
+      }
     }
 
     // If no baud rate is specified allow to be set via USB
     if (enableBaudCb) {
-        cliPrintLine("Baud rate change over USB enabled.");
-        // Register the right side baud rate setting routine with the left side which allows setting of the UART
-        // baud rate over USB without setting it using the serialpassthrough command
-        serialSetBaudRateCb(cliPort, serialSetBaudRate, passThroughPort);
+      cliPrintLine("Baud rate change over USB enabled.");
+      // Register the right side baud rate setting routine with the left side which allows setting of the UART
+      // baud rate over USB without setting it using the serialpassthrough command
+      serialSetBaudRateCb(cliPort, serialSetBaudRate, passThroughPort);
     }
 
     cliPrintLine("Forwarding, power cycle to exit.");
 
-#ifdef USE_PINIO
-    // Register control line state callback
-    if (pinioDtr) {
+    #ifdef USE_PINIO
+      // Register control line state callback
+      if (pinioDtr) {
         serialSetCtrlLineStateCb(cliPort, cbCtrlLine, (void *)(intptr_t)(pinioDtr - 1));
-    }
-#endif /* USE_PINIO */
+      }
+    #endif //USE_PINIO
 
     serialPassthrough(cliPort, passThroughPort, NULL, NULL);
-}
-#endif
+  }
+  #endif //SKIP_SERIAL_PASSTHROUGH
 
 static void printAdjustmentRange(uint8_t dumpMask, const adjustmentRange_t *adjustmentRanges, const adjustmentRange_t *defaultAdjustmentRanges)
 {
