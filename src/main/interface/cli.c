@@ -8,321 +8,299 @@
 
 #include "platform.h"
 
-// FIXME remove this for targets that don't need a CLI.  Perhaps use a no-op macro when USE_CLI is not enabled
 // signal that we're in cli mode
 uint8_t cliMode = 0;
 #ifndef EEPROM_IN_RAM
-extern uint8_t __config_start;   // configured via linker script when building binaries.
-extern uint8_t __config_end;
+  extern uint8_t __config_start;   // configured via linker script when building binaries.
+  extern uint8_t __config_end;
 #endif
 
 #ifdef USE_CLI
+  #include "blackbox/blackbox.h"
 
-#include "blackbox/blackbox.h"
+  #include "build/build_config.h"
+  #include "build/debug.h"
+  #include "build/version.h"
 
-#include "build/build_config.h"
-#include "build/debug.h"
-#include "build/version.h"
+  #include "cms/cms.h"
 
-#include "cms/cms.h"
+  #include "common/axis.h"
+  #include "common/color.h"
+  #include "common/maths.h"
+  #include "common/printf.h"
+  #include "common/strtol.h"
+  #include "common/time.h"
+  #include "common/typeconversion.h"
+  #include "common/utils.h"
 
-#include "common/axis.h"
-#include "common/color.h"
-#include "common/maths.h"
-#include "common/printf.h"
-#include "common/strtol.h"
-#include "common/time.h"
-#include "common/typeconversion.h"
-#include "common/utils.h"
+  #include "config/config_eeprom.h"
+  #include "config/feature.h"
 
-#include "config/config_eeprom.h"
-#include "config/feature.h"
+  #include "drivers/accgyro/accgyro.h"
+  #ifdef USE_GYRO_IMUF9001
+    #include "drivers/accgyro/accgyro_imuf9001.h"
+  #endif
+  #include "drivers/adc.h"
+  #include "drivers/buf_writer.h"
+  #include "drivers/bus_spi.h"
+  #include "drivers/camera_control.h"
+  #include "drivers/compass/compass.h"
+  #include "drivers/display.h"
+  #include "drivers/dma.h"
+  #include "drivers/dma_spi.h"
+  #include "drivers/flash.h"
+  #include "drivers/inverter.h"
+  #include "drivers/io.h"
+  #include "drivers/io_impl.h"
+  #include "drivers/light_led.h"
+  #include "drivers/rangefinder/rangefinder_hcsr04.h"
+  #include "drivers/sdcard.h"
+  #include "drivers/sensor.h"
+  #include "drivers/serial.h"
+  #include "drivers/serial_escserial.h"
+  #include "drivers/sound_beeper.h"
+  #include "drivers/stack_check.h"
+  #include "drivers/system.h"
+  #include "drivers/time.h"
+  #include "drivers/timer.h"
+  #include "drivers/transponder_ir.h"
+  #include "drivers/usb_msc.h"
+  #include "drivers/vtx_common.h"
 
-#include "drivers/accgyro/accgyro.h"
-#ifdef USE_GYRO_IMUF9001
-#include "drivers/accgyro/accgyro_imuf9001.h"
-#endif
-#include "drivers/adc.h"
-#include "drivers/buf_writer.h"
-#include "drivers/bus_spi.h"
-#include "drivers/camera_control.h"
-#include "drivers/compass/compass.h"
-#include "drivers/display.h"
-#include "drivers/dma.h"
-#include "drivers/dma_spi.h"
-#include "drivers/flash.h"
-#include "drivers/inverter.h"
-#include "drivers/io.h"
-#include "drivers/io_impl.h"
-#include "drivers/light_led.h"
-#include "drivers/rangefinder/rangefinder_hcsr04.h"
-#include "drivers/sdcard.h"
-#include "drivers/sensor.h"
-#include "drivers/serial.h"
-#include "drivers/serial_escserial.h"
-#include "drivers/sound_beeper.h"
-#include "drivers/stack_check.h"
-#include "drivers/system.h"
-#include "drivers/time.h"
-#include "drivers/timer.h"
-#include "drivers/transponder_ir.h"
-#include "drivers/usb_msc.h"
-#include "drivers/vtx_common.h"
+  #include "fc/board_info.h"
+  #include "fc/config.h"
+  #include "fc/controlrate_profile.h"
+  #include "fc/fc_core.h"
+  #include "fc/fc_rc.h"
+  #include "fc/rc_adjustments.h"
+  #include "fc/rc_controls.h"
+  #include "fc/runtime_config.h"
 
-#include "fc/board_info.h"
-#include "fc/config.h"
-#include "fc/controlrate_profile.h"
-#include "fc/fc_core.h"
-#include "fc/fc_rc.h"
-#include "fc/rc_adjustments.h"
-#include "fc/rc_controls.h"
-#include "fc/runtime_config.h"
+  #include "flight/failsafe.h"
+  #include "flight/imu.h"
+  #include "flight/mixer.h"
+  #include "flight/pid.h"
+  #include "flight/position.h"
+  #include "flight/servos.h"
 
-#include "flight/failsafe.h"
-#include "flight/imu.h"
-#include "flight/mixer.h"
-#include "flight/pid.h"
-#include "flight/position.h"
-#include "flight/servos.h"
+  #include "interface/cli.h"
+  #include "interface/msp.h"
+  #include "interface/msp_box.h"
+  #include "interface/msp_protocol.h"
+  #include "interface/settings.h"
+  #ifdef MSP_OVER_CLI
+    #include "msp/msp_serial.h"
+  #endif
 
-#include "interface/cli.h"
-#include "interface/msp.h"
-#include "interface/msp_box.h"
-#include "interface/msp_protocol.h"
-#include "interface/settings.h"
-#ifdef MSP_OVER_CLI
-#include "msp/msp_serial.h"
-#endif
+  #include "io/asyncfatfs/asyncfatfs.h"
+  #include "io/beeper.h"
+  #include "io/flashfs.h"
+  #include "io/gimbal.h"
+  #include "io/gps.h"
+  #include "io/ledstrip.h"
+  #include "io/osd.h"
+  #include "io/serial.h"
+  #include "io/transponder_ir.h"
+  #include "io/usb_msc.h"
+  #include "io/vtx_control.h"
+  #include "io/vtx.h"
 
-#include "io/asyncfatfs/asyncfatfs.h"
-#include "io/beeper.h"
-#include "io/flashfs.h"
-#include "io/gimbal.h"
-#include "io/gps.h"
-#include "io/ledstrip.h"
-#include "io/osd.h"
-#include "io/serial.h"
-#include "io/transponder_ir.h"
-#include "io/usb_msc.h"
-#include "io/vtx_control.h"
-#include "io/vtx.h"
+  #include "pg/adc.h"
+  #include "pg/beeper.h"
+  #include "pg/beeper_dev.h"
+  #include "pg/board.h"
+  #include "pg/bus_i2c.h"
+  #include "pg/bus_spi.h"
+  #include "pg/max7456.h"
+  #include "pg/pinio.h"
+  #include "pg/pg.h"
+  #include "pg/pg_ids.h"
+  #include "pg/rx.h"
+  #include "pg/rx_spi.h"
+  #include "pg/rx_pwm.h"
+  #include "pg/timerio.h"
+  #include "pg/usb.h"
 
-#include "pg/adc.h"
-#include "pg/beeper.h"
-#include "pg/beeper_dev.h"
-#include "pg/board.h"
-#include "pg/bus_i2c.h"
-#include "pg/bus_spi.h"
-#include "pg/max7456.h"
-#include "pg/pinio.h"
-#include "pg/pg.h"
-#include "pg/pg_ids.h"
-#include "pg/rx.h"
-#include "pg/rx_spi.h"
-#include "pg/rx_pwm.h"
-#include "pg/timerio.h"
-#include "pg/usb.h"
+  #include "rx/rx.h"
+  #include "rx/spektrum.h"
+  #include "rx/cc2500_frsky_common.h"
+  #include "rx/cc2500_frsky_x.h"
 
-#include "rx/rx.h"
-#include "rx/spektrum.h"
-#include "rx/cc2500_frsky_common.h"
-#include "rx/cc2500_frsky_x.h"
+  #include "scheduler/scheduler.h"
 
-#include "scheduler/scheduler.h"
+  #include "sensors/acceleration.h"
+  #include "sensors/adcinternal.h"
+  #include "sensors/barometer.h"
+  #include "sensors/battery.h"
+  #include "sensors/boardalignment.h"
+  #include "sensors/compass.h"
+  #include "sensors/esc_sensor.h"
+  #include "sensors/gyro.h"
+  #include "sensors/sensors.h"
 
-#include "sensors/acceleration.h"
-#include "sensors/adcinternal.h"
-#include "sensors/barometer.h"
-#include "sensors/battery.h"
-#include "sensors/boardalignment.h"
-#include "sensors/compass.h"
-#include "sensors/esc_sensor.h"
-#include "sensors/gyro.h"
-#include "sensors/sensors.h"
-
-#include "telemetry/frsky_hub.h"
-#include "telemetry/telemetry.h"
+  #include "telemetry/frsky_hub.h"
+  #include "telemetry/telemetry.h"
 
 
-static serialPort_t *cliPort;
+  static serialPort_t *cliPort;
 
-#ifdef STM32F1
-#define CLI_IN_BUFFER_SIZE 128
-#else
-// Space required to set array parameters
-#define CLI_IN_BUFFER_SIZE 256
-#endif
-#define CLI_OUT_BUFFER_SIZE 64
+  #ifdef STM32F1
+    #define CLI_IN_BUFFER_SIZE 128
+  #else
+    // Space required to set array parameters
+    #define CLI_IN_BUFFER_SIZE 256
+  #endif
+  #define CLI_OUT_BUFFER_SIZE 64
 
-static bufWriter_t *cliWriter;
-static uint8_t cliWriteBuffer[sizeof(*cliWriter) + CLI_OUT_BUFFER_SIZE];
+  static bufWriter_t *cliWriter;
+  static uint8_t cliWriteBuffer[sizeof(*cliWriter) + CLI_OUT_BUFFER_SIZE];
 
-static char cliBuffer[CLI_IN_BUFFER_SIZE];
-static uint32_t bufferIndex = 0;
+  static char cliBuffer[CLI_IN_BUFFER_SIZE];
+  static uint32_t bufferIndex = 0;
 
-static bool configIsInCopy = false;
+  static bool configIsInCopy = false;
 
-#define CURRENT_PROFILE_INDEX -1
-static int8_t pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
-static int8_t rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
+  #define CURRENT_PROFILE_INDEX -1
+  static int8_t pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
+  static int8_t rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
 
-#if defined(USE_BOARD_INFO)
-static bool boardInformationUpdated = false;
-#if defined(USE_SIGNATURE)
-static bool signatureUpdated = false;
-#endif
-#endif // USE_BOARD_INFO
+  #if defined(USE_BOARD_INFO)
+    static bool boardInformationUpdated = false;
+    #if defined(USE_SIGNATURE)
+      static bool signatureUpdated = false;
+    #endif
+  #endif // USE_BOARD_INFO
 
-#ifdef USE_GYRO_IMUF9001
-#define IMUF_CUSTOM_BUFF_LENGTH 26000
-static   uint8_t  imuf_custom_buff[IMUF_CUSTOM_BUFF_LENGTH];
-static   uint32_t imuf_buff_ptr = 0;
-static   uint32_t imuf_checksum = 0;
-static   int      imuf_bin_safe = 0;
+  #ifdef USE_GYRO_IMUF9001
+    #define IMUF_CUSTOM_BUFF_LENGTH 26000
+    static   uint8_t  imuf_custom_buff[IMUF_CUSTOM_BUFF_LENGTH];
+    static   uint32_t imuf_buff_ptr = 0;
+    static   uint32_t imuf_checksum = 0;
+    static   int      imuf_bin_safe = 0;
+  #endif
 
-#endif
+  static const char* const emptyName = "-";
+  static const char* const emptyString = "";
 
-static const char* const emptyName = "-";
-static const char* const emptyString = "";
+  int cliSmartMode = 0;
 
-int cliSmartMode = 0;
-
-#ifndef USE_QUAD_MIXER_ONLY
-// sync this with mixerMode_e
-static const char * const mixerNames[] = {
+  #ifndef USE_QUAD_MIXER_ONLY
+  // sync this with mixerMode_e
+  static const char * const mixerNames[] = {
     "TRI", "QUADP", "QUADX", "BI",
     "GIMBAL", "Y6", "HEX6",
     "FLYING_WING", "Y4", "HEX6X", "OCTOX8", "OCTOFLATP", "OCTOFLATX",
     "AIRPLANE", "HELI_120_CCPM", "HELI_90_DEG", "VTAIL4",
     "HEX6H", "PPM_TO_SERVO", "DUALCOPTER", "SINGLECOPTER",
     "ATAIL4", "CUSTOM", "CUSTOMAIRPLANE", "CUSTOMTRI", "QUADX1234", NULL
-};
-#endif
+  };
+  #endif
 
-// sync this with features_e
-static const char * const featureNames[] = {
+  // sync this with features_e
+  static const char * const featureNames[] = {
     "RX_PPM", "", "INFLIGHT_ACC_CAL", "RX_SERIAL", "MOTOR_STOP",
     "SERVO_TILT", "SOFTSERIAL", "GPS", "",
     "RANGEFINDER", "TELEMETRY", "", "3D", "RX_PARALLEL_PWM",
     "RX_MSP", "RSSI_ADC", "LED_STRIP", "DISPLAY", "OSD",
     "", "CHANNEL_FORWARDING", "TRANSPONDER", "AIRMODE",
     "", "", "RX_SPI", "SOFTSPI", "ESC_SENSOR", "ANTI_GRAVITY", "DYNAMIC_FILTER", "LEGACY_SA_SUPPORT", NULL
-};
+  };
 
-// sync this with rxFailsafeChannelMode_e
-static const char rxFailsafeModeCharacters[] = "ahs";
+  // sync this with rxFailsafeChannelMode_e
+  static const char rxFailsafeModeCharacters[] = "ahs";
 
-static const rxFailsafeChannelMode_e rxFailsafeModesTable[RX_FAILSAFE_TYPE_COUNT][RX_FAILSAFE_MODE_COUNT] = {
+  static const rxFailsafeChannelMode_e rxFailsafeModesTable[RX_FAILSAFE_TYPE_COUNT][RX_FAILSAFE_MODE_COUNT] = {
     { RX_FAILSAFE_MODE_AUTO, RX_FAILSAFE_MODE_HOLD, RX_FAILSAFE_MODE_INVALID },
     { RX_FAILSAFE_MODE_INVALID, RX_FAILSAFE_MODE_HOLD, RX_FAILSAFE_MODE_SET }
-};
+  };
 
-#if defined(USE_SENSOR_NAMES)
-// sync this with sensors_e
-static const char * const sensorTypeNames[] = {
-    "GYRO", "ACC", "BARO", "MAG", "RANGEFINDER", "GPS", "GPS+MAG", NULL
-};
+  #if defined(USE_SENSOR_NAMES)
+    // sync this with sensors_e
+    static const char * const sensorTypeNames[] = {
+      "GYRO", "ACC", "BARO", "MAG", "RANGEFINDER", "GPS", "GPS+MAG", NULL
+    };
 
-#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_RANGEFINDER)
+    #define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_RANGEFINDER)
 
-static const char * const *sensorHardwareNames[] = {
-    lookupTableGyroHardware, lookupTableAccHardware, lookupTableBaroHardware, lookupTableMagHardware, lookupTableRangefinderHardware
-};
-#endif // USE_SENSOR_NAMES
+    static const char * const *sensorHardwareNames[] = {
+      lookupTableGyroHardware, lookupTableAccHardware, lookupTableBaroHardware, lookupTableMagHardware, lookupTableRangefinderHardware
+    };
+  #endif //USE_SENSOR_NAMES
 
-static void backupPgConfig(const pgRegistry_t *pg)
-{
+  static void backupPgConfig(const pgRegistry_t *pg) {
     memcpy(pg->copy, pg->address, pg->size);
-}
+  }
 
-static void restorePgConfig(const pgRegistry_t *pg)
-{
+  static void restorePgConfig(const pgRegistry_t *pg) {
     memcpy(pg->address, pg->copy, pg->size);
-}
+  }
 
-static void backupConfigs(void)
-{
+  static void backupConfigs(void) {
     // make copies of configs to do differencing
     PG_FOREACH(pg) {
-        backupPgConfig(pg);
+      backupPgConfig(pg);
     }
 
     configIsInCopy = true;
-}
+  }
 
-static void restoreConfigs(void)
-{
+  static void restoreConfigs(void) {
     PG_FOREACH(pg) {
-        restorePgConfig(pg);
+      restorePgConfig(pg);
     }
 
     configIsInCopy = false;
-}
+  }
 
-static void backupAndResetConfigs(void)
-{
+  static void backupAndResetConfigs(void) {
     backupConfigs();
     // reset all configs to defaults to do differencing
     resetConfigs();
-}
+  }
 
-static void cliPrint(const char *str)
-{
+  static void cliPrint(const char *str) {
     while (*str) {
-        if(cliSmartMode)
-        {
-            //no carriage returns. Those are dumb.
-            if(*str == '\r')
-            {
-                (void)(*str++);
-            }
-            else
-            {
-                bufWriterAppend(cliWriter, *str++);
-            }
+      if(cliSmartMode) {
+        //no carriage returns. Those are dumb.
+        if(*str == '\r') {
+          (void)(*str++);
+        } else {
+          bufWriterAppend(cliWriter, *str++);
         }
-        else
-        {
-            bufWriterAppend(cliWriter, *str++);
-        }
+      } else {
+        bufWriterAppend(cliWriter, *str++);
+      }
     }
     bufWriterFlush(cliWriter);
-}
+  }
 
-static void cliPrintLinefeed(void)
-{
-
+  static void cliPrintLinefeed(void) {
     cliPrint("\r\n");
 
-    if(cliSmartMode)
-    {
-        bufWriterFlush(cliWriter);
+    if(cliSmartMode) {
+      bufWriterFlush(cliWriter);
     }
+  }
 
-}
-
-static void cliPrintLine(const char *str)
-{
+  static void cliPrintLine(const char *str) {
     cliPrint(str);
     cliPrintLinefeed();
-}
+  }
 
-#ifdef MINIMAL_CLI
-#define cliPrintHashLine(str)
-#else
-static void cliPrintHashLine(const char *str)
-{
-    cliPrint("\r\n# ");
-    cliPrintLine(str);
-}
-#endif
+  #ifdef MINIMAL_CLI
+    #define cliPrintHashLine(str)
+  #else
+    static void cliPrintHashLine(const char *str) {
+      cliPrint("\r\n# ");
+      cliPrintLine(str);
+    }
+  #endif //MINIMAL_CLI
 
-static void cliPutp(void *p, char ch)
-{
+  static void cliPutp(void *p, char ch){
     bufWriterAppend(p, ch);
-}
+  }
 
-typedef enum {
+  typedef enum {
     DUMP_MASTER = (1 << 0),
     DUMP_PROFILE = (1 << 1),
     DUMP_RATES = (1 << 2),
@@ -330,252 +308,230 @@ typedef enum {
     DO_DIFF = (1 << 4),
     SHOW_DEFAULTS = (1 << 5),
     HIDE_UNUSED = (1 << 6)
-} dumpFlags_e;
+  } dumpFlags_e;
 
-static void cliPrintfva(const char *format, va_list va)
-{
+  static void cliPrintfva(const char *format, va_list va) {
     tfp_format(cliWriter, cliPutp, format, va);
     bufWriterFlush(cliWriter);
-}
+  }
 
-static bool cliDumpPrintLinef(uint8_t dumpMask, bool equalsDefault, const char *format, ...)
-{
+  static bool cliDumpPrintLinef(uint8_t dumpMask, bool equalsDefault, const char *format, ...) {
     if (!((dumpMask & DO_DIFF) && equalsDefault)) {
-        va_list va;
-        va_start(va, format);
-        cliPrintfva(format, va);
-        va_end(va);
-        cliPrintLinefeed();
-        return true;
+      va_list va;
+      va_start(va, format);
+      cliPrintfva(format, va);
+      va_end(va);
+      cliPrintLinefeed();
+      return (true);
     } else {
-        return false;
+      return (false);
     }
-}
+  }
 
-static void cliWrite(uint8_t ch)
-{
+  static void cliWrite(uint8_t ch) {
     bufWriterAppend(cliWriter, ch);
-}
+  }
 
-static bool cliDefaultPrintLinef(uint8_t dumpMask, bool equalsDefault, const char *format, ...)
-{
+  static bool cliDefaultPrintLinef(uint8_t dumpMask, bool equalsDefault, const char *format, ...) {
     if ((dumpMask & SHOW_DEFAULTS) && !equalsDefault) {
-        cliWrite('#');
+      cliWrite('#');
 
-        va_list va;
-        va_start(va, format);
-        cliPrintfva(format, va);
-        va_end(va);
-        cliPrintLinefeed();
-        return true;
+      va_list va;
+      va_start(va, format);
+      cliPrintfva(format, va);
+      va_end(va);
+      cliPrintLinefeed();
+      return (true);
     } else {
-        return false;
+      return (false);
     }
-}
+  }
 
-static void cliPrintf(const char *format, ...)
-{
+  static void cliPrintf(const char *format, ...) {
     va_list va;
     va_start(va, format);
     cliPrintfva(format, va);
     va_end(va);
-}
+  }
 
-
-static void cliPrintLinef(const char *format, ...)
-{
+  static void cliPrintLinef(const char *format, ...) {
     va_list va;
     va_start(va, format);
     cliPrintfva(format, va);
     va_end(va);
     cliPrintLinefeed();
-}
+  }
 
-static void cliPrintErrorLinef(const char *format, ...)
-{
+  static void cliPrintErrorLinef(const char *format, ...) {
     cliPrint("###ERROR### ");
     va_list va;
     va_start(va, format);
     cliPrintfva(format, va);
     va_end(va);
     cliPrintLinefeed();
-}
+  }
 
 
-static void printValuePointer(const clivalue_t *var, const void *valuePointer, bool full)
-{
+  static void printValuePointer(const clivalue_t *var, const void *valuePointer, bool full) {
     if ((var->type & VALUE_MODE_MASK) == MODE_ARRAY) {
-        for (int i = 0; i < var->config.array.length; i++) {
-            switch (var->type & VALUE_TYPE_MASK) {
-            default:
-            case VAR_UINT8:
-                // uint8_t array
-                cliPrintf("%d", ((uint8_t *)valuePointer)[i]);
-                break;
-
-            case VAR_INT8:
-                // int8_t array
-                cliPrintf("%d", ((int8_t *)valuePointer)[i]);
-                break;
-
-            case VAR_UINT16:
-                // uin16_t array
-                cliPrintf("%d", ((uint16_t *)valuePointer)[i]);
-                break;
-
-            case VAR_INT16:
-                // int16_t array
-                cliPrintf("%d", ((int16_t *)valuePointer)[i]);
-                break;
-            }
-
-            if (i < var->config.array.length - 1) {
-                cliPrint(",");
-            }
-        }
-    } else {
-        int value = 0;
-
+      for (int i = 0; i < var->config.array.length; i++) {
         switch (var->type & VALUE_TYPE_MASK) {
+          default:
+          case VAR_UINT8:
+            // uint8_t array
+            cliPrintf("%d", ((uint8_t *)valuePointer)[i]);
+            break;
+          case VAR_INT8:
+            // int8_t array
+            cliPrintf("%d", ((int8_t *)valuePointer)[i]);
+            break;
+          case VAR_UINT16:
+            // uin16_t array
+            cliPrintf("%d", ((uint16_t *)valuePointer)[i]);
+            break;
+          case VAR_INT16:
+            // int16_t array
+            cliPrintf("%d", ((int16_t *)valuePointer)[i]);
+            break;
+        }
+
+        if (i < var->config.array.length - 1) {
+          cliPrint(",");
+        }
+      }
+    } else {
+      int value = 0;
+
+      switch (var->type & VALUE_TYPE_MASK) {
         case VAR_UINT8:
-            value = *(uint8_t *)valuePointer;
-            break;
-
+          value = *(uint8_t *)valuePointer;
+          break;
         case VAR_INT8:
-            value = *(int8_t *)valuePointer;
-            break;
-
+          value = *(int8_t *)valuePointer;
+          break;
         case VAR_UINT16:
         case VAR_INT16:
-            value = *(int16_t *)valuePointer;
-            break;
+          value = *(int16_t *)valuePointer;
+          break;
         case VAR_UINT32:
-            value = *(uint32_t *)valuePointer;
-            break;
-        }
+          value = *(uint32_t *)valuePointer;
+          break;
+      }
 
-        switch (var->type & VALUE_MODE_MASK) {
+      switch (var->type & VALUE_MODE_MASK) {
         case MODE_DIRECT:
-            cliPrintf("%d", value);
-            if (full) {
-                cliPrintf(" %d %d", var->config.minmax.min, var->config.minmax.max);
-            }
-            break;
+          cliPrintf("%d", value);
+          if (full) {
+            cliPrintf(" %d %d", var->config.minmax.min, var->config.minmax.max);
+          }
+          break;
         case MODE_LOOKUP:
-            cliPrint(lookupTables[var->config.lookup.tableIndex].values[value]);
-            break;
+          cliPrint(lookupTables[var->config.lookup.tableIndex].values[value]);
+          break;
         case MODE_BITSET:
-            if (value & 1 << var->config.bitpos) {
-                cliPrintf("ON");
-            } else {
-                cliPrintf("OFF");
-            }
-        }
+          if (value & 1 << var->config.bitpos) {
+            cliPrintf("ON");
+          } else {
+            cliPrintf("OFF");
+          }
+          break;
+      }
     }
-}
+  }
 
 
-static bool valuePtrEqualsDefault(const clivalue_t *var, const void *ptr, const void *ptrDefault)
-{
+  static bool valuePtrEqualsDefault(const clivalue_t *var, const void *ptr, const void *ptrDefault) {
     bool result = true;
     int elementCount = 1;
     uint32_t mask = 0xffffffff;
 
     if ((var->type & VALUE_MODE_MASK) == MODE_ARRAY) {
-        elementCount = var->config.array.length;
+      elementCount = var->config.array.length;
     }
+
     if ((var->type & VALUE_MODE_MASK) == MODE_BITSET) {
-        mask = 1 << var->config.bitpos;
+      mask = 1 << var->config.bitpos;
     }
+
     for (int i = 0; i < elementCount; i++) {
-        switch (var->type & VALUE_TYPE_MASK) {
+      switch (var->type & VALUE_TYPE_MASK) {
         case VAR_UINT8:
-            result = result && (((uint8_t *)ptr)[i] & mask) == (((uint8_t *)ptrDefault)[i] & mask);
-            break;
-
+          result = result && (((uint8_t *)ptr)[i] & mask) == (((uint8_t *)ptrDefault)[i] & mask);
+          break;
         case VAR_INT8:
-            result = result && ((int8_t *)ptr)[i] == ((int8_t *)ptrDefault)[i];
-            break;
-
+          result = result && ((int8_t *)ptr)[i] == ((int8_t *)ptrDefault)[i];
+          break;
         case VAR_UINT16:
-            result = result && (((int16_t *)ptr)[i] & mask) == (((int16_t *)ptrDefault)[i] & mask);
-            break;
+          result = result && (((int16_t *)ptr)[i] & mask) == (((int16_t *)ptrDefault)[i] & mask);
+          break;
         case VAR_INT16:
-            result = result && ((int16_t *)ptr)[i] == ((int16_t *)ptrDefault)[i];
-            break;
+          result = result && ((int16_t *)ptr)[i] == ((int16_t *)ptrDefault)[i];
+          break;
         case VAR_UINT32:
-            result = result && (((uint32_t *)ptr)[i] & mask) == (((uint32_t *)ptrDefault)[i] & mask);
-            break;
-        }
+          result = result && (((uint32_t *)ptr)[i] & mask) == (((uint32_t *)ptrDefault)[i] & mask);
+          break;
+      }
     }
+
     for (int i = 0; i < elementCount; i++) {
-        switch (var->type & VALUE_TYPE_MASK) {
+      switch (var->type & VALUE_TYPE_MASK) {
         case VAR_UINT8:
-            result = result && ((uint8_t *)ptr)[i] == ((uint8_t *)ptrDefault)[i];
-            break;
-
+          result = result && ((uint8_t *)ptr)[i] == ((uint8_t *)ptrDefault)[i];
+          break;
         case VAR_INT8:
-            result = result && ((int8_t *)ptr)[i] == ((int8_t *)ptrDefault)[i];
-            break;
-
+          result = result && ((int8_t *)ptr)[i] == ((int8_t *)ptrDefault)[i];
+          break;
         case VAR_UINT16:
         case VAR_INT16:
-            result = result && ((int16_t *)ptr)[i] == ((int16_t *)ptrDefault)[i];
-            break;
-        }
+          result = result && ((int16_t *)ptr)[i] == ((int16_t *)ptrDefault)[i];
+          break;
+      }
     }
     return (result);
-}
+  }
 
-static uint8_t getPidProfileIndexToUse()
-{
+  static uint8_t getPidProfileIndexToUse() {
     return pidProfileIndexToUse == CURRENT_PROFILE_INDEX ? getCurrentPidProfileIndex() : pidProfileIndexToUse;
-}
+  }
 
-static uint8_t getRateProfileIndexToUse()
-{
+  static uint8_t getRateProfileIndexToUse() {
     return rateProfileIndexToUse == CURRENT_PROFILE_INDEX ? getCurrentControlRateProfileIndex() : rateProfileIndexToUse;
-}
+  }
 
-
-static uint16_t getValueOffset(const clivalue_t *value)
-{
+  static uint16_t getValueOffset(const clivalue_t *value) {
     switch (value->type & VALUE_SECTION_MASK) {
-    case MASTER_VALUE:
-        return value->offset;
-    case PROFILE_VALUE:
-        return value->offset + sizeof(pidProfile_t) * getPidProfileIndexToUse();
-    case PROFILE_RATE_VALUE:
-        return value->offset + sizeof(controlRateConfig_t) * getRateProfileIndexToUse();
+      case MASTER_VALUE:
+        return (value->offset);
+      case PROFILE_VALUE:
+        return (value->offset + sizeof(pidProfile_t) * getPidProfileIndexToUse());
+      case PROFILE_RATE_VALUE:
+        return (value->offset + sizeof(controlRateConfig_t) * getRateProfileIndexToUse());
     }
-    return 0;
-}
+      return (0);
+  }
 
-void *cliGetValuePointer(const clivalue_t *value)
-{
+  void *cliGetValuePointer(const clivalue_t *value) {
     const pgRegistry_t* rec = pgFind(value->pgn);
     if (configIsInCopy) {
-        return CONST_CAST(void *, rec->copy + getValueOffset(value));
+      return (CONST_CAST(void *, rec->copy + getValueOffset(value)));
     } else {
-        return CONST_CAST(void *, rec->address + getValueOffset(value));
+      return (CONST_CAST(void *, rec->address + getValueOffset(value)));
     }
-}
+  }
 
-const void *cliGetDefaultPointer(const clivalue_t *value)
-{
+  const void *cliGetDefaultPointer(const clivalue_t *value) {
     const pgRegistry_t* rec = pgFind(value->pgn);
-    return rec->address + getValueOffset(value);
-}
+    return (rec->address + getValueOffset(value));
+  }
 
-static void dumpPgValue(const clivalue_t *value, uint8_t dumpMask)
-{
+  static void dumpPgValue(const clivalue_t *value, uint8_t dumpMask) {
     const pgRegistry_t *pg = pgFind(value->pgn);
-#ifdef DEBUG
-    if (!pg) {
+    #ifdef DEBUG
+      if (!pg) {
         cliPrintLinef("VALUE %s ERROR", value->name);
         return; // if it's not found, the pgn shouldn't be in the value table!
-    }
-#endif
+      }
+    #endif
 
     const char *format = "set %s = ";
     const char *defaultFormat = "#set %s = ";
@@ -583,68 +539,64 @@ static void dumpPgValue(const clivalue_t *value, uint8_t dumpMask)
     const bool equalsDefault = valuePtrEqualsDefault(value, pg->copy + valueOffset, pg->address + valueOffset);
 
     if (((dumpMask & DO_DIFF) == 0) || !equalsDefault) {
-        if (dumpMask & SHOW_DEFAULTS && !equalsDefault) {
-            cliPrintf(defaultFormat, value->name);
-            printValuePointer(value, (uint8_t*)pg->address + valueOffset, false);
-            cliPrintLinefeed();
-        }
-        cliPrintf(format, value->name);
-        printValuePointer(value, pg->copy + valueOffset, false);
+      if (dumpMask & SHOW_DEFAULTS && !equalsDefault) {
+        cliPrintf(defaultFormat, value->name);
+        printValuePointer(value, (uint8_t*)pg->address + valueOffset, false);
         cliPrintLinefeed();
+      }
+      cliPrintf(format, value->name);
+      printValuePointer(value, pg->copy + valueOffset, false);
+      cliPrintLinefeed();
     }
-}
+  }
 
-static void dumpAllValues(uint16_t valueSection, uint8_t dumpMask)
-{
+  static void dumpAllValues(uint16_t valueSection, uint8_t dumpMask) {
     for (uint32_t i = 0; i < valueTableEntryCount; i++) {
-        const clivalue_t *value = &valueTable[i];
-        bufWriterFlush(cliWriter);
-        if ((value->type & VALUE_SECTION_MASK) == valueSection) {
-            dumpPgValue(value, dumpMask);
-        }
+      const clivalue_t *value = &valueTable[i];
+      bufWriterFlush(cliWriter);
+      if ((value->type & VALUE_SECTION_MASK) == valueSection) {
+        dumpPgValue(value, dumpMask);
+      }
     }
-}
+  }
 
-static void cliPrintVar(const clivalue_t *var, bool full)
-{
+  static void cliPrintVar(const clivalue_t *var, bool full) {
     const void *ptr = cliGetValuePointer(var);
-
     printValuePointer(var, ptr, full);
-}
+  }
 
-static void cliPrintVarRange(const clivalue_t *var)
-{
+  static void cliPrintVarRange(const clivalue_t *var) {
     switch (var->type & VALUE_MODE_MASK) {
-    case (MODE_DIRECT): {
+      case (MODE_DIRECT): {
         cliPrintLinef("Allowed range: %d - %d", var->config.minmax.min, var->config.minmax.max);
-    }
-    break;
-    case (MODE_LOOKUP): {
+      }
+      break;
+      case (MODE_LOOKUP): {
         const lookupTableEntry_t *tableEntry = &lookupTables[var->config.lookup.tableIndex];
         cliPrint("Allowed values: ");
         bool firstEntry = true;
         for (unsigned i = 0; i < tableEntry->valueCount; i++) {
-            if (tableEntry->values[i]) {
-                if (!firstEntry) {
-                    cliPrint(", ");
-                }
-                cliPrintf("%s", tableEntry->values[i]);
-                firstEntry = false;
+          if (tableEntry->values[i]) {
+            if (!firstEntry) {
+              cliPrint(", ");
             }
+            cliPrintf("%s", tableEntry->values[i]);
+            firstEntry = false;
+          }
         }
         cliPrintLinefeed();
-    }
-    break;
-    case (MODE_ARRAY): {
+      }
+      break;
+      case (MODE_ARRAY): {
         cliPrintLinef("Array length: %d", var->config.array.length);
-    }
-    break;
-    case (MODE_BITSET): {
+      }
+      break;
+      case (MODE_BITSET): {
         cliPrintLinef("Allowed values: OFF, ON");
+      }
+      break;
     }
-    break;
-    }
-}
+  }
 
 static void cliSetVar(const clivalue_t *var, const int16_t value)
 {
