@@ -598,158 +598,134 @@ uint8_t cliMode = 0;
     }
   }
 
-static void cliSetVar(const clivalue_t *var, const int16_t value)
-{
+  static void cliSetVar(const clivalue_t *var, const int16_t value) {
     void *ptr = cliGetValuePointer(var);
     uint32_t workValue;
     uint32_t mask;
 
     if ((var->type & VALUE_MODE_MASK) == MODE_BITSET) {
-        switch (var->type & VALUE_TYPE_MASK) {
+      switch (var->type & VALUE_TYPE_MASK) {
         case VAR_UINT8:
-            mask = (1 << var->config.bitpos) & 0xff;
-            if (value) {
-                workValue = *(uint8_t *)ptr | mask;
-            } else {
-                workValue = *(uint8_t *)ptr & ~mask;
-            }
-            *(uint8_t *)ptr = workValue;
-            break;
-
+          mask = (1 << var->config.bitpos) & 0xff;
+          if (value) {
+              workValue = *(uint8_t *)ptr | mask;
+          } else {
+              workValue = *(uint8_t *)ptr & ~mask;
+          }
+          *(uint8_t *)ptr = workValue;
+          break;
         case VAR_UINT16:
-            mask = (1 << var->config.bitpos) & 0xffff;
-            if (value) {
-                workValue = *(uint16_t *)ptr | mask;
-            } else {
-                workValue = *(uint16_t *)ptr & ~mask;
-            }
-            *(uint16_t *)ptr = workValue;
-            break;
-
+          mask = (1 << var->config.bitpos) & 0xffff;
+          if (value) {
+              workValue = *(uint16_t *)ptr | mask;
+          } else {
+              workValue = *(uint16_t *)ptr & ~mask;
+          }
+          *(uint16_t *)ptr = workValue;
+          break;
         case VAR_UINT32:
-            mask = 1 << var->config.bitpos;
-            if (value) {
-                workValue = *(uint32_t *)ptr | mask;
-            } else {
-                workValue = *(uint32_t *)ptr & ~mask;
-            }
-            *(uint32_t *)ptr = workValue;
-            break;
-
-        }
+          mask = 1 << var->config.bitpos;
+          if (value) {
+              workValue = *(uint32_t *)ptr | mask;
+          } else {
+              workValue = *(uint32_t *)ptr & ~mask;
+          }
+          *(uint32_t *)ptr = workValue;
+          break;
+      }
     } else {
-        switch (var->type & VALUE_TYPE_MASK) {
+      switch (var->type & VALUE_TYPE_MASK) {
         case VAR_UINT8:
-            *(uint8_t *)ptr = value;
-            break;
-
+          *(uint8_t *)ptr = value;
+          break;
         case VAR_INT8:
-            *(int8_t *)ptr = value;
-            break;
-
+        *(int8_t *)ptr = value;
+        break;
         case VAR_UINT16:
         case VAR_INT16:
-            *(int16_t *)ptr = value;
-            break;
-        }
+          *(int16_t *)ptr = value;
+          break;
+      }
     }
-}
+  }
 
-#if defined(USE_RESOURCE_MGMT) && !defined(MINIMAL_CLI)
-static void cliRepeat(char ch, uint8_t len)
-{
-    for (int i = 0; i < len; i++) {
+  #if defined(USE_RESOURCE_MGMT) && !defined(MINIMAL_CLI)
+    static void cliRepeat(char ch, uint8_t len) {
+      for (int i = 0; i < len; i++) {
         bufWriterAppend(cliWriter, ch);
+      }
+      cliPrintLinefeed();
     }
-    cliPrintLinefeed();
-}
-#endif
+  #endif
 
-static void cliPrompt(void)
-{
+  static void cliPrompt(void) {
     cliPrint("\r\n# ");
-}
+  }
 
-static void cliShowParseError(void)
-{
+  static void cliShowParseError(void) {
     cliPrintErrorLinef("Parse error");
-}
+  }
 
-static void cliShowArgumentRangeError(char *name, int min, int max)
-{
+  static void cliShowArgumentRangeError(char *name, int min, int max) {
     cliPrintErrorLinef("%s not between %d and %d", name, min, max);
-}
+  }
 
-static const char *nextArg(const char *currentArg)
-{
+  static const char *nextArg(const char *currentArg) {
     const char *ptr = strchr(currentArg, ' ');
     while (ptr && *ptr == ' ') {
-        ptr++;
+      ptr++;
     }
 
-    return ptr;
-}
+    return (ptr);
+  }
 
-static const char *processChannelRangeArgs(const char *ptr, channelRange_t *range, uint8_t *validArgumentCount)
-{
+  static const char *processChannelRangeArgs(const char *ptr, channelRange_t *range, uint8_t *validArgumentCount) {
     for (uint32_t argIndex = 0; argIndex < 2; argIndex++) {
-        ptr = nextArg(ptr);
-        if (ptr) {
-            int val = atoi(ptr);
-            val = CHANNEL_VALUE_TO_STEP(val);
-            if (val >= MIN_MODE_RANGE_STEP && val <= MAX_MODE_RANGE_STEP) {
-                if (argIndex == 0) {
-                    range->startStep = val;
-                } else {
-                    range->endStep = val;
-                }
-                (*validArgumentCount)++;
-            }
+      ptr = nextArg(ptr);
+      if (ptr) {
+        int val = atoi(ptr);
+        val = CHANNEL_VALUE_TO_STEP(val);
+        if (val >= MIN_MODE_RANGE_STEP && val <= MAX_MODE_RANGE_STEP) {
+          if (argIndex == 0) {
+            range->startStep = val;
+          } else {
+            range->endStep = val;
+          }
+          (*validArgumentCount)++;
         }
+      }
     }
+    return (ptr);
+  }
 
-    return ptr;
-}
 
-// Check if a string's length is zero
-static bool isEmpty(const char *string)
-{
+  static bool isEmpty(const char *string) {
     return (string == NULL || *string == '\0') ? true : false;
-}
+  }
 
-static void printRxFailsafe(uint8_t dumpMask, const rxFailsafeChannelConfig_t *rxFailsafeChannelConfigs, const rxFailsafeChannelConfig_t *defaultRxFailsafeChannelConfigs)
-{
+  static void printRxFailsafe(uint8_t dumpMask, const rxFailsafeChannelConfig_t *rxFailsafeChannelConfigs, const rxFailsafeChannelConfig_t *defaultRxFailsafeChannelConfigs) {
     // print out rxConfig failsafe settings
     for (uint32_t channel = 0; channel < MAX_SUPPORTED_RC_CHANNEL_COUNT; channel++) {
-        const rxFailsafeChannelConfig_t *channelFailsafeConfig = &rxFailsafeChannelConfigs[channel];
-        const rxFailsafeChannelConfig_t *defaultChannelFailsafeConfig = &defaultRxFailsafeChannelConfigs[channel];
-        const bool equalsDefault = !memcmp(channelFailsafeConfig, defaultChannelFailsafeConfig, sizeof(*channelFailsafeConfig));
-        const bool requireValue = channelFailsafeConfig->mode == RX_FAILSAFE_MODE_SET;
-        if (requireValue) {
-            const char *format = "rxfail %u %c %d";
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                channel,
-                rxFailsafeModeCharacters[defaultChannelFailsafeConfig->mode],
-                RXFAIL_STEP_TO_CHANNEL_VALUE(defaultChannelFailsafeConfig->step)
-            );
-            cliDumpPrintLinef(dumpMask, equalsDefault, format,
-                channel,
-                rxFailsafeModeCharacters[channelFailsafeConfig->mode],
-                RXFAIL_STEP_TO_CHANNEL_VALUE(channelFailsafeConfig->step)
-            );
-        } else {
-            const char *format = "rxfail %u %c";
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                channel,
-                rxFailsafeModeCharacters[defaultChannelFailsafeConfig->mode]
-            );
-            cliDumpPrintLinef(dumpMask, equalsDefault, format,
-                channel,
-                rxFailsafeModeCharacters[channelFailsafeConfig->mode]
-            );
-        }
+      const rxFailsafeChannelConfig_t *channelFailsafeConfig = &rxFailsafeChannelConfigs[channel];
+      const rxFailsafeChannelConfig_t *defaultChannelFailsafeConfig = &defaultRxFailsafeChannelConfigs[channel];
+      const bool equalsDefault = !memcmp(channelFailsafeConfig, defaultChannelFailsafeConfig, sizeof(*channelFailsafeConfig));
+      const bool requireValue = channelFailsafeConfig->mode == RX_FAILSAFE_MODE_SET;
+      if (requireValue) {
+        const char *format = "rxfail %u %c %d";
+        cliDefaultPrintLinef(dumpMask, equalsDefault, format, channel,
+          rxFailsafeModeCharacters[defaultChannelFailsafeConfig->mode],
+          RXFAIL_STEP_TO_CHANNEL_VALUE(defaultChannelFailsafeConfig->step));
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, channel,
+            rxFailsafeModeCharacters[channelFailsafeConfig->mode],
+            RXFAIL_STEP_TO_CHANNEL_VALUE(channelFailsafeConfig->step));
+      } else {
+        const char *format = "rxfail %u %c";
+        cliDefaultPrintLinef(dumpMask, equalsDefault, format, channel,
+          rxFailsafeModeCharacters[defaultChannelFailsafeConfig->mode]);
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, channel, rxFailsafeModeCharacters[channelFailsafeConfig->mode]);
+      }
     }
-}
+  }
 
 static void cliRxFailsafe(char *cmdline)
 {
