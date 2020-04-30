@@ -1106,172 +1106,138 @@ uint8_t cliMode = 0;
   }
   #endif //SKIP_SERIAL_PASSTHROUGH
 
-static void printAdjustmentRange(uint8_t dumpMask, const adjustmentRange_t *adjustmentRanges, const adjustmentRange_t *defaultAdjustmentRanges)
-{
+  static void printAdjustmentRange(uint8_t dumpMask, const adjustmentRange_t *adjustmentRanges, const adjustmentRange_t *defaultAdjustmentRanges) {
     const char *format = "adjrange %u %u %u %u %u %u %u %u %u";
     // print out adjustment ranges channel settings
     for (uint32_t i = 0; i < MAX_ADJUSTMENT_RANGE_COUNT; i++) {
-        const adjustmentRange_t *ar = &adjustmentRanges[i];
-        bool equalsDefault = false;
-        if (defaultAdjustmentRanges) {
-            const adjustmentRange_t *arDefault = &defaultAdjustmentRanges[i];
-            equalsDefault = !memcmp(ar, arDefault, sizeof(*ar));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                arDefault->adjustmentIndex,
-                arDefault->auxChannelIndex,
-                MODE_STEP_TO_CHANNEL_VALUE(arDefault->range.startStep),
-                MODE_STEP_TO_CHANNEL_VALUE(arDefault->range.endStep),
-                arDefault->adjustmentFunction,
-                arDefault->auxSwitchChannelIndex,
-                arDefault->adjustmentCenter,
-                arDefault->adjustmentScale
-            );
-        }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            ar->adjustmentIndex,
-            ar->auxChannelIndex,
-            MODE_STEP_TO_CHANNEL_VALUE(ar->range.startStep),
-            MODE_STEP_TO_CHANNEL_VALUE(ar->range.endStep),
-            ar->adjustmentFunction,
-            ar->auxSwitchChannelIndex,
-            ar->adjustmentCenter,
-            ar->adjustmentScale
-        );
+      const adjustmentRange_t *ar = &adjustmentRanges[i];
+      bool equalsDefault = false;
+      if (defaultAdjustmentRanges) {
+        const adjustmentRange_t *arDefault = &defaultAdjustmentRanges[i];
+        equalsDefault = !memcmp(ar, arDefault, sizeof(*ar));
+        cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, arDefault->adjustmentIndex, arDefault->auxChannelIndex,
+          MODE_STEP_TO_CHANNEL_VALUE(arDefault->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(arDefault->range.endStep),
+          arDefault->adjustmentFunction, arDefault->auxSwitchChannelIndex, arDefault->adjustmentCenter, arDefault->adjustmentScale);
+      }
+      cliDumpPrintLinef(dumpMask, equalsDefault, format, i, ar->adjustmentIndex, ar->auxChannelIndex,
+        MODE_STEP_TO_CHANNEL_VALUE(ar->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(ar->range.endStep),
+        ar->adjustmentFunction, ar->auxSwitchChannelIndex, ar->adjustmentCenter, ar->adjustmentScale);
     }
-}
+  }
 
-static void cliAdjustmentRange(char *cmdline)
-{
+  static void cliAdjustmentRange(char *cmdline) {
     const char *format = "adjrange %u %u %u %u %u %u %u %u %u";
     int i, val = 0;
     const char *ptr;
 
     if (isEmpty(cmdline)) {
-        printAdjustmentRange(DUMP_MASTER, adjustmentRanges(0), NULL);
+      printAdjustmentRange(DUMP_MASTER, adjustmentRanges(0), NULL);
     } else {
-        ptr = cmdline;
-        i = atoi(ptr++);
-        if (i < MAX_ADJUSTMENT_RANGE_COUNT) {
-            adjustmentRange_t *ar = adjustmentRangesMutable(i);
-            uint8_t validArgumentCount = 0;
+      ptr = cmdline;
+      i = atoi(ptr++);
+      if (i < MAX_ADJUSTMENT_RANGE_COUNT) {
+        adjustmentRange_t *ar = adjustmentRangesMutable(i);
+        uint8_t validArgumentCount = 0;
 
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < MAX_SIMULTANEOUS_ADJUSTMENT_COUNT) {
-                    ar->adjustmentIndex = val;
-                    validArgumentCount++;
-                }
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
-                    ar->auxChannelIndex = val;
-                    validArgumentCount++;
-                }
-            }
-
-            ptr = processChannelRangeArgs(ptr, &ar->range, &validArgumentCount);
-
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < ADJUSTMENT_FUNCTION_COUNT) {
-                    ar->adjustmentFunction = val;
-                    validArgumentCount++;
-                }
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
-                    ar->auxSwitchChannelIndex = val;
-                    validArgumentCount++;
-                }
-            }
-
-            if (validArgumentCount != 6) {
-                memset(ar, 0, sizeof(adjustmentRange_t));
-                cliShowParseError();
-                return;
-            }
-
-            // Optional arguments
-            ar->adjustmentCenter = 0;
-            ar->adjustmentScale = 0;
-
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                ar->adjustmentCenter = val;
-                validArgumentCount++;
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                ar->adjustmentScale = val;
-                validArgumentCount++;
-            }
-            cliDumpPrintLinef(0, false, format,
-                i,
-                ar->adjustmentIndex,
-                ar->auxChannelIndex,
-                MODE_STEP_TO_CHANNEL_VALUE(ar->range.startStep),
-                MODE_STEP_TO_CHANNEL_VALUE(ar->range.endStep),
-                ar->adjustmentFunction,
-                ar->auxSwitchChannelIndex,
-                ar->adjustmentCenter,
-                ar->adjustmentScale
-            );
-
-        } else {
-            cliShowArgumentRangeError("index", 0, MAX_ADJUSTMENT_RANGE_COUNT - 1);
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val >= 0 && val < MAX_SIMULTANEOUS_ADJUSTMENT_COUNT) {
+            ar->adjustmentIndex = val;
+            validArgumentCount++;
+          }
         }
-    }
-}
 
-#ifndef USE_QUAD_MIXER_ONLY
-static void printMotorMix(uint8_t dumpMask, const motorMixer_t *customMotorMixer, const motorMixer_t *defaultCustomMotorMixer)
-{
-    const char *format = "mmix %d %s %s %s %s";
-    char buf0[FTOA_BUFFER_LENGTH];
-    char buf1[FTOA_BUFFER_LENGTH];
-    char buf2[FTOA_BUFFER_LENGTH];
-    char buf3[FTOA_BUFFER_LENGTH];
-    for (uint32_t i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
+            ar->auxChannelIndex = val;
+            validArgumentCount++;
+          }
+        }
+
+        ptr = processChannelRangeArgs(ptr, &ar->range, &validArgumentCount);
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val >= 0 && val < ADJUSTMENT_FUNCTION_COUNT) {
+            ar->adjustmentFunction = val;
+            validArgumentCount++;
+          }
+        }
+
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
+            ar->auxSwitchChannelIndex = val;
+            validArgumentCount++;
+          }
+        }
+
+        if (validArgumentCount != 6) {
+          memset(ar, 0, sizeof(adjustmentRange_t));
+          cliShowParseError();
+          return;
+        }
+
+        // Optional arguments
+        ar->adjustmentCenter = 0;
+        ar->adjustmentScale = 0;
+
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          ar->adjustmentCenter = val;
+          validArgumentCount++;
+        }
+
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          ar->adjustmentScale = val;
+          validArgumentCount++;
+        }
+        cliDumpPrintLinef(0, false, format, i, ar->adjustmentIndex, ar->auxChannelIndex,
+          MODE_STEP_TO_CHANNEL_VALUE(ar->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(ar->range.endStep),
+          ar->adjustmentFunction, ar->auxSwitchChannelIndex, ar->adjustmentCenter, ar->adjustmentScale);
+      } else {
+        cliShowArgumentRangeError("index", 0, MAX_ADJUSTMENT_RANGE_COUNT - 1);
+      }
+    }
+  }
+
+  #ifndef USE_QUAD_MIXER_ONLY
+    static void printMotorMix(uint8_t dumpMask, const motorMixer_t *customMotorMixer, const motorMixer_t *defaultCustomMotorMixer) {
+      const char *format = "mmix %d %s %s %s %s";
+      char buf0[FTOA_BUFFER_LENGTH];
+      char buf1[FTOA_BUFFER_LENGTH];
+      char buf2[FTOA_BUFFER_LENGTH];
+      char buf3[FTOA_BUFFER_LENGTH];
+      for (uint32_t i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
         if (customMotorMixer[i].throttle == 0.0f)
-            break;
+          break;
         const float thr = customMotorMixer[i].throttle;
         const float roll = customMotorMixer[i].roll;
         const float pitch = customMotorMixer[i].pitch;
         const float yaw = customMotorMixer[i].yaw;
         bool equalsDefault = false;
         if (defaultCustomMotorMixer) {
-            const float thrDefault = defaultCustomMotorMixer[i].throttle;
-            const float rollDefault = defaultCustomMotorMixer[i].roll;
-            const float pitchDefault = defaultCustomMotorMixer[i].pitch;
-            const float yawDefault = defaultCustomMotorMixer[i].yaw;
-            const bool equalsDefault = thr == thrDefault && roll == rollDefault && pitch == pitchDefault && yaw == yawDefault;
+          const float thrDefault = defaultCustomMotorMixer[i].throttle;
+          const float rollDefault = defaultCustomMotorMixer[i].roll;
+          const float pitchDefault = defaultCustomMotorMixer[i].pitch;
+          const float yawDefault = defaultCustomMotorMixer[i].yaw;
+          const bool equalsDefault = thr == thrDefault && roll == rollDefault && pitch == pitchDefault && yaw == yawDefault;
 
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                ftoa(thrDefault, buf0),
-                ftoa(rollDefault, buf1),
-                ftoa(pitchDefault, buf2),
-                ftoa(yawDefault, buf3));
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, ftoa(thrDefault, buf0),
+            ftoa(rollDefault, buf1), ftoa(pitchDefault, buf2), ftoa(yawDefault, buf3));
         }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            ftoa(thr, buf0),
-            ftoa(roll, buf1),
-            ftoa(pitch, buf2),
-            ftoa(yaw, buf3));
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, i, ftoa(thr, buf0),
+          ftoa(roll, buf1), ftoa(pitch, buf2), ftoa(yaw, buf3));
+      }
     }
-}
-#endif // USE_QUAD_MIXER_ONLY
+  #endif //USE_QUAD_MIXER_ONLY
 
 static void cliMotorMix(char *cmdline)
 {
