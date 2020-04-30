@@ -727,87 +727,72 @@ uint8_t cliMode = 0;
     }
   }
 
-static void cliRxFailsafe(char *cmdline)
-{
+  static void cliRxFailsafe(char *cmdline) {
     uint8_t channel;
     char buf[3];
 
     if (isEmpty(cmdline)) {
-        // print out rxConfig failsafe settings
-        for (channel = 0; channel < MAX_SUPPORTED_RC_CHANNEL_COUNT; channel++) {
-            cliRxFailsafe(itoa(channel, buf, 10));
-        }
+      // print out rxConfig failsafe settings
+      for (channel = 0; channel < MAX_SUPPORTED_RC_CHANNEL_COUNT; channel++) {
+        cliRxFailsafe(itoa(channel, buf, 10));
+      }
     } else {
-        const char *ptr = cmdline;
-        channel = atoi(ptr++);
-        if ((channel < MAX_SUPPORTED_RC_CHANNEL_COUNT)) {
+      const char *ptr = cmdline;
+      channel = atoi(ptr++);
+      if ((channel < MAX_SUPPORTED_RC_CHANNEL_COUNT)) {
+        rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(channel);
+        const rxFailsafeChannelType_e type = (channel < NON_AUX_CHANNEL_COUNT) ? RX_FAILSAFE_TYPE_FLIGHT : RX_FAILSAFE_TYPE_AUX;
+        rxFailsafeChannelMode_e mode = channelFailsafeConfig->mode;
+        bool requireValue = channelFailsafeConfig->mode == RX_FAILSAFE_MODE_SET;
 
-            rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(channel);
-
-            const rxFailsafeChannelType_e type = (channel < NON_AUX_CHANNEL_COUNT) ? RX_FAILSAFE_TYPE_FLIGHT : RX_FAILSAFE_TYPE_AUX;
-            rxFailsafeChannelMode_e mode = channelFailsafeConfig->mode;
-            bool requireValue = channelFailsafeConfig->mode == RX_FAILSAFE_MODE_SET;
-
-            ptr = nextArg(ptr);
-            if (ptr) {
-                const char *p = strchr(rxFailsafeModeCharacters, *(ptr));
-                if (p) {
-                    const uint8_t requestedMode = p - rxFailsafeModeCharacters;
-                    mode = rxFailsafeModesTable[type][requestedMode];
-                } else {
-                    mode = RX_FAILSAFE_MODE_INVALID;
-                }
-                if (mode == RX_FAILSAFE_MODE_INVALID) {
-                    cliShowParseError();
-                    return;
-                }
-
-                requireValue = mode == RX_FAILSAFE_MODE_SET;
-
-                ptr = nextArg(ptr);
-                if (ptr) {
-                    if (!requireValue) {
-                        cliShowParseError();
-                        return;
-                    }
-                    uint16_t value = atoi(ptr);
-                    value = CHANNEL_VALUE_TO_RXFAIL_STEP(value);
-                    if (value > MAX_RXFAIL_RANGE_STEP) {
-                        cliPrintLine("Value out of range");
-                        return;
-                    }
-
-                    channelFailsafeConfig->step = value;
-                } else if (requireValue) {
-                    cliShowParseError();
-                    return;
-                }
-                channelFailsafeConfig->mode = mode;
+        ptr = nextArg(ptr);
+        if (ptr) {
+          const char *p = strchr(rxFailsafeModeCharacters, *(ptr));
+          if (p) {
+            const uint8_t requestedMode = p - rxFailsafeModeCharacters;
+            mode = rxFailsafeModesTable[type][requestedMode];
+          } else {
+            mode = RX_FAILSAFE_MODE_INVALID;
+          }
+          if (mode == RX_FAILSAFE_MODE_INVALID) {
+            cliShowParseError();
+            return;
+          }
+          requireValue = mode == RX_FAILSAFE_MODE_SET;
+          ptr = nextArg(ptr);
+          if (ptr) {
+            if (!requireValue) {
+              cliShowParseError();
+              return;
             }
-
-            char modeCharacter = rxFailsafeModeCharacters[channelFailsafeConfig->mode];
-
-            // double use of cliPrintf below
-            // 1. acknowledge interpretation on command,
-            // 2. query current setting on single item,
-
-            if (requireValue) {
-                cliPrintLinef("rxfail %u %c %d",
-                    channel,
-                    modeCharacter,
-                    RXFAIL_STEP_TO_CHANNEL_VALUE(channelFailsafeConfig->step)
-                );
-            } else {
-                cliPrintLinef("rxfail %u %c",
-                    channel,
-                    modeCharacter
-                );
+            uint16_t value = atoi(ptr);
+            value = CHANNEL_VALUE_TO_RXFAIL_STEP(value);
+            if (value > MAX_RXFAIL_RANGE_STEP) {
+              cliPrintLine("Value out of range");
+              return;
             }
-        } else {
-            cliShowArgumentRangeError("channel", 0, MAX_SUPPORTED_RC_CHANNEL_COUNT - 1);
+            channelFailsafeConfig->step = value;
+          } else if (requireValue) {
+            cliShowParseError();
+            return;
+          }
+          channelFailsafeConfig->mode = mode;
         }
+
+        char modeCharacter = rxFailsafeModeCharacters[channelFailsafeConfig->mode];
+        // double use of cliPrintf below
+        // 1. acknowledge interpretation on command,
+        // 2. query current setting on single item,
+        if (requireValue) {
+          cliPrintLinef("rxfail %u %c %d", channel, modeCharacter, RXFAIL_STEP_TO_CHANNEL_VALUE(channelFailsafeConfig->step));
+        } else {
+          cliPrintLinef("rxfail %u %c", channel, modeCharacter);
+        }
+      } else {
+        cliShowArgumentRangeError("channel", 0, MAX_SUPPORTED_RC_CHANNEL_COUNT - 1);
+      }
     }
-}
+  }
 
 static void printAux(uint8_t dumpMask, const modeActivationCondition_t *modeActivationConditions, const modeActivationCondition_t *defaultModeActivationConditions)
 {
