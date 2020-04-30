@@ -821,196 +821,168 @@ uint8_t cliMode = 0;
     }
   }
 
-static void cliAux(char *cmdline)
-{
+  static void cliAux(char *cmdline) {
     int i, val = 0;
     const char *ptr;
 
     if (isEmpty(cmdline)) {
-        printAux(DUMP_MASTER, modeActivationConditions(0), NULL);
+      printAux(DUMP_MASTER, modeActivationConditions(0), NULL);
     } else {
-        ptr = cmdline;
-        i = atoi(ptr++);
-        if (i < MAX_MODE_ACTIVATION_CONDITION_COUNT) {
-            modeActivationCondition_t *mac = modeActivationConditionsMutable(i);
-            uint8_t validArgumentCount = 0;
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                const box_t *box = findBoxByPermanentId(val);
-                if (box) {
-                    mac->modeId = box->boxId;
-                    validArgumentCount++;
-                }
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
-                    mac->auxChannelIndex = val;
-                    validArgumentCount++;
-                }
-            }
-            ptr = processChannelRangeArgs(ptr, &mac->range, &validArgumentCount);
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val == MODELOGIC_OR || val == MODELOGIC_AND) {
-                    mac->modeLogic = val;
-                    validArgumentCount++;
-                }
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                const box_t *box = findBoxByPermanentId(val);
-                if (box) {
-                    mac->linkedTo = box->boxId;
-                    validArgumentCount++;
-                }
-            }
-            if (validArgumentCount == 4) { // for backwards compatibility
-                mac->modeLogic = MODELOGIC_OR;
-            } else if (validArgumentCount == 5) { // for backwards compatibility
-                mac->linkedTo = 0;
-            } else if (validArgumentCount != 6) {
-                memset(mac, 0, sizeof(modeActivationCondition_t));
-            }
-            cliPrintLinef( "aux %u %u %u %u %u %u %u",
-                i,
-                mac->modeId,
-                mac->auxChannelIndex,
-                MODE_STEP_TO_CHANNEL_VALUE(mac->range.startStep),
-                MODE_STEP_TO_CHANNEL_VALUE(mac->range.endStep),
-                mac->modeLogic,
-                mac->linkedTo
-            );
-        } else {
-            cliShowArgumentRangeError("index", 0, MAX_MODE_ACTIVATION_CONDITION_COUNT - 1);
+      ptr = cmdline;
+      i = atoi(ptr++);
+      if (i < MAX_MODE_ACTIVATION_CONDITION_COUNT) {
+        modeActivationCondition_t *mac = modeActivationConditionsMutable(i);
+        uint8_t validArgumentCount = 0;
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          const box_t *box = findBoxByPermanentId(val);
+          if (box) {
+            mac->modeId = box->boxId;
+            validArgumentCount++;
+          }
         }
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
+            mac->auxChannelIndex = val;
+            validArgumentCount++;
+          }
+        }
+        ptr = processChannelRangeArgs(ptr, &mac->range, &validArgumentCount);
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          if (val == MODELOGIC_OR || val == MODELOGIC_AND) {
+            mac->modeLogic = val;
+            validArgumentCount++;
+          }
+        }
+        ptr = nextArg(ptr);
+        if (ptr) {
+          val = atoi(ptr);
+          const box_t *box = findBoxByPermanentId(val);
+          if (box) {
+            mac->linkedTo = box->boxId;
+            validArgumentCount++;
+          }
+        }
+        if (validArgumentCount == 4) { // for backwards compatibility
+          mac->modeLogic = MODELOGIC_OR;
+        } else if (validArgumentCount == 5) { // for backwards compatibility
+          mac->linkedTo = 0;
+        } else if (validArgumentCount != 6) {
+          memset(mac, 0, sizeof(modeActivationCondition_t));
+        }
+        cliPrintLinef( "aux %u %u %u %u %u %u %u", i, mac->modeId, mac->auxChannelIndex,
+            MODE_STEP_TO_CHANNEL_VALUE(mac->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(mac->range.endStep),
+            mac->modeLogic, mac->linkedTo);
+      } else {
+        cliShowArgumentRangeError("index", 0, MAX_MODE_ACTIVATION_CONDITION_COUNT - 1);
+      }
     }
-}
+  }
 
-static void printSerial(uint8_t dumpMask, const serialConfig_t *serialConfig, const serialConfig_t *serialConfigDefault)
-{
+  static void printSerial(uint8_t dumpMask, const serialConfig_t *serialConfig, const serialConfig_t *serialConfigDefault) {
     const char *format = "serial %d %d %ld %ld %ld %ld";
     for (uint32_t i = 0; i < SERIAL_PORT_COUNT; i++) {
-        if (!serialIsPortAvailable(serialConfig->portConfigs[i].identifier)) {
-            continue;
-        };
-        bool equalsDefault = false;
-        if (serialConfigDefault) {
-            equalsDefault = !memcmp(&serialConfig->portConfigs[i], &serialConfigDefault->portConfigs[i], sizeof(serialConfig->portConfigs[i]));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                serialConfigDefault->portConfigs[i].identifier,
-                serialConfigDefault->portConfigs[i].functionMask,
-                baudRates[serialConfigDefault->portConfigs[i].msp_baudrateIndex],
-                baudRates[serialConfigDefault->portConfigs[i].gps_baudrateIndex],
-                baudRates[serialConfigDefault->portConfigs[i].telemetry_baudrateIndex],
-                baudRates[serialConfigDefault->portConfigs[i].blackbox_baudrateIndex]
-            );
-        }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            serialConfig->portConfigs[i].identifier,
-            serialConfig->portConfigs[i].functionMask,
-            baudRates[serialConfig->portConfigs[i].msp_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].gps_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].telemetry_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].blackbox_baudrateIndex]
-            );
+      if (!serialIsPortAvailable(serialConfig->portConfigs[i].identifier)) {
+        continue;
+      };
+      bool equalsDefault = false;
+      if (serialConfigDefault) {
+        equalsDefault = !memcmp(&serialConfig->portConfigs[i], &serialConfigDefault->portConfigs[i], sizeof(serialConfig->portConfigs[i]));
+        cliDefaultPrintLinef(dumpMask, equalsDefault, format,
+          serialConfigDefault->portConfigs[i].identifier, serialConfigDefault->portConfigs[i].functionMask,
+          baudRates[serialConfigDefault->portConfigs[i].msp_baudrateIndex], baudRates[serialConfigDefault->portConfigs[i].gps_baudrateIndex],
+          baudRates[serialConfigDefault->portConfigs[i].telemetry_baudrateIndex], baudRates[serialConfigDefault->portConfigs[i].blackbox_baudrateIndex]);
+      }
+      cliDumpPrintLinef(dumpMask, equalsDefault, format,
+        serialConfig->portConfigs[i].identifier, serialConfig->portConfigs[i].functionMask,
+        baudRates[serialConfig->portConfigs[i].msp_baudrateIndex], baudRates[serialConfig->portConfigs[i].gps_baudrateIndex],
+        baudRates[serialConfig->portConfigs[i].telemetry_baudrateIndex], baudRates[serialConfig->portConfigs[i].blackbox_baudrateIndex]);
     }
-}
+  }
 
-static void cliSerial(char *cmdline)
-{
+  static void cliSerial(char *cmdline) {
     const char *format = "serial %d %d %ld %ld %ld %ld";
     if (isEmpty(cmdline)) {
-        printSerial(DUMP_MASTER, serialConfig(), NULL);
-        return;
+      printSerial(DUMP_MASTER, serialConfig(), NULL);
+      return;
     }
     serialPortConfig_t portConfig;
     memset(&portConfig, 0 , sizeof(portConfig));
 
     serialPortConfig_t *currentConfig;
-
     uint8_t validArgumentCount = 0;
-
     const char *ptr = cmdline;
 
     int val = atoi(ptr++);
     currentConfig = serialFindPortConfiguration(val);
     if (currentConfig) {
-        portConfig.identifier = val;
-        validArgumentCount++;
+      portConfig.identifier = val;
+      validArgumentCount++;
     }
 
     ptr = nextArg(ptr);
     if (ptr) {
-        val = atoi(ptr);
-        portConfig.functionMask = val & 0xFFFF;
-        validArgumentCount++;
+      val = atoi(ptr);
+      portConfig.functionMask = val & 0xFFFF;
+      validArgumentCount++;
     }
 
     for (int i = 0; i < 4; i ++) {
-        ptr = nextArg(ptr);
-        if (!ptr) {
-            break;
-        }
+      ptr = nextArg(ptr);
+      if (!ptr) {
+        break;
+      }
 
-        val = atoi(ptr);
+      val = atoi(ptr);
+      uint8_t baudRateIndex = lookupBaudRateIndex(val);
+      if (baudRates[baudRateIndex] != (uint32_t) val) {
+        break;
+      }
 
-        uint8_t baudRateIndex = lookupBaudRateIndex(val);
-        if (baudRates[baudRateIndex] != (uint32_t) val) {
-            break;
-        }
-
-        switch (i) {
+      switch (i) {
         case 0:
-            if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_1000000) {
-                continue;
-            }
-            portConfig.msp_baudrateIndex = baudRateIndex;
-            break;
+          if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_1000000) {
+            continue;
+          }
+          portConfig.msp_baudrateIndex = baudRateIndex;
+          break;
         case 1:
-            if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
-                continue;
-            }
-            portConfig.gps_baudrateIndex = baudRateIndex;
-            break;
+          if (baudRateIndex < BAUD_9600 || baudRateIndex > BAUD_115200) {
+            continue;
+          }
+          portConfig.gps_baudrateIndex = baudRateIndex;
+          break;
         case 2:
-            if (baudRateIndex != BAUD_AUTO && baudRateIndex > BAUD_115200) {
-                continue;
-            }
-            portConfig.telemetry_baudrateIndex = baudRateIndex;
-            break;
+          if (baudRateIndex != BAUD_AUTO && baudRateIndex > BAUD_115200) {
+            continue;
+          }
+          portConfig.telemetry_baudrateIndex = baudRateIndex;
+          break;
         case 3:
-            if (baudRateIndex < BAUD_19200 || baudRateIndex > BAUD_2470000) {
-                continue;
-            }
-            portConfig.blackbox_baudrateIndex = baudRateIndex;
-            break;
-        }
-
-        validArgumentCount++;
+          if (baudRateIndex < BAUD_19200 || baudRateIndex > BAUD_2470000) {
+            continue;
+          }
+          portConfig.blackbox_baudrateIndex = baudRateIndex;
+          break;
+      }
+      validArgumentCount++;
     }
 
     if (validArgumentCount < 6) {
-        cliShowParseError();
-        return;
+      cliShowParseError();
+      return;
     }
-
     memcpy(currentConfig, &portConfig, sizeof(portConfig));
 
-    cliDumpPrintLinef(0, false, format,
-        portConfig.identifier,
-        portConfig.functionMask,
-        baudRates[portConfig.msp_baudrateIndex],
-        baudRates[portConfig.gps_baudrateIndex],
-        baudRates[portConfig.telemetry_baudrateIndex],
-        baudRates[portConfig.blackbox_baudrateIndex]
-        );
-
-}
+    cliDumpPrintLinef(0, false, format, portConfig.identifier, portConfig.functionMask,
+      baudRates[portConfig.msp_baudrateIndex], baudRates[portConfig.gps_baudrateIndex],
+      baudRates[portConfig.telemetry_baudrateIndex], baudRates[portConfig.blackbox_baudrateIndex]);
+  }
 
 #ifndef SKIP_SERIAL_PASSTHROUGH
 #ifdef USE_PINIO
