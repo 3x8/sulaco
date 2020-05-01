@@ -1867,77 +1867,66 @@ uint8_t cliMode = 0;
     }
   #endif
 
-#ifdef USE_SDCARD
-
-static void cliWriteBytes(const uint8_t *buffer, int count)
-{
-    while (count > 0) {
+  #ifdef USE_SDCARD
+    static void cliWriteBytes(const uint8_t *buffer, int count) {
+      while (count > 0) {
         cliWrite(*buffer);
         buffer++;
         count--;
+      }
     }
-}
 
-static void cliSdInfo(char *cmdline)
-{
-    UNUSED(cmdline);
+    static void cliSdInfo(char *cmdline) {
+      UNUSED(cmdline);
 
-    cliPrint("SD card: ");
+      cliPrint("SD card: ");
 
-    if (!sdcard_isInserted()) {
+      if (!sdcard_isInserted()) {
         cliPrintLine("None inserted");
         return;
-    }
+      }
 
-    if (!sdcard_isFunctional() || !sdcard_isInitialized()) {
+      if (!sdcard_isFunctional() || !sdcard_isInitialized()) {
         cliPrintLine("Startup failed");
         return;
-    }
+      }
 
-    const sdcardMetadata_t *metadata = sdcard_getMetadata();
+      const sdcardMetadata_t *metadata = sdcard_getMetadata();
 
-    cliPrintf("Manufacturer 0x%x, %ukB, %02d/%04d, v%d.%d, '",
-        metadata->manufacturerID,
-        metadata->numBlocks / 2, /* One block is half a kB */
-        metadata->productionMonth,
-        metadata->productionYear,
-        metadata->productRevisionMajor,
-        metadata->productRevisionMinor
-    );
+      cliPrintf("Manufacturer 0x%x, %ukB, %02d/%04d, v%d.%d, '",
+        metadata->manufacturerID, metadata->numBlocks / 2,  metadata->productionMonth,
+        metadata->productionYear, metadata->productRevisionMajor, metadata->productRevisionMinor);
+      cliWriteBytes((uint8_t*)metadata->productName, sizeof(metadata->productName));
+      cliPrint("'\r\n" "Filesystem: ");
 
-    cliWriteBytes((uint8_t*)metadata->productName, sizeof(metadata->productName));
+      switch (afatfs_getFilesystemState()) {
+        case AFATFS_FILESYSTEM_STATE_READY:
+          cliPrint("Ready");
+          break;
+        case AFATFS_FILESYSTEM_STATE_INITIALIZATION:
+          cliPrint("Initializing");
+          break;
+        case AFATFS_FILESYSTEM_STATE_UNKNOWN:
+        case AFATFS_FILESYSTEM_STATE_FATAL:
+          cliPrint("Fatal");
 
-    cliPrint("'\r\n" "Filesystem: ");
-
-    switch (afatfs_getFilesystemState()) {
-    case AFATFS_FILESYSTEM_STATE_READY:
-        cliPrint("Ready");
-        break;
-    case AFATFS_FILESYSTEM_STATE_INITIALIZATION:
-        cliPrint("Initializing");
-        break;
-    case AFATFS_FILESYSTEM_STATE_UNKNOWN:
-    case AFATFS_FILESYSTEM_STATE_FATAL:
-        cliPrint("Fatal");
-
-        switch (afatfs_getLastError()) {
-        case AFATFS_ERROR_BAD_MBR:
+          switch (afatfs_getLastError()) {
+          case AFATFS_ERROR_BAD_MBR:
             cliPrint(" - no FAT MBR partitions");
             break;
-        case AFATFS_ERROR_BAD_FILESYSTEM_HEADER:
+          case AFATFS_ERROR_BAD_FILESYSTEM_HEADER:
             cliPrint(" - bad FAT header");
             break;
-        case AFATFS_ERROR_GENERIC:
-        case AFATFS_ERROR_NONE:
+          case AFATFS_ERROR_GENERIC:
+          case AFATFS_ERROR_NONE:
             ; // Nothing more detailed to print
             break;
-        }
-        break;
+          }
+          break;
+      }
+      cliPrintLinefeed();
     }
-    cliPrintLinefeed();
-}
-
-#endif
+  #endif
 
 #ifdef USE_FLASHFS
 
