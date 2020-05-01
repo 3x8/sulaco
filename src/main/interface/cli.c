@@ -1928,107 +1928,97 @@ uint8_t cliMode = 0;
     }
   #endif
 
-#ifdef USE_FLASHFS
+  #ifdef USE_FLASHFS
+    static void cliFlashInfo(char *cmdline) {
+      const flashGeometry_t *layout = flashfsGetGeometry();
 
-static void cliFlashInfo(char *cmdline)
-{
-    const flashGeometry_t *layout = flashfsGetGeometry();
-
-    UNUSED(cmdline);
-
-    cliPrintLinef("Flash sectors=%u, sectorSize=%u, pagesPerSector=%u, pageSize=%u, totalSize=%u, usedSize=%u",
-            layout->sectors, layout->sectorSize, layout->pagesPerSector, layout->pageSize, layout->totalSize, flashfsGetOffset());
-}
-
-
-static void cliFlashErase(char *cmdline)
-{
-    UNUSED(cmdline);
-
-    if (!flashfsIsSupported()) {
-        return;
+      UNUSED(cmdline);
+      cliPrintLinef("Flash sectors=%u, sectorSize=%u, pagesPerSector=%u, pageSize=%u, totalSize=%u, usedSize=%u",
+        layout->sectors, layout->sectorSize, layout->pagesPerSector, layout->pageSize, layout->totalSize, flashfsGetOffset());
     }
 
-#ifndef MINIMAL_CLI
-    uint32_t i = 0;
-    cliPrintLine("Erasing, please wait ... ");
-#else
-    cliPrintLine("Erasing,");
-#endif
 
-    bufWriterFlush(cliWriter);
-    flashfsEraseCompletely();
+    static void cliFlashErase(char *cmdline) {
+      UNUSED(cmdline);
 
-    while (!flashfsIsReady()) {
-#ifndef MINIMAL_CLI
-        cliPrintf(".");
-        if (i++ > 120) {
+      if (!flashfsIsSupported()) {
+        return;
+      }
+
+      #ifndef MINIMAL_CLI
+        uint32_t i = 0;
+        cliPrintLine("Erasing, please wait ... ");
+      #else
+        cliPrintLine("Erasing,");
+      #endif
+
+      bufWriterFlush(cliWriter);
+      flashfsEraseCompletely();
+
+      while (!flashfsIsReady()) {
+        #ifndef MINIMAL_CLI
+          cliPrintf(".");
+          if (i++ > 120) {
             i=0;
             cliPrintLinefeed();
-        }
-
-        bufWriterFlush(cliWriter);
-#endif
+          }
+          bufWriterFlush(cliWriter);
+        #endif
         delay(100);
+      }
+
+      beeper(BEEPER_BLACKBOX_ERASE);
+      cliPrintLinefeed();
+      cliPrintLine("Done.");
     }
-    beeper(BEEPER_BLACKBOX_ERASE);
-    cliPrintLinefeed();
-    cliPrintLine("Done.");
-}
 
-#ifdef USE_FLASH_TOOLS
+    #ifdef USE_FLASH_TOOLS
+      static void cliFlashWrite(char *cmdline) {
+        const uint32_t address = atoi(cmdline);
+        const char *text = strchr(cmdline, ' ');
 
-static void cliFlashWrite(char *cmdline)
-{
-    const uint32_t address = atoi(cmdline);
-    const char *text = strchr(cmdline, ' ');
+        if (!text) {
+          cliShowParseError();
+        } else {
+          flashfsSeekAbs(address);
+          flashfsWrite((uint8_t*)text, strlen(text), true);
+          flashfsFlushSync();
+          cliPrintLinef("Wrote %u bytes at %u.", strlen(text), address);
+        }
+      }
 
-    if (!text) {
-        cliShowParseError();
-    } else {
-        flashfsSeekAbs(address);
-        flashfsWrite((uint8_t*)text, strlen(text), true);
-        flashfsFlushSync();
+      static void cliFlashRead(char *cmdline) {
+        uint32_t address = atoi(cmdline);
+        const char *nextArg = strchr(cmdline, ' ');
 
-        cliPrintLinef("Wrote %u bytes at %u.", strlen(text), address);
-    }
-}
+        if (!nextArg) {
+          cliShowParseError();
+        } else {
+          uint32_t length = atoi(nextArg);
 
-static void cliFlashRead(char *cmdline)
-{
-    uint32_t address = atoi(cmdline);
-
-    const char *nextArg = strchr(cmdline, ' ');
-
-    if (!nextArg) {
-        cliShowParseError();
-    } else {
-        uint32_t length = atoi(nextArg);
-
-        cliPrintLinef("Reading %u bytes at %u:", length, address);
-
-        uint8_t buffer[32];
-        while (length > 0) {
+          cliPrintLinef("Reading %u bytes at %u:", length, address);
+          uint8_t buffer[32];
+          while (length > 0) {
             int bytesRead = flashfsReadAbs(address, buffer, length < sizeof(buffer) ? length : sizeof(buffer));
 
             for (int i = 0; i < bytesRead; i++) {
-                cliWrite(buffer[i]);
+              cliWrite(buffer[i]);
             }
 
             length -= bytesRead;
             address += bytesRead;
 
             if (bytesRead == 0) {
-                //Assume we reached the end of the volume or something fatal happened
-                break;
+              //Assume we reached the end of the volume or something fatal happened
+              break;
             }
+          }
+          cliPrintLinefeed();
         }
-        cliPrintLinefeed();
-    }
-}
+      }
 
-#endif
-#endif
+    #endif
+  #endif
 
 #ifdef USE_VTX_CONTROL
 static void printVtx(uint8_t dumpMask, const vtxConfig_t *vtxConfig, const vtxConfig_t *vtxConfigDefault)
