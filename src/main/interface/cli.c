@@ -1307,347 +1307,305 @@ uint8_t cliMode = 0;
     #endif //USE_QUAD_MIXER_ONLY
   }
 
-static void printRxRange(uint8_t dumpMask, const rxChannelRangeConfig_t *channelRangeConfigs, const rxChannelRangeConfig_t *defaultChannelRangeConfigs)
-{
+  static void printRxRange(uint8_t dumpMask, const rxChannelRangeConfig_t *channelRangeConfigs, const rxChannelRangeConfig_t *defaultChannelRangeConfigs) {
     const char *format = "rxrange %u %u %u";
     for (uint32_t i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
-        bool equalsDefault = false;
-        if (defaultChannelRangeConfigs) {
-            equalsDefault = !memcmp(&channelRangeConfigs[i], &defaultChannelRangeConfigs[i], sizeof(channelRangeConfigs[i]));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                defaultChannelRangeConfigs[i].min,
-                defaultChannelRangeConfigs[i].max
-            );
-        }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            channelRangeConfigs[i].min,
-            channelRangeConfigs[i].max
-        );
+      bool equalsDefault = false;
+      if (defaultChannelRangeConfigs) {
+        equalsDefault = !memcmp(&channelRangeConfigs[i], &defaultChannelRangeConfigs[i], sizeof(channelRangeConfigs[i]));
+        cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, defaultChannelRangeConfigs[i].min, defaultChannelRangeConfigs[i].max);
+      }
+      cliDumpPrintLinef(dumpMask, equalsDefault, format, i, channelRangeConfigs[i].min, channelRangeConfigs[i].max);
     }
-}
+  }
 
-static void cliRxRange(char *cmdline)
-{
+  static void cliRxRange(char *cmdline) {
     const char *format = "rxrange %u %u %u";
     int i, validArgumentCount = 0;
     const char *ptr;
 
     if (isEmpty(cmdline)) {
-        printRxRange(DUMP_MASTER, rxChannelRangeConfigs(0), NULL);
+      printRxRange(DUMP_MASTER, rxChannelRangeConfigs(0), NULL);
     } else if (strcasecmp(cmdline, "reset") == 0) {
-        resetAllRxChannelRangeConfigurations(rxChannelRangeConfigsMutable(0));
+      resetAllRxChannelRangeConfigurations(rxChannelRangeConfigsMutable(0));
     } else {
-        ptr = cmdline;
-        i = atoi(ptr);
-        if (i >= 0 && i < NON_AUX_CHANNEL_COUNT) {
-            int rangeMin = PWM_PULSE_MIN, rangeMax = PWM_PULSE_MAX;
+      ptr = cmdline;
+      i = atoi(ptr);
+      if (i >= 0 && i < NON_AUX_CHANNEL_COUNT) {
+        int rangeMin = PWM_PULSE_MIN, rangeMax = PWM_PULSE_MAX;
 
-            ptr = nextArg(ptr);
-            if (ptr) {
-                rangeMin = atoi(ptr);
-                validArgumentCount++;
-            }
-
-            ptr = nextArg(ptr);
-            if (ptr) {
-                rangeMax = atoi(ptr);
-                validArgumentCount++;
-            }
-
-            if (validArgumentCount != 2) {
-                cliShowParseError();
-            } else if (rangeMin < PWM_PULSE_MIN || rangeMin > PWM_PULSE_MAX || rangeMax < PWM_PULSE_MIN || rangeMax > PWM_PULSE_MAX) {
-                cliShowParseError();
-            } else {
-                rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(i);
-                channelRangeConfig->min = rangeMin;
-                channelRangeConfig->max = rangeMax;
-                cliDumpPrintLinef(0, false, format,
-                    i,
-                    channelRangeConfig->min,
-                    channelRangeConfig->max
-                );
-
-            }
-        } else {
-            cliShowArgumentRangeError("channel", 0, NON_AUX_CHANNEL_COUNT - 1);
+        ptr = nextArg(ptr);
+        if (ptr) {
+          rangeMin = atoi(ptr);
+          validArgumentCount++;
         }
-    }
-}
 
-#ifdef USE_LED_STRIP
-static void printLed(uint8_t dumpMask, const ledConfig_t *ledConfigs, const ledConfig_t *defaultLedConfigs)
-{
-    const char *format = "led %u %s";
-    char ledConfigBuffer[20];
-    char ledConfigDefaultBuffer[20];
-    for (uint32_t i = 0; i < LED_MAX_STRIP_LENGTH; i++) {
+        ptr = nextArg(ptr);
+        if (ptr) {
+          rangeMax = atoi(ptr);
+          validArgumentCount++;
+        }
+
+        if (validArgumentCount != 2) {
+          cliShowParseError();
+        } else if (rangeMin < PWM_PULSE_MIN || rangeMin > PWM_PULSE_MAX || rangeMax < PWM_PULSE_MIN || rangeMax > PWM_PULSE_MAX) {
+          cliShowParseError();
+        } else {
+          rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(i);
+          channelRangeConfig->min = rangeMin;
+          channelRangeConfig->max = rangeMax;
+          cliDumpPrintLinef(0, false, format, i, channelRangeConfig->min, channelRangeConfig->max);
+        }
+      } else {
+        cliShowArgumentRangeError("channel", 0, NON_AUX_CHANNEL_COUNT - 1);
+      }
+    }
+  }
+
+  #ifdef USE_LED_STRIP
+    static void printLed(uint8_t dumpMask, const ledConfig_t *ledConfigs, const ledConfig_t *defaultLedConfigs) {
+      const char *format = "led %u %s";
+      char ledConfigBuffer[20];
+      char ledConfigDefaultBuffer[20];
+
+      for (uint32_t i = 0; i < LED_MAX_STRIP_LENGTH; i++) {
         ledConfig_t ledConfig = ledConfigs[i];
         generateLedConfig(&ledConfig, ledConfigBuffer, sizeof(ledConfigBuffer));
         bool equalsDefault = false;
         if (defaultLedConfigs) {
-            ledConfig_t ledConfigDefault = defaultLedConfigs[i];
-            equalsDefault = ledConfig == ledConfigDefault;
-            generateLedConfig(&ledConfigDefault, ledConfigDefaultBuffer, sizeof(ledConfigDefaultBuffer));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, ledConfigDefaultBuffer);
+          ledConfig_t ledConfigDefault = defaultLedConfigs[i];
+          equalsDefault = ledConfig == ledConfigDefault;
+          generateLedConfig(&ledConfigDefault, ledConfigDefaultBuffer, sizeof(ledConfigDefaultBuffer));
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, ledConfigDefaultBuffer);
         }
         cliDumpPrintLinef(dumpMask, equalsDefault, format, i, ledConfigBuffer);
+      }
     }
-}
 
-static void cliLed(char *cmdline)
-{
-    const char *format = "led %u %s";
-    char ledConfigBuffer[20];
-    int i;
-    const char *ptr;
+    static void cliLed(char *cmdline) {
+      const char *format = "led %u %s";
+      char ledConfigBuffer[20];
+      int i;
+      const char *ptr;
 
-    if (isEmpty(cmdline)) {
+      if (isEmpty(cmdline)) {
         printLed(DUMP_MASTER, ledStripConfig()->ledConfigs, NULL);
-    } else {
+      } else {
         ptr = cmdline;
         i = atoi(ptr);
         if (i < LED_MAX_STRIP_LENGTH) {
-            ptr = nextArg(cmdline);
-            if (parseLedStripConfig(i, ptr)) {
-                generateLedConfig((ledConfig_t *)&ledStripConfig()->ledConfigs[i], ledConfigBuffer, sizeof(ledConfigBuffer));
-                cliDumpPrintLinef(0, false, format, i, ledConfigBuffer);
-            } else {
-                cliShowParseError();
-            }
+          ptr = nextArg(cmdline);
+          if (parseLedStripConfig(i, ptr)) {
+            generateLedConfig((ledConfig_t *)&ledStripConfig()->ledConfigs[i], ledConfigBuffer, sizeof(ledConfigBuffer));
+            cliDumpPrintLinef(0, false, format, i, ledConfigBuffer);
+          } else {
+            cliShowParseError();
+          }
         } else {
-            cliShowArgumentRangeError("index", 0, LED_MAX_STRIP_LENGTH - 1);
+          cliShowArgumentRangeError("index", 0, LED_MAX_STRIP_LENGTH - 1);
         }
+      }
     }
-}
 
-static void printColor(uint8_t dumpMask, const hsvColor_t *colors, const hsvColor_t *defaultColors)
-{
-    const char *format = "color %u %d,%u,%u";
-    for (uint32_t i = 0; i < LED_CONFIGURABLE_COLOR_COUNT; i++) {
+    static void printColor(uint8_t dumpMask, const hsvColor_t *colors, const hsvColor_t *defaultColors) {
+      const char *format = "color %u %d,%u,%u";
+      for (uint32_t i = 0; i < LED_CONFIGURABLE_COLOR_COUNT; i++) {
         const hsvColor_t *color = &colors[i];
         bool equalsDefault = false;
         if (defaultColors) {
-            const hsvColor_t *colorDefault = &defaultColors[i];
-            equalsDefault = !memcmp(color, colorDefault, sizeof(*color));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format, i,colorDefault->h, colorDefault->s, colorDefault->v);
+          const hsvColor_t *colorDefault = &defaultColors[i];
+          equalsDefault = !memcmp(color, colorDefault, sizeof(*color));
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i,colorDefault->h, colorDefault->s, colorDefault->v);
         }
         cliDumpPrintLinef(dumpMask, equalsDefault, format, i, color->h, color->s, color->v);
+      }
     }
-}
 
-static void cliColor(char *cmdline)
-{
-    const char *format = "color %u %d,%u,%u";
-    if (isEmpty(cmdline)) {
+    static void cliColor(char *cmdline) {
+      const char *format = "color %u %d,%u,%u";
+      if (isEmpty(cmdline)) {
         printColor(DUMP_MASTER, ledStripConfig()->colors, NULL);
-    } else {
+      } else {
         const char *ptr = cmdline;
         const int i = atoi(ptr);
         if (i < LED_CONFIGURABLE_COLOR_COUNT) {
-            ptr = nextArg(cmdline);
-            if (parseColor(i, ptr)) {
-                const hsvColor_t *color = &ledStripConfig()->colors[i];
-                cliDumpPrintLinef(0, false, format, i, color->h, color->s, color->v);
-            } else {
-                cliShowParseError();
-            }
+          ptr = nextArg(cmdline);
+          if (parseColor(i, ptr)) {
+            const hsvColor_t *color = &ledStripConfig()->colors[i];
+            cliDumpPrintLinef(0, false, format, i, color->h, color->s, color->v);
+          } else {
+            cliShowParseError();
+          }
         } else {
-            cliShowArgumentRangeError("index", 0, LED_CONFIGURABLE_COLOR_COUNT - 1);
+          cliShowArgumentRangeError("index", 0, LED_CONFIGURABLE_COLOR_COUNT - 1);
         }
+      }
     }
-}
 
-static void printModeColor(uint8_t dumpMask, const ledStripConfig_t *ledStripConfig, const ledStripConfig_t *defaultLedStripConfig)
-{
-    const char *format = "mode_color %u %u %u";
-    for (uint32_t i = 0; i < LED_MODE_COUNT; i++) {
+    static void printModeColor(uint8_t dumpMask, const ledStripConfig_t *ledStripConfig, const ledStripConfig_t *defaultLedStripConfig) {
+      const char *format = "mode_color %u %u %u";
+      for (uint32_t i = 0; i < LED_MODE_COUNT; i++) {
         for (uint32_t j = 0; j < LED_DIRECTION_COUNT; j++) {
-            int colorIndex = ledStripConfig->modeColors[i].color[j];
-            bool equalsDefault = false;
-            if (defaultLedStripConfig) {
-                int colorIndexDefault = defaultLedStripConfig->modeColors[i].color[j];
-                equalsDefault = colorIndex == colorIndexDefault;
-                cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, j, colorIndexDefault);
-            }
-            cliDumpPrintLinef(dumpMask, equalsDefault, format, i, j, colorIndex);
+          int colorIndex = ledStripConfig->modeColors[i].color[j];
+          bool equalsDefault = false;
+          if (defaultLedStripConfig) {
+            int colorIndexDefault = defaultLedStripConfig->modeColors[i].color[j];
+            equalsDefault = colorIndex == colorIndexDefault;
+            cliDefaultPrintLinef(dumpMask, equalsDefault, format, i, j, colorIndexDefault);
+          }
+          cliDumpPrintLinef(dumpMask, equalsDefault, format, i, j, colorIndex);
         }
-    }
+      }
 
-    for (uint32_t j = 0; j < LED_SPECIAL_COLOR_COUNT; j++) {
+      for (uint32_t j = 0; j < LED_SPECIAL_COLOR_COUNT; j++) {
         const int colorIndex = ledStripConfig->specialColors.color[j];
         bool equalsDefault = false;
         if (defaultLedStripConfig) {
-            const int colorIndexDefault = defaultLedStripConfig->specialColors.color[j];
-            equalsDefault = colorIndex == colorIndexDefault;
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format, LED_SPECIAL, j, colorIndexDefault);
+          const int colorIndexDefault = defaultLedStripConfig->specialColors.color[j];
+          equalsDefault = colorIndex == colorIndexDefault;
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, LED_SPECIAL, j, colorIndexDefault);
         }
         cliDumpPrintLinef(dumpMask, equalsDefault, format, LED_SPECIAL, j, colorIndex);
-    }
+      }
 
-    const int ledStripAuxChannel = ledStripConfig->ledstrip_aux_channel;
-    bool equalsDefault = false;
-    if (defaultLedStripConfig) {
+      const int ledStripAuxChannel = ledStripConfig->ledstrip_aux_channel;
+      bool equalsDefault = false;
+      if (defaultLedStripConfig) {
         const int ledStripAuxChannelDefault = defaultLedStripConfig->ledstrip_aux_channel;
         equalsDefault = ledStripAuxChannel == ledStripAuxChannelDefault;
         cliDefaultPrintLinef(dumpMask, equalsDefault, format, LED_AUX_CHANNEL, 0, ledStripAuxChannelDefault);
+      }
+      cliDumpPrintLinef(dumpMask, equalsDefault, format, LED_AUX_CHANNEL, 0, ledStripAuxChannel);
     }
-    cliDumpPrintLinef(dumpMask, equalsDefault, format, LED_AUX_CHANNEL, 0, ledStripAuxChannel);
-}
 
-static void cliModeColor(char *cmdline)
-{
-    if (isEmpty(cmdline)) {
+    static void cliModeColor(char *cmdline) {
+      if (isEmpty(cmdline)) {
         printModeColor(DUMP_MASTER, ledStripConfig(), NULL);
-    } else {
+      } else {
         enum {MODE = 0, FUNCTION, COLOR, ARGS_COUNT};
         int args[ARGS_COUNT];
         int argNo = 0;
         char *saveptr;
         const char* ptr = strtok_r(cmdline, " ", &saveptr);
         while (ptr && argNo < ARGS_COUNT) {
-            args[argNo++] = atoi(ptr);
-            ptr = strtok_r(NULL, " ", &saveptr);
+          args[argNo++] = atoi(ptr);
+          ptr = strtok_r(NULL, " ", &saveptr);
         }
 
         if (ptr != NULL || argNo != ARGS_COUNT) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
         int modeIdx  = args[MODE];
         int funIdx = args[FUNCTION];
         int color = args[COLOR];
         if (!setModeColor(modeIdx, funIdx, color)) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
         // values are validated
         cliPrintLinef("mode_color %u %u %u", modeIdx, funIdx, color);
+      }
     }
-}
-#endif
+  #endif
 
-#ifdef USE_SERVOS
-static void printServo(uint8_t dumpMask, const servoParam_t *servoParams, const servoParam_t *defaultServoParams)
-{
-    // print out servo settings
-    const char *format = "servo %u %d %d %d %d %d";
-    for (uint32_t i = 0; i < MAX_SUPPORTED_SERVOS; i++) {
+  #ifdef USE_SERVOS
+    static void printServo(uint8_t dumpMask, const servoParam_t *servoParams, const servoParam_t *defaultServoParams) {
+      // print out servo settings
+      const char *format = "servo %u %d %d %d %d %d";
+      for (uint32_t i = 0; i < MAX_SUPPORTED_SERVOS; i++) {
         const servoParam_t *servoConf = &servoParams[i];
         bool equalsDefault = false;
         if (defaultServoParams) {
-            const servoParam_t *defaultServoConf = &defaultServoParams[i];
-            equalsDefault = !memcmp(servoConf, defaultServoConf, sizeof(*servoConf));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                defaultServoConf->min,
-                defaultServoConf->max,
-                defaultServoConf->middle,
-                defaultServoConf->rate,
-                defaultServoConf->forwardFromChannel
-            );
+          const servoParam_t *defaultServoConf = &defaultServoParams[i];
+          equalsDefault = !memcmp(servoConf, defaultServoConf, sizeof(*servoConf));
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i,
+            defaultServoConf->min, defaultServoConf->max, defaultServoConf->middle, defaultServoConf->rate, defaultServoConf->forwardFromChannel);
         }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            servoConf->min,
-            servoConf->max,
-            servoConf->middle,
-            servoConf->rate,
-            servoConf->forwardFromChannel
-        );
-    }
-    // print servo directions
-    for (uint32_t i = 0; i < MAX_SUPPORTED_SERVOS; i++) {
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, i,
+          servoConf->min, servoConf->max, servoConf->middle, servoConf->rate, servoConf->forwardFromChannel);
+      }
+      // print servo directions
+      for (uint32_t i = 0; i < MAX_SUPPORTED_SERVOS; i++) {
         const char *format = "smix reverse %d %d r";
         const servoParam_t *servoConf = &servoParams[i];
         const servoParam_t *servoConfDefault = &defaultServoParams[i];
         if (defaultServoParams) {
-            bool equalsDefault = servoConf->reversedSources == servoConfDefault->reversedSources;
-            for (uint32_t channel = 0; channel < INPUT_SOURCE_COUNT; channel++) {
-                equalsDefault = ~(servoConf->reversedSources ^ servoConfDefault->reversedSources) & (1 << channel);
-                if (servoConfDefault->reversedSources & (1 << channel)) {
-                    cliDefaultPrintLinef(dumpMask, equalsDefault, format, i , channel);
-                }
-                if (servoConf->reversedSources & (1 << channel)) {
-                    cliDumpPrintLinef(dumpMask, equalsDefault, format, i , channel);
-                }
+          bool equalsDefault = servoConf->reversedSources == servoConfDefault->reversedSources;
+          for (uint32_t channel = 0; channel < INPUT_SOURCE_COUNT; channel++) {
+            equalsDefault = ~(servoConf->reversedSources ^ servoConfDefault->reversedSources) & (1 << channel);
+            if (servoConfDefault->reversedSources & (1 << channel)) {
+              cliDefaultPrintLinef(dumpMask, equalsDefault, format, i , channel);
             }
+            if (servoConf->reversedSources & (1 << channel)) {
+              cliDumpPrintLinef(dumpMask, equalsDefault, format, i , channel);
+            }
+          }
         } else {
-            for (uint32_t channel = 0; channel < INPUT_SOURCE_COUNT; channel++) {
-                if (servoConf->reversedSources & (1 << channel)) {
-                    cliDumpPrintLinef(dumpMask, true, format, i , channel);
-                }
+          for (uint32_t channel = 0; channel < INPUT_SOURCE_COUNT; channel++) {
+            if (servoConf->reversedSources & (1 << channel)) {
+              cliDumpPrintLinef(dumpMask, true, format, i , channel);
             }
+          }
         }
+      }
     }
-}
 
-static void cliServo(char *cmdline)
-{
-    const char *format = "servo %u %d %d %d %d %d";
-    enum { SERVO_ARGUMENT_COUNT = 6 };
-    int16_t arguments[SERVO_ARGUMENT_COUNT];
+    static void cliServo(char *cmdline) {
+      const char *format = "servo %u %d %d %d %d %d";
+      enum { SERVO_ARGUMENT_COUNT = 6 };
+      int16_t arguments[SERVO_ARGUMENT_COUNT];
+      servoParam_t *servo;
+      int i;
+      char *ptr;
 
-    servoParam_t *servo;
-
-    int i;
-    char *ptr;
-
-    if (isEmpty(cmdline)) {
+      if (isEmpty(cmdline)) {
         printServo(DUMP_MASTER, servoParams(0), NULL);
-    } else {
+      } else {
         int validArgumentCount = 0;
-
         ptr = cmdline;
-
         // Command line is integers (possibly negative) separated by spaces, no other characters allowed.
-
         // If command line doesn't fit the format, don't modify the config
         while (*ptr) {
-            if (*ptr == '-' || (*ptr >= '0' && *ptr <= '9')) {
-                if (validArgumentCount >= SERVO_ARGUMENT_COUNT) {
-                    cliShowParseError();
-                    return;
-                }
-
-                arguments[validArgumentCount++] = atoi(ptr);
-
-                do {
-                    ptr++;
-                } while (*ptr >= '0' && *ptr <= '9');
-            } else if (*ptr == ' ') {
-                ptr++;
-            } else {
-                cliShowParseError();
-                return;
+          if (*ptr == '-' || (*ptr >= '0' && *ptr <= '9')) {
+            if (validArgumentCount >= SERVO_ARGUMENT_COUNT) {
+              cliShowParseError();
+              return;
             }
+
+            arguments[validArgumentCount++] = atoi(ptr);
+
+            do {
+              ptr++;
+            } while (*ptr >= '0' && *ptr <= '9');
+          } else if (*ptr == ' ') {
+            ptr++;
+          } else {
+            cliShowParseError();
+            return;
+          }
         }
 
         enum {INDEX = 0, MIN, MAX, MIDDLE, RATE, FORWARD};
-
         i = arguments[INDEX];
-
         // Check we got the right number of args and the servo index is correct (don't validate the other values)
         if (validArgumentCount != SERVO_ARGUMENT_COUNT || i < 0 || i >= MAX_SUPPORTED_SERVOS) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
         servo = servoParamsMutable(i);
-
         if (
-            arguments[MIN] < PWM_PULSE_MIN || arguments[MIN] > PWM_PULSE_MAX ||
-            arguments[MAX] < PWM_PULSE_MIN || arguments[MAX] > PWM_PULSE_MAX ||
-            arguments[MIDDLE] < arguments[MIN] || arguments[MIDDLE] > arguments[MAX] ||
-            arguments[MIN] > arguments[MAX] || arguments[MAX] < arguments[MIN] ||
-            arguments[RATE] < -100 || arguments[RATE] > 100 ||
-            arguments[FORWARD] >= MAX_SUPPORTED_RC_CHANNEL_COUNT
+          arguments[MIN] < PWM_PULSE_MIN || arguments[MIN] > PWM_PULSE_MAX ||
+          arguments[MAX] < PWM_PULSE_MIN || arguments[MAX] > PWM_PULSE_MAX ||
+          arguments[MIDDLE] < arguments[MIN] || arguments[MIDDLE] > arguments[MAX] ||
+          arguments[MIN] > arguments[MAX] || arguments[MAX] < arguments[MIN] ||
+          arguments[RATE] < -100 || arguments[RATE] > 100 ||
+          arguments[FORWARD] >= MAX_SUPPORTED_RC_CHANNEL_COUNT
         ) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
         servo->min = arguments[MIN];
@@ -1656,289 +1614,258 @@ static void cliServo(char *cmdline)
         servo->rate = arguments[RATE];
         servo->forwardFromChannel = arguments[FORWARD];
 
-        cliDumpPrintLinef(0, false, format,
-            i,
-            servo->min,
-            servo->max,
-            servo->middle,
-            servo->rate,
-            servo->forwardFromChannel
-        );
-
+        cliDumpPrintLinef(0, false, format, i, servo->min, servo->max, servo->middle, servo->rate, servo->forwardFromChannel);
+      }
     }
-}
-#endif
+  #endif
 
-#ifdef USE_TPA_CURVES
-static void printTPACurve(void)
-{
-    cliPrintf("tpacurve kp ");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+  #ifdef USE_TPA_CURVES
+    static void printTPACurve(void) {
+      cliPrintf("tpacurve kp ");
+      for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKpCurve[i]);
+          cliPrintf("%d", currentControlRateProfile->tpaKpCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKpCurve[i]);
+          cliPrintf("%d=", currentControlRateProfile->tpaKpCurve[i]);
         }
-    }
-    cliPrintLinefeed();
+      }
+      cliPrintLinefeed();
 
-    cliPrintf("tpacurve ki ");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+      cliPrintf("tpacurve ki ");
+      for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKiCurve[i]);
+          cliPrintf("%d", currentControlRateProfile->tpaKiCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKiCurve[i]);
+          cliPrintf("%d=", currentControlRateProfile->tpaKiCurve[i]);
         }
-    }
-    cliPrintLinefeed();
+      }
+      cliPrintLinefeed();
 
-    cliPrintf("tpacurve kd ");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+      cliPrintf("tpacurve kd ");
+      for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKdCurve[i]);
+          cliPrintf("%d", currentControlRateProfile->tpaKdCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKdCurve[i]);
+          cliPrintf("%d=", currentControlRateProfile->tpaKdCurve[i]);
         }
+      }
+      cliPrintLinefeed();
     }
-    cliPrintLinefeed();
-}
-static void printTPACurveUsage(void)
-{
-    cliPrintf("Usage: tpacurve [kp|ki|kd] 100=100=100=100=100=100=100=100=100");
-    cliPrintLinefeed();
-}
 
-static void cliTPACurve(char *cmdLine)
-{
-    enum { KP = 0, KI, KD };
-    int type = -1;
-    int len = strlen(cmdLine);
+    static void printTPACurveUsage(void) {
+      cliPrintf("Usage: tpacurve [kp|ki|kd] 100=100=100=100=100=100=100=100=100");
+      cliPrintLinefeed();
+    }
 
-    if (len == 0) {
+    static void cliTPACurve(char *cmdLine) {
+      enum { KP = 0, KI, KD };
+      int type = -1;
+      int len = strlen(cmdLine);
+
+      if (len == 0) {
         printTPACurve();
         return;
-    } else {
+      } else {
         if (strncasecmp(cmdLine, "kp", 2) == 0) {
-            type = KP;
+          type = KP;
         }
         else if (strncasecmp(cmdLine, "ki", 2) == 0) {
-            type = KI;
+          type = KI;
         }
         else if (strncasecmp(cmdLine, "kd", 2) == 0) {
-            type = KD;
+          type = KD;
         }
         else {
-            printTPACurveUsage();
-            return;
+          printTPACurveUsage();
+          return;
         }
-
 
         if (type > -1) {
-            // Bump pointer up to start of curve ignoring spaces
-            char* curveStr = cmdLine + 2;
-            int count = 0;
-            while (curveStr[count] == ' ') {
-                count++;
-            }
-            curveStr = curveStr + count;
+          // Bump pointer up to start of curve ignoring spaces
+          char* curveStr = cmdLine + 2;
+          int count = 0;
+          while (curveStr[count] == ' ') {
+            count++;
+          }
+          curveStr = curveStr + count;
 
-            // split by token
-            int i = 0;
-            char *p = strtok(curveStr, "=");
-            uint8_t tempCurve[9] = {0.0f,};
+          // split by token
+          int i = 0;
+          char *p = strtok(curveStr, "=");
+          uint8_t tempCurve[9] = {0.0f,};
 
-            while (p != NULL && i < 9) {
-                tempCurve[i++] = atoi(p);
-                p = strtok (NULL, "=");
-            }
-            if (i < 9) {
+          while (p != NULL && i < 9) {
+            tempCurve[i++] = atoi(p);
+            p = strtok (NULL, "=");
+          }
+          if (i < 9) {
+            printTPACurveUsage();
+            return;
+          }
+          else {
+            switch (type) {
+              case KP:
+                memcpy(currentControlRateProfile->tpaKpCurve, tempCurve, sizeof(tempCurve));
+                cliPrintf("New TPA Saved");
+                cliPrintLinefeed();
+                printTPACurve();
+                break;
+              case KI:
+                memcpy(currentControlRateProfile->tpaKiCurve, tempCurve, sizeof(tempCurve));
+                cliPrintf("New TPA Saved");
+                cliPrintLinefeed();
+                printTPACurve();
+                break;
+              case KD:
+                memcpy(currentControlRateProfile->tpaKdCurve, tempCurve, sizeof(tempCurve));
+                cliPrintf("New TPA Saved");
+                cliPrintLinefeed();
+                printTPACurve();
+                break;
+              default:
                 printTPACurveUsage();
-                return;
             }
-            else {
-                switch (type) {
-                    case KP:
-                        memcpy(currentControlRateProfile->tpaKpCurve, tempCurve, sizeof(tempCurve));
-                        cliPrintf("New TPA Saved");
-                        cliPrintLinefeed();
-                        printTPACurve();
-                        break;
-                    case KI:
-                        memcpy(currentControlRateProfile->tpaKiCurve, tempCurve, sizeof(tempCurve));
-                        cliPrintf("New TPA Saved");
-                        cliPrintLinefeed();
-                        printTPACurve();
-                        break;
-                    case KD:
-                        memcpy(currentControlRateProfile->tpaKdCurve, tempCurve, sizeof(tempCurve));
-                        cliPrintf("New TPA Saved");
-                        cliPrintLinefeed();
-                        printTPACurve();
-                        break;
-                    default:
-                        printTPACurveUsage();
-                }
-            }
+          }
         }
+      }
     }
-}
-#endif
+  #endif
 
-
-#ifdef USE_SERVOS
-static void printServoMix(uint8_t dumpMask, const servoMixer_t *customServoMixers, const servoMixer_t *defaultCustomServoMixers)
-{
-    const char *format = "smix %d %d %d %d %d %d %d %d";
-    for (uint32_t i = 0; i < MAX_SERVO_RULES; i++) {
+  #ifdef USE_SERVOS
+    static void printServoMix(uint8_t dumpMask, const servoMixer_t *customServoMixers, const servoMixer_t *defaultCustomServoMixers) {
+      const char *format = "smix %d %d %d %d %d %d %d %d";
+      for (uint32_t i = 0; i < MAX_SERVO_RULES; i++) {
         const servoMixer_t customServoMixer = customServoMixers[i];
         if (customServoMixer.rate == 0) {
-            break;
+          break;
         }
 
         bool equalsDefault = false;
         if (defaultCustomServoMixers) {
-            servoMixer_t customServoMixerDefault = defaultCustomServoMixers[i];
-            equalsDefault = !memcmp(&customServoMixer, &customServoMixerDefault, sizeof(customServoMixer));
+          servoMixer_t customServoMixerDefault = defaultCustomServoMixers[i];
+          equalsDefault = !memcmp(&customServoMixer, &customServoMixerDefault, sizeof(customServoMixer));
 
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                customServoMixerDefault.targetChannel,
-                customServoMixerDefault.inputSource,
-                customServoMixerDefault.rate,
-                customServoMixerDefault.speed,
-                customServoMixerDefault.min,
-                customServoMixerDefault.max,
-                customServoMixerDefault.box
-            );
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i,
+            customServoMixerDefault.targetChannel, customServoMixerDefault.inputSource, customServoMixerDefault.rate,
+            customServoMixerDefault.speed, customServoMixerDefault.min, customServoMixerDefault.max, customServoMixerDefault.box);
         }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            customServoMixer.targetChannel,
-            customServoMixer.inputSource,
-            customServoMixer.rate,
-            customServoMixer.speed,
-            customServoMixer.min,
-            customServoMixer.max,
-            customServoMixer.box
-        );
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, i,
+          customServoMixer.targetChannel, customServoMixer.inputSource, customServoMixer.rate,
+          customServoMixer.speed, customServoMixer.min, customServoMixer.max, customServoMixer.box);
+      }
+      cliPrintLinefeed();
     }
 
-    cliPrintLinefeed();
-}
+    static void cliServoMix(char *cmdline) {
+      int args[8], check = 0;
+      int len = strlen(cmdline);
 
-static void cliServoMix(char *cmdline)
-{
-    int args[8], check = 0;
-    int len = strlen(cmdline);
-
-    if (len == 0) {
+      if (len == 0) {
         printServoMix(DUMP_MASTER, customServoMixers(0), NULL);
-    } else if (strncasecmp(cmdline, "reset", 5) == 0) {
+      } else if (strncasecmp(cmdline, "reset", 5) == 0) {
         // erase custom mixer
         memset(customServoMixers_array(), 0, sizeof(*customServoMixers_array()));
         for (uint32_t i = 0; i < MAX_SUPPORTED_SERVOS; i++) {
-            servoParamsMutable(i)->reversedSources = 0;
+          servoParamsMutable(i)->reversedSources = 0;
         }
-    } else if (strncasecmp(cmdline, "load", 4) == 0) {
+      } else if (strncasecmp(cmdline, "load", 4) == 0) {
         const char *ptr = nextArg(cmdline);
         if (ptr) {
-            len = strlen(ptr);
-            for (uint32_t i = 0; ; i++) {
-                if (mixerNames[i] == NULL) {
-                    cliPrintErrorLinef("Invalid name");
-                    break;
-                }
-                if (strncasecmp(ptr, mixerNames[i], len) == 0) {
-                    servoMixerLoadMix(i);
-                    cliPrintLinef("Loaded %s", mixerNames[i]);
-                    cliServoMix("");
-                    break;
-                }
+          len = strlen(ptr);
+          for (uint32_t i = 0; ; i++) {
+            if (mixerNames[i] == NULL) {
+              cliPrintErrorLinef("Invalid name");
+              break;
             }
+            if (strncasecmp(ptr, mixerNames[i], len) == 0) {
+              servoMixerLoadMix(i);
+              cliPrintLinef("Loaded %s", mixerNames[i]);
+              cliServoMix("");
+              break;
+            }
+          }
         }
-    } else if (strncasecmp(cmdline, "reverse", 7) == 0) {
+      } else if (strncasecmp(cmdline, "reverse", 7) == 0) {
         enum {SERVO = 0, INPUT, REVERSE, ARGS_COUNT};
         char *ptr = strchr(cmdline, ' ');
 
         if (ptr == NULL) {
-            cliPrintf("s");
-            for (uint32_t inputSource = 0; inputSource < INPUT_SOURCE_COUNT; inputSource++)
-                cliPrintf("\ti%d", inputSource);
-            cliPrintLinefeed();
+          cliPrintf("s");
+          for (uint32_t inputSource = 0; inputSource < INPUT_SOURCE_COUNT; inputSource++)
+            cliPrintf("\ti%d", inputSource);
+          cliPrintLinefeed();
 
-            for (uint32_t servoIndex = 0; servoIndex < MAX_SUPPORTED_SERVOS; servoIndex++) {
-                cliPrintf("%d", servoIndex);
-                for (uint32_t inputSource = 0; inputSource < INPUT_SOURCE_COUNT; inputSource++) {
-                    cliPrintf("\t%s  ", (servoParams(servoIndex)->reversedSources & (1 << inputSource)) ? "r" : "n");
-                }
-                cliPrintLinefeed();
+          for (uint32_t servoIndex = 0; servoIndex < MAX_SUPPORTED_SERVOS; servoIndex++) {
+            cliPrintf("%d", servoIndex);
+            for (uint32_t inputSource = 0; inputSource < INPUT_SOURCE_COUNT; inputSource++) {
+              cliPrintf("\t%s  ", (servoParams(servoIndex)->reversedSources & (1 << inputSource)) ? "r" : "n");
             }
-            return;
+            cliPrintLinefeed();
+          }
+          return;
         }
 
         char *saveptr;
         ptr = strtok_r(ptr, " ", &saveptr);
         while (ptr != NULL && check < ARGS_COUNT - 1) {
-            args[check++] = atoi(ptr);
-            ptr = strtok_r(NULL, " ", &saveptr);
+          args[check++] = atoi(ptr);
+          ptr = strtok_r(NULL, " ", &saveptr);
         }
 
         if (ptr == NULL || check != ARGS_COUNT - 1) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
-        if (args[SERVO] >= 0 && args[SERVO] < MAX_SUPPORTED_SERVOS
-                && args[INPUT] >= 0 && args[INPUT] < INPUT_SOURCE_COUNT
-                && (*ptr == 'r' || *ptr == 'n')) {
-            if (*ptr == 'r') {
-                servoParamsMutable(args[SERVO])->reversedSources |= 1 << args[INPUT];
-            } else {
-                servoParamsMutable(args[SERVO])->reversedSources &= ~(1 << args[INPUT]);
-            }
+        if (args[SERVO] >= 0 && args[SERVO] < MAX_SUPPORTED_SERVOS && args[INPUT] >= 0 && args[INPUT] < INPUT_SOURCE_COUNT && (*ptr == 'r' || *ptr == 'n')) {
+          if (*ptr == 'r') {
+            servoParamsMutable(args[SERVO])->reversedSources |= 1 << args[INPUT];
+          } else {
+            servoParamsMutable(args[SERVO])->reversedSources &= ~(1 << args[INPUT]);
+          }
         } else {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
         cliServoMix("reverse");
-    } else {
+      } else {
         enum {RULE = 0, TARGET, INPUT, RATE, SPEED, MIN, MAX, BOX, ARGS_COUNT};
         char *saveptr;
         char *ptr = strtok_r(cmdline, " ", &saveptr);
         while (ptr != NULL && check < ARGS_COUNT) {
-            args[check++] = atoi(ptr);
-            ptr = strtok_r(NULL, " ", &saveptr);
+          args[check++] = atoi(ptr);
+          ptr = strtok_r(NULL, " ", &saveptr);
         }
 
         if (ptr != NULL || check != ARGS_COUNT) {
-            cliShowParseError();
-            return;
+          cliShowParseError();
+          return;
         }
 
         int32_t i = args[RULE];
         if (i >= 0 && i < MAX_SERVO_RULES &&
-            args[TARGET] >= 0 && args[TARGET] < MAX_SUPPORTED_SERVOS &&
-            args[INPUT] >= 0 && args[INPUT] < INPUT_SOURCE_COUNT &&
-            args[RATE] >= -100 && args[RATE] <= 100 &&
-            args[SPEED] >= 0 && args[SPEED] <= MAX_SERVO_SPEED &&
-            args[MIN] >= 0 && args[MIN] <= 100 &&
-            args[MAX] >= 0 && args[MAX] <= 100 && args[MIN] < args[MAX] &&
-            args[BOX] >= 0 && args[BOX] <= MAX_SERVO_BOXES) {
-            customServoMixersMutable(i)->targetChannel = args[TARGET];
-            customServoMixersMutable(i)->inputSource = args[INPUT];
-            customServoMixersMutable(i)->rate = args[RATE];
-            customServoMixersMutable(i)->speed = args[SPEED];
-            customServoMixersMutable(i)->min = args[MIN];
-            customServoMixersMutable(i)->max = args[MAX];
-            customServoMixersMutable(i)->box = args[BOX];
-            cliServoMix("");
+          args[TARGET] >= 0 && args[TARGET] < MAX_SUPPORTED_SERVOS &&
+          args[INPUT] >= 0 && args[INPUT] < INPUT_SOURCE_COUNT &&
+          args[RATE] >= -100 && args[RATE] <= 100 &&
+          args[SPEED] >= 0 && args[SPEED] <= MAX_SERVO_SPEED &&
+          args[MIN] >= 0 && args[MIN] <= 100 &&
+          args[MAX] >= 0 && args[MAX] <= 100 && args[MIN] < args[MAX] &&
+          args[BOX] >= 0 && args[BOX] <= MAX_SERVO_BOXES) {
+          customServoMixersMutable(i)->targetChannel = args[TARGET];
+          customServoMixersMutable(i)->inputSource = args[INPUT];
+          customServoMixersMutable(i)->rate = args[RATE];
+          customServoMixersMutable(i)->speed = args[SPEED];
+          customServoMixersMutable(i)->min = args[MIN];
+          customServoMixersMutable(i)->max = args[MAX];
+          customServoMixersMutable(i)->box = args[BOX];
+          cliServoMix("");
         } else {
-            cliShowParseError();
+          cliShowParseError();
         }
+      }
     }
-}
-#endif
+  #endif
 
 #ifdef USE_SDCARD
 
