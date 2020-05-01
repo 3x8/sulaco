@@ -90,7 +90,7 @@ bool mpu6500GyroDetect(gyroDev_t *gyro) {
     gyro->readFn = mpuGyroRead;
 
     // 16.4 dps/lsb scalefactor
-    gyro->scale = 1.0f / (gyro->gyro_high_fsr ? 8.2f : 16.4f);
+    gyro->scale = 1.0f / (gyro->gyro_high_fsr ? GYRO_SCALE_4000DPS : GYRO_SCALE_2000DPS);
 
     return (true);
 }
