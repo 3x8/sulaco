@@ -2975,305 +2975,271 @@ uint8_t cliMode = 0;
     }
   #endif
 
-#ifndef USE_QUAD_MIXER_ONLY
-static void cliMixer(char *cmdline)
-{
-    int len;
+  #ifndef USE_QUAD_MIXER_ONLY
+    static void cliMixer(char *cmdline) {
+      int len;
+      len = strlen(cmdline);
 
-    len = strlen(cmdline);
-
-    if (len == 0) {
+      if (len == 0) {
         cliPrintLinef("Mixer: %s", mixerNames[mixerConfig()->mixerMode - 1]);
         return;
-    } else if (strncasecmp(cmdline, "list", len) == 0) {
+      } else if (strncasecmp(cmdline, "list", len) == 0) {
         cliPrint("Available:");
         for (uint32_t i = 0; ; i++) {
-            if (mixerNames[i] == NULL)
-                break;
-            cliPrintf(" %s", mixerNames[i]);
+          if (mixerNames[i] == NULL)
+            break;
+          cliPrintf(" %s", mixerNames[i]);
         }
         cliPrintLinefeed();
         return;
-    }
+      }
 
-    for (uint32_t i = 0; ; i++) {
+      for (uint32_t i = 0; ; i++) {
         if (mixerNames[i] == NULL) {
-            cliPrintErrorLinef("Invalid name");
-            return;
+          cliPrintErrorLinef("Invalid name");
+          return;
         }
         if (strncasecmp(cmdline, mixerNames[i], len) == 0) {
-            mixerConfigMutable()->mixerMode = i + 1;
-            break;
+          mixerConfigMutable()->mixerMode = i + 1;
+          break;
         }
+      }
+      cliMixer("");
     }
+  #endif
 
-    cliMixer("");
-}
-#endif
-
-static void cliMotor(char *cmdline)
-{
+  static void cliMotor(char *cmdline) {
     if (isEmpty(cmdline)) {
-        cliShowParseError();
-
-        return;
+      cliShowParseError();
+      return;
     }
 
     int motorIndex = 0;
     int motorValue = 0;
-
     char *saveptr;
     char *pch = strtok_r(cmdline, " ", &saveptr);
     int index = 0;
+
     while (pch != NULL) {
-        switch (index) {
-        case 0:
-            motorIndex = parseOutputIndex(pch, true);
-            if (motorIndex == -1) {
-                return;
-            }
-
-            break;
-        case 1:
-            motorValue = atoi(pch);
-
-            break;
+      switch (index) {
+      case 0:
+        motorIndex = parseOutputIndex(pch, true);
+        if (motorIndex == -1) {
+          return;
         }
-        index++;
-        pch = strtok_r(NULL, " ", &saveptr);
+        break;
+      case 1:
+        motorValue = atoi(pch);
+        break;
+      }
+      index++;
+      pch = strtok_r(NULL, " ", &saveptr);
     }
 
     if (index == 2) {
-        if (motorValue < PWM_RANGE_MIN || motorValue > PWM_RANGE_MAX) {
-            cliShowArgumentRangeError("value", 1000, 2000);
-        } else {
-            uint32_t motorOutputValue = convertExternalToMotor(motorValue);
+      if (motorValue < PWM_RANGE_MIN || motorValue > PWM_RANGE_MAX) {
+        cliShowArgumentRangeError("value", 1000, 2000);
+      } else {
+        uint32_t motorOutputValue = convertExternalToMotor(motorValue);
 
-            if (motorIndex != ALL_MOTORS) {
-                motor_disarmed[motorIndex] = motorOutputValue;
-
-                cliPrintLinef("motor %d: %d", motorIndex, motorOutputValue);
-            } else  {
-                for (int i = 0; i < getMotorCount(); i++) {
-                    motor_disarmed[i] = motorOutputValue;
-                }
-
-                cliPrintLinef("all motors: %d", motorOutputValue);
-            }
+        if (motorIndex != ALL_MOTORS) {
+          motor_disarmed[motorIndex] = motorOutputValue;
+            cliPrintLinef("motor %d: %d", motorIndex, motorOutputValue);
+        } else  {
+          for (int i = 0; i < getMotorCount(); i++) {
+            motor_disarmed[i] = motorOutputValue;
+          }
+          cliPrintLinef("all motors: %d", motorOutputValue);
         }
+      }
     } else {
-        cliShowParseError();
+      cliShowParseError();
     }
-}
+  }
 
-#ifndef MINIMAL_CLI
-static void cliPlaySound(char *cmdline)
-{
-    int i;
-    const char *name;
-    static int lastSoundIdx = -1;
+  #ifndef MINIMAL_CLI
+    static void cliPlaySound(char *cmdline) {
+      int i;
+      const char *name;
+      static int lastSoundIdx = -1;
 
-    if (isEmpty(cmdline)) {
+      if (isEmpty(cmdline)) {
         i = lastSoundIdx + 1;     //next sound index
         if ((name=beeperNameForTableIndex(i)) == NULL) {
-            while (true) {   //no name for index; try next one
-                if (++i >= beeperTableEntryCount())
-                    i = 0;   //if end then wrap around to first entry
-                if ((name=beeperNameForTableIndex(i)) != NULL)
-                    break;   //if name OK then play sound below
-                if (i == lastSoundIdx + 1) {     //prevent infinite loop
-                    cliPrintErrorLinef("Error playing sound");
-                    return;
-                }
+          while (true) {   //no name for index; try next one
+            if (++i >= beeperTableEntryCount()) {
+              i = 0;   //if end then wrap around to first entry
             }
+            if ((name=beeperNameForTableIndex(i)) != NULL) {
+              break;   //if name OK then play sound below
+            }
+            if (i == lastSoundIdx + 1) {     //prevent infinite loop
+              cliPrintErrorLinef("Error playing sound");
+              return;
+            }
+          }
         }
-    } else {       //index value was given
+      } else {       //index value was given
         i = atoi(cmdline);
         if ((name=beeperNameForTableIndex(i)) == NULL) {
-            cliPrintLinef("No sound for index %d", i);
-            return;
+          cliPrintLinef("No sound for index %d", i);
+          return;
         }
+      }
+      lastSoundIdx = i;
+      beeperSilence();
+      cliPrintLinef("Playing sound %d: %s", i, name);
+      beeper(beeperModeForTableIndex(i));
     }
-    lastSoundIdx = i;
-    beeperSilence();
-    cliPrintLinef("Playing sound %d: %s", i, name);
-    beeper(beeperModeForTableIndex(i));
-}
-#endif
+  #endif
 
-static void cliProfile(char *cmdline)
-{
+  static void cliProfile(char *cmdline) {
     if (isEmpty(cmdline)) {
-        cliPrintLinef("profile %d", getPidProfileIndexToUse());
-        return;
+      cliPrintLinef("profile %d", getPidProfileIndexToUse());
+      return;
     } else {
-        const int i = atoi(cmdline);
-        if (i >= 0 && i < MAX_PROFILE_COUNT) {
-            changePidProfile(i);
-            cliProfile("");
-        } else {
-            cliPrintErrorLinef("PROFILE OUTSIDE OF [0..%d]", MAX_PROFILE_COUNT - 1);
-        }
+      const int i = atoi(cmdline);
+      if (i >= 0 && i < MAX_PROFILE_COUNT) {
+        changePidProfile(i);
+        cliProfile("");
+      } else {
+        cliPrintErrorLinef("PROFILE OUTSIDE OF [0..%d]", MAX_PROFILE_COUNT - 1);
+      }
     }
-}
+  }
 
-static void cliRateProfile(char *cmdline)
-{
+  static void cliRateProfile(char *cmdline) {
     if (isEmpty(cmdline)) {
-        cliPrintLinef("rateprofile %d", getRateProfileIndexToUse());
-        return;
+      cliPrintLinef("rateprofile %d", getRateProfileIndexToUse());
+      return;
     } else {
-        const int i = atoi(cmdline);
-        if (i >= 0 && i < CONTROL_RATE_PROFILE_COUNT) {
-            changeControlRateProfile(i);
-            cliRateProfile("");
-        } else {
-            cliPrintErrorLinef("RATE PROFILE OUTSIDE OF [0..%d]", CONTROL_RATE_PROFILE_COUNT - 1);
-        }
+      const int i = atoi(cmdline);
+      if (i >= 0 && i < CONTROL_RATE_PROFILE_COUNT) {
+        changeControlRateProfile(i);
+        cliRateProfile("");
+      } else {
+        cliPrintErrorLinef("RATE PROFILE OUTSIDE OF [0..%d]", CONTROL_RATE_PROFILE_COUNT - 1);
+      }
     }
-}
+  }
 
-static void cliDumpPidProfile(uint8_t pidProfileIndex, uint8_t dumpMask)
-{
+  static void cliDumpPidProfile(uint8_t pidProfileIndex, uint8_t dumpMask) {
     if (pidProfileIndex >= MAX_PROFILE_COUNT) {
-        // Faulty values
-        return;
+      // Faulty values
+      return;
     }
 
     pidProfileIndexToUse = pidProfileIndex;
-
     cliPrintHashLine("profile");
     cliProfile("");
     cliPrintLinefeed();
     dumpAllValues(PROFILE_VALUE, dumpMask);
-
     pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
-}
+  }
 
-static void cliDumpRateProfile(uint8_t rateProfileIndex, uint8_t dumpMask)
-{
+  static void cliDumpRateProfile(uint8_t rateProfileIndex, uint8_t dumpMask) {
     if (rateProfileIndex >= CONTROL_RATE_PROFILE_COUNT) {
-        // Faulty values
-        return;
+      // Faulty values
+      return;
     }
 
     rateProfileIndexToUse = rateProfileIndex;
-
     cliPrintHashLine("rateprofile");
     cliRateProfile("");
     cliPrintLinefeed();
     dumpAllValues(PROFILE_RATE_VALUE, dumpMask);
-
     rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
-}
+  }
 
-static void cliSave(char *cmdline)
-{
+  static void cliSave(char *cmdline) {
     UNUSED(cmdline);
-
     cliPrintHashLine("saving");
-
-#if defined(USE_BOARD_INFO)
-    if (boardInformationUpdated) {
+    #if defined(USE_BOARD_INFO)
+      if (boardInformationUpdated) {
         persistBoardInformation();
-    }
-#if defined(USE_SIGNATURE)
-    if (signatureUpdated) {
-        persistSignature();
-    }
-#endif
-#endif // USE_BOARD_INFO
-
+      }
+      #if defined(USE_SIGNATURE)
+        if (signatureUpdated) {
+          persistSignature();
+        }
+      #endif
+    #endif // USE_BOARD_INFO
     writeEEPROM();
-
     cliReboot();
-}
+  }
 
-static void cliDefaults(char *cmdline)
-{
+  static void cliDefaults(char *cmdline) {
     bool saveConfigs;
 
     if (isEmpty(cmdline)) {
-        saveConfigs = true;
+      saveConfigs = true;
     } else if (strncasecmp(cmdline, "nosave", 6) == 0) {
-        saveConfigs = false;
+      saveConfigs = false;
     } else {
-        return;
+      return;
     }
 
     cliPrintHashLine("resetting to defaults");
-
     resetConfigs();
-
     if (saveConfigs) {
-        cliSave(NULL);
+      cliSave(NULL);
     }
-}
+  }
 
-void cliPrintVarDefault(const clivalue_t *value)
-{
+  void cliPrintVarDefault(const clivalue_t *value) {
     const pgRegistry_t *pg = pgFind(value->pgn);
     if (pg) {
-        const char *defaultFormat = "Default value: ";
-        const int valueOffset = getValueOffset(value);
-        const bool equalsDefault = valuePtrEqualsDefault(value, pg->copy + valueOffset, pg->address + valueOffset);
-        if (!equalsDefault) {
-            cliPrintf(defaultFormat, value->name);
-            printValuePointer(value, (uint8_t*)pg->address + valueOffset, false);
-            cliPrintLinefeed();
-        }
+      const char *defaultFormat = "Default value: ";
+      const int valueOffset = getValueOffset(value);
+      const bool equalsDefault = valuePtrEqualsDefault(value, pg->copy + valueOffset, pg->address + valueOffset);
+      if (!equalsDefault) {
+        cliPrintf(defaultFormat, value->name);
+        printValuePointer(value, (uint8_t*)pg->address + valueOffset, false);
+        cliPrintLinefeed();
+      }
     }
-}
+  }
 
-STATIC_UNIT_TESTED void cliGet(char *cmdline)
-{
+  STATIC_UNIT_TESTED void cliGet(char *cmdline) {
     const clivalue_t *val;
     int matchedCommands = 0;
 
     pidProfileIndexToUse = getCurrentPidProfileIndex();
     rateProfileIndexToUse = getCurrentControlRateProfileIndex();
-
     backupAndResetConfigs();
 
     for (uint32_t i = 0; i < valueTableEntryCount; i++) {
-        if (strcasestr(valueTable[i].name, cmdline)) {
-            val = &valueTable[i];
-            if (matchedCommands > 0) {
-                cliPrintLinefeed();
-            }
-            cliPrintf("%s = ", valueTable[i].name);
-            cliPrintVar(val, 0);
-            cliPrintLinefeed();
-            switch (val->type & VALUE_SECTION_MASK) {
-            case PROFILE_VALUE:
-                cliProfile("");
-
-                break;
-            case PROFILE_RATE_VALUE:
-                cliRateProfile("");
-
-                break;
-            default:
-
-                break;
-            }
-            cliPrintVarRange(val);
-            cliPrintVarDefault(val);
-            matchedCommands++;
+      if (strcasestr(valueTable[i].name, cmdline)) {
+        val = &valueTable[i];
+        if (matchedCommands > 0) {
+          cliPrintLinefeed();
         }
+        cliPrintf("%s = ", valueTable[i].name);
+        cliPrintVar(val, 0);
+        cliPrintLinefeed();
+        switch (val->type & VALUE_SECTION_MASK) {
+          case PROFILE_VALUE:
+            cliProfile("");
+            break;
+          case PROFILE_RATE_VALUE:
+            cliRateProfile("");
+            break;
+          default:
+            break;
+        }
+        cliPrintVarRange(val);
+        cliPrintVarDefault(val);
+        matchedCommands++;
+      }
     }
-
     restoreConfigs();
-
     pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
     rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
-
     if (matchedCommands) {
-        return;
+      return;
     }
-
     cliPrintErrorLinef("Invalid name");
-}
+  }
 
 #ifdef USE_PEGASUS_UI
 static const char * valueSectionMask[] = {
