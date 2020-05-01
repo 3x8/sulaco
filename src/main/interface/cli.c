@@ -2020,350 +2020,314 @@ uint8_t cliMode = 0;
     #endif
   #endif
 
-#ifdef USE_VTX_CONTROL
-static void printVtx(uint8_t dumpMask, const vtxConfig_t *vtxConfig, const vtxConfig_t *vtxConfigDefault)
-{
-    // print out vtx channel settings
-    const char *format = "vtx %u %u %u %u %u %u";
-    bool equalsDefault = false;
-    for (uint32_t i = 0; i < MAX_CHANNEL_ACTIVATION_CONDITION_COUNT; i++) {
+  #ifdef USE_VTX_CONTROL
+    static void printVtx(uint8_t dumpMask, const vtxConfig_t *vtxConfig, const vtxConfig_t *vtxConfigDefault) {
+      // print out vtx channel settings
+      const char *format = "vtx %u %u %u %u %u %u";
+      bool equalsDefault = false;
+      for (uint32_t i = 0; i < MAX_CHANNEL_ACTIVATION_CONDITION_COUNT; i++) {
         const vtxChannelActivationCondition_t *cac = &vtxConfig->vtxChannelActivationConditions[i];
         if (vtxConfigDefault) {
-            const vtxChannelActivationCondition_t *cacDefault = &vtxConfigDefault->vtxChannelActivationConditions[i];
-            equalsDefault = !memcmp(cac, cacDefault, sizeof(*cac));
-            cliDefaultPrintLinef(dumpMask, equalsDefault, format,
-                i,
-                cacDefault->auxChannelIndex,
-                cacDefault->band,
-                cacDefault->channel,
-                MODE_STEP_TO_CHANNEL_VALUE(cacDefault->range.startStep),
-                MODE_STEP_TO_CHANNEL_VALUE(cacDefault->range.endStep)
-            );
+          const vtxChannelActivationCondition_t *cacDefault = &vtxConfigDefault->vtxChannelActivationConditions[i];
+          equalsDefault = !memcmp(cac, cacDefault, sizeof(*cac));
+          cliDefaultPrintLinef(dumpMask, equalsDefault, format, i,
+            cacDefault->auxChannelIndex, cacDefault->band, cacDefault->channel,
+            MODE_STEP_TO_CHANNEL_VALUE(cacDefault->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(cacDefault->range.endStep));
         }
-        cliDumpPrintLinef(dumpMask, equalsDefault, format,
-            i,
-            cac->auxChannelIndex,
-            cac->band,
-            cac->channel,
-            MODE_STEP_TO_CHANNEL_VALUE(cac->range.startStep),
-            MODE_STEP_TO_CHANNEL_VALUE(cac->range.endStep)
-        );
+        cliDumpPrintLinef(dumpMask, equalsDefault, format, i,
+          cac->auxChannelIndex, cac->band, cac->channel,
+          MODE_STEP_TO_CHANNEL_VALUE(cac->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(cac->range.endStep));
+      }
     }
-}
 
-static void cliVtx(char *cmdline)
-{
-    const char *format = "vtx %u %u %u %u %u %u";
-    int i, val = 0;
-    const char *ptr;
+    static void cliVtx(char *cmdline) {
+      const char *format = "vtx %u %u %u %u %u %u";
+      int i, val = 0;
+      const char *ptr;
 
-    if (isEmpty(cmdline)) {
+      if (isEmpty(cmdline)) {
         printVtx(DUMP_MASTER, vtxConfig(), NULL);
-    } else {
+      } else {
         ptr = cmdline;
         i = atoi(ptr++);
         if (i < MAX_CHANNEL_ACTIVATION_CONDITION_COUNT) {
-            vtxChannelActivationCondition_t *cac = &vtxConfigMutable()->vtxChannelActivationConditions[i];
-            uint8_t validArgumentCount = 0;
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
-                    cac->auxChannelIndex = val;
-                    validArgumentCount++;
-                }
+          vtxChannelActivationCondition_t *cac = &vtxConfigMutable()->vtxChannelActivationConditions[i];
+          uint8_t validArgumentCount = 0;
+          ptr = nextArg(ptr);
+          if (ptr) {
+            val = atoi(ptr);
+            if (val >= 0 && val < MAX_AUX_CHANNEL_COUNT) {
+              cac->auxChannelIndex = val;
+              validArgumentCount++;
             }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                // FIXME Use VTX API to get min/max
-                if (val >= VTX_SETTINGS_MIN_BAND && val <= VTX_SETTINGS_MAX_BAND) {
-                    cac->band = val;
-                    validArgumentCount++;
-                }
+          }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            val = atoi(ptr);
+            // FIXME Use VTX API to get min/max
+            if (val >= VTX_SETTINGS_MIN_BAND && val <= VTX_SETTINGS_MAX_BAND) {
+              cac->band = val;
+              validArgumentCount++;
             }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                val = atoi(ptr);
-                // FIXME Use VTX API to get min/max
-                if (val >= VTX_SETTINGS_MIN_CHANNEL && val <= VTX_SETTINGS_MAX_CHANNEL) {
-                    cac->channel = val;
-                    validArgumentCount++;
-                }
+          }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            val = atoi(ptr);
+            // FIXME Use VTX API to get min/max
+            if (val >= VTX_SETTINGS_MIN_CHANNEL && val <= VTX_SETTINGS_MAX_CHANNEL) {
+              cac->channel = val;
+              validArgumentCount++;
             }
-            ptr = processChannelRangeArgs(ptr, &cac->range, &validArgumentCount);
+          }
+          ptr = processChannelRangeArgs(ptr, &cac->range, &validArgumentCount);
 
-            if (validArgumentCount != 5) {
-                memset(cac, 0, sizeof(vtxChannelActivationCondition_t));
-                cliShowParseError();
-            } else {
-                cliDumpPrintLinef(0, false, format,
-                    i,
-                    cac->auxChannelIndex,
-                    cac->band,
-                    cac->channel,
-                    MODE_STEP_TO_CHANNEL_VALUE(cac->range.startStep),
-                    MODE_STEP_TO_CHANNEL_VALUE(cac->range.endStep)
-                );
-            }
+          if (validArgumentCount != 5) {
+            memset(cac, 0, sizeof(vtxChannelActivationCondition_t));
+            cliShowParseError();
+          } else {
+            cliDumpPrintLinef(0, false, format, i,
+              cac->auxChannelIndex, cac->band, cac->channel,
+              MODE_STEP_TO_CHANNEL_VALUE(cac->range.startStep), MODE_STEP_TO_CHANNEL_VALUE(cac->range.endStep));
+          }
         } else {
-            cliShowArgumentRangeError("index", 0, MAX_CHANNEL_ACTIVATION_CONDITION_COUNT - 1);
+          cliShowArgumentRangeError("index", 0, MAX_CHANNEL_ACTIVATION_CONDITION_COUNT - 1);
         }
+      }
     }
-}
+  #endif //VTX_CONTROL
 
-#endif // VTX_CONTROL
-
-static void printName(uint8_t dumpMask, const pilotConfig_t *pilotConfig)
-{
+  static void printName(uint8_t dumpMask, const pilotConfig_t *pilotConfig) {
     const bool equalsDefault = strlen(pilotConfig->name) == 0;
     cliDumpPrintLinef(dumpMask, equalsDefault, "name %s", equalsDefault ? emptyName : pilotConfig->name);
-}
+  }
 
-static void cliName(char *cmdline)
-{
+  static void cliName(char *cmdline) {
     const unsigned int len = strlen(cmdline);
     if (len > 0) {
-        memset(pilotConfigMutable()->name, 0, ARRAYLEN(pilotConfig()->name));
-        if (strncmp(cmdline, emptyName, len)) {
-            strncpy(pilotConfigMutable()->name, cmdline, MIN(len, MAX_NAME_LENGTH));
-        }
+      memset(pilotConfigMutable()->name, 0, ARRAYLEN(pilotConfig()->name));
+      if (strncmp(cmdline, emptyName, len)) {
+        strncpy(pilotConfigMutable()->name, cmdline, MIN(len, MAX_NAME_LENGTH));
+      }
     }
     printName(DUMP_MASTER, pilotConfig());
-}
+  }
 
-#if defined(USE_BOARD_INFO)
+  #if defined(USE_BOARD_INFO)
+    #define ERROR_MESSAGE "%s cannot be changed. Current value: '%s'"
 
-#define ERROR_MESSAGE "%s cannot be changed. Current value: '%s'"
-
-static void cliBoardName(char *cmdline)
-{
-    const unsigned int len = strlen(cmdline);
-    if (len > 0 && boardInformationIsSet() && (len != strlen(getBoardName()) || strncmp(getBoardName(), cmdline, len))) {
+    static void cliBoardName(char *cmdline) {
+      const unsigned int len = strlen(cmdline);
+      if (len > 0 && boardInformationIsSet() && (len != strlen(getBoardName()) || strncmp(getBoardName(), cmdline, len))) {
         cliPrintErrorLinef(ERROR_MESSAGE, "# board_name", getBoardName());
-    } else {
+      } else {
         if (len > 0) {
-            setBoardName(cmdline);
-            boardInformationUpdated = true;
+          setBoardName(cmdline);
+          boardInformationUpdated = true;
         }
         cliPrintLinef("# board_name %s", getBoardName());
+      }
     }
-}
 
-static void cliManufacturerId(char *cmdline)
-{
-    const unsigned int len = strlen(cmdline);
-    if (len > 0 && boardInformationIsSet() && (len != strlen(getManufacturerId()) || strncmp(getManufacturerId(), cmdline, len))) {
+    static void cliManufacturerId(char *cmdline) {
+      const unsigned int len = strlen(cmdline);
+      if (len > 0 && boardInformationIsSet() && (len != strlen(getManufacturerId()) || strncmp(getManufacturerId(), cmdline, len))) {
         cliPrintErrorLinef(ERROR_MESSAGE, "# manufacturer_id", getManufacturerId());
-    } else {
+      } else {
         if (len > 0) {
-            setManufacturerId(cmdline);
-            boardInformationUpdated = true;
+          setManufacturerId(cmdline);
+          boardInformationUpdated = true;
         }
         cliPrintLinef("# manufacturer_id %s", getManufacturerId());
+      }
     }
-}
 
-#if defined(USE_SIGNATURE)
-static void writeSignature(char *signatureStr, uint8_t *signature)
-{
-    for (unsigned i = 0; i < SIGNATURE_LENGTH; i++) {
-        tfp_sprintf(&signatureStr[2 * i], "%02x", signature[i]);
-    }
-}
-
-static void cliSignature(char *cmdline)
-{
-    const int len = strlen(cmdline);
-
-    uint8_t signature[SIGNATURE_LENGTH] = {0};
-    if (len > 0) {
-        if (len != 2 * SIGNATURE_LENGTH) {
-            cliPrintErrorLinef("Invalid length: %d (expected: %d)", len, 2 * SIGNATURE_LENGTH);
-
-            return;
-        }
-
-#define BLOCK_SIZE 2
+    #if defined(USE_SIGNATURE)
+      static void writeSignature(char *signatureStr, uint8_t *signature) {
         for (unsigned i = 0; i < SIGNATURE_LENGTH; i++) {
-            char temp[BLOCK_SIZE + 1];
-            strncpy(temp, &cmdline[i * BLOCK_SIZE], BLOCK_SIZE);
-            temp[BLOCK_SIZE] = '\0';
-            char *end;
-            unsigned result = strtoul(temp, &end, 16);
-            if (end == &temp[BLOCK_SIZE]) {
-                signature[i] = result;
-            } else {
-                cliPrintErrorLinef("Invalid character found: %c", end[0]);
-
-                return;
-            }
+          tfp_sprintf(&signatureStr[2 * i], "%02x", signature[i]);
         }
-#undef BLOCK_SIZE
-    }
+      }
 
-    char signatureStr[SIGNATURE_LENGTH * 2 + 1] = {0};
-    if (len > 0 && signatureIsSet() && memcmp(signature, getSignature(), SIGNATURE_LENGTH)) {
+    static void cliSignature(char *cmdline) {
+      const int len = strlen(cmdline);
+      uint8_t signature[SIGNATURE_LENGTH] = {0};
+
+      if (len > 0) {
+        if (len != 2 * SIGNATURE_LENGTH) {
+          cliPrintErrorLinef("Invalid length: %d (expected: %d)", len, 2 * SIGNATURE_LENGTH);
+          return;
+        }
+
+        #define BLOCK_SIZE 2
+        for (unsigned i = 0; i < SIGNATURE_LENGTH; i++) {
+          char temp[BLOCK_SIZE + 1];
+          strncpy(temp, &cmdline[i * BLOCK_SIZE], BLOCK_SIZE);
+          temp[BLOCK_SIZE] = '\0';
+          char *end;
+          unsigned result = strtoul(temp, &end, 16);
+          if (end == &temp[BLOCK_SIZE]) {
+            signature[i] = result;
+          } else {
+            cliPrintErrorLinef("Invalid character found: %c", end[0]);
+            return;
+          }
+        }
+        #undef BLOCK_SIZE
+      }
+
+      char signatureStr[SIGNATURE_LENGTH * 2 + 1] = {0};
+      if (len > 0 && signatureIsSet() && memcmp(signature, getSignature(), SIGNATURE_LENGTH)) {
         writeSignature(signatureStr, getSignature());
         cliPrintErrorLinef(ERROR_MESSAGE, "signature", signatureStr);
-    } else {
+      } else {
         if (len > 0) {
-            setSignature(signature);
-
-            signatureUpdated = true;
-
-            writeSignature(signatureStr, getSignature());
+          setSignature(signature);
+          signatureUpdated = true;
+          writeSignature(signatureStr, getSignature());
         } else if (signatureUpdated || signatureIsSet()) {
-            writeSignature(signatureStr, getSignature());
+          writeSignature(signatureStr, getSignature());
         }
-
         cliPrintLinef("signature %s", signatureStr);
+      }
     }
-}
-#endif
+    #endif //USE_SIGNATURE
+    #undef ERROR_MESSAGE
+  #endif //USE_BOARD_INFO
 
-#undef ERROR_MESSAGE
-
-#endif // USE_BOARD_INFO
-
-static void cliMcuId(char *cmdline){
+  static void cliMcuId(char *cmdline){
     UNUSED(cmdline);
-
     cliPrintLinef("# MCU UID %08x%08x%08x", U_ID_2, U_ID_1, U_ID_0);
-}
+  }
 
-static void printFeature(uint8_t dumpMask, const featureConfig_t *featureConfig, const featureConfig_t *featureConfigDefault)
-{
+  static void printFeature(uint8_t dumpMask, const featureConfig_t *featureConfig, const featureConfig_t *featureConfigDefault) {
     const uint32_t mask = featureConfig->enabledFeatures;
     const uint32_t defaultMask = featureConfigDefault->enabledFeatures;
+
     for (uint32_t i = 0; featureNames[i]; i++) { // disabled features first
-        if (strcmp(featureNames[i], emptyString) != 0) { //Skip unused
-            const char *format = "feature -%s";
-            cliDefaultPrintLinef(dumpMask, (defaultMask | ~mask) & (1 << i), format, featureNames[i]);
-            cliDumpPrintLinef(dumpMask, (~defaultMask | mask) & (1 << i), format, featureNames[i]);
-        }
+      if (strcmp(featureNames[i], emptyString) != 0) { //Skip unused
+        const char *format = "feature -%s";
+        cliDefaultPrintLinef(dumpMask, (defaultMask | ~mask) & (1 << i), format, featureNames[i]);
+        cliDumpPrintLinef(dumpMask, (~defaultMask | mask) & (1 << i), format, featureNames[i]);
+      }
     }
     for (uint32_t i = 0; featureNames[i]; i++) {  // enabled features
-        if (strcmp(featureNames[i], emptyString) != 0) { //Skip unused
-            const char *format = "feature %s";
-            if (defaultMask & (1 << i)) {
-                cliDefaultPrintLinef(dumpMask, (~defaultMask | mask) & (1 << i), format, featureNames[i]);
-            }
-            if (mask & (1 << i)) {
-                cliDumpPrintLinef(dumpMask, (defaultMask | ~mask) & (1 << i), format, featureNames[i]);
-            }
+      if (strcmp(featureNames[i], emptyString) != 0) { //Skip unused
+        const char *format = "feature %s";
+        if (defaultMask & (1 << i)) {
+          cliDefaultPrintLinef(dumpMask, (~defaultMask | mask) & (1 << i), format, featureNames[i]);
         }
+        if (mask & (1 << i)) {
+          cliDumpPrintLinef(dumpMask, (defaultMask | ~mask) & (1 << i), format, featureNames[i]);
+        }
+      }
     }
-}
+  }
 
-static void cliFeature(char *cmdline)
-{
+  static void cliFeature(char *cmdline) {
     uint32_t len = strlen(cmdline);
     uint32_t mask = featureMask();
 
     if (len == 0) {
-        cliPrint("Enabled: ");
-        for (uint32_t i = 0; ; i++) {
-            if (featureNames[i] == NULL)
-                break;
-            if (mask & (1 << i))
-                cliPrintf("%s ", featureNames[i]);
-        }
-        cliPrintLinefeed();
+      cliPrint("Enabled: ");
+      for (uint32_t i = 0; ; i++) {
+        if (featureNames[i] == NULL)
+          break;
+        if (mask & (1 << i))
+          cliPrintf("%s ", featureNames[i]);
+      }
+      cliPrintLinefeed();
     } else if (strncasecmp(cmdline, "list", len) == 0) {
-        cliPrint("Available:");
-        for (uint32_t i = 0; ; i++) {
-            if (featureNames[i] == NULL)
-                break;
-            if (strcmp(featureNames[i], emptyString) != 0) //Skip unused
-                cliPrintf(" %s", featureNames[i]);
-        }
-        cliPrintLinefeed();
-        return;
+      cliPrint("Available:");
+      for (uint32_t i = 0; ; i++) {
+        if (featureNames[i] == NULL)
+          break;
+        if (strcmp(featureNames[i], emptyString) != 0) //Skip unused
+          cliPrintf(" %s", featureNames[i]);
+      }
+      cliPrintLinefeed();
+      return;
     } else {
-        bool remove = false;
-        if (cmdline[0] == '-') {
-            // remove feature
-            remove = true;
-            cmdline++; // skip over -
-            len--;
+      bool remove = false;
+      if (cmdline[0] == '-') {
+        // remove feature
+        remove = true;
+        cmdline++; // skip over -
+        len--;
+      }
+
+      for (uint32_t i = 0; ; i++) {
+        if (featureNames[i] == NULL) {
+          cliPrintErrorLinef("Invalid name");
+          break;
         }
 
-        for (uint32_t i = 0; ; i++) {
-            if (featureNames[i] == NULL) {
-                cliPrintErrorLinef("Invalid name");
-                break;
+        if (strncasecmp(cmdline, featureNames[i], len) == 0) {
+          mask = 1 << i;
+          #ifndef USE_GPS
+            if (mask & FEATURE_GPS) {
+              cliPrintLine("unavailable");
+              break;
             }
-
-            if (strncasecmp(cmdline, featureNames[i], len) == 0) {
-
-                mask = 1 << i;
-#ifndef USE_GPS
-                if (mask & FEATURE_GPS) {
-                    cliPrintLine("unavailable");
-                    break;
-                }
-#endif
-#ifndef USE_RANGEFINDER
-                if (mask & FEATURE_RANGEFINDER) {
-                    cliPrintLine("unavailable");
-                    break;
-                }
-#endif
-                if (remove) {
-                    featureClear(mask);
-                    cliPrint("Disabled");
-                } else {
-                    featureSet(mask);
-                    cliPrint("Enabled");
-                }
-                cliPrintLinef(" %s", featureNames[i]);
-                break;
+          #endif
+          #ifndef USE_RANGEFINDER
+            if (mask & FEATURE_RANGEFINDER) {
+              cliPrintLine("unavailable");
+              break;
             }
+          #endif
+          if (remove) {
+            featureClear(mask);
+            cliPrint("Disabled");
+          } else {
+            featureSet(mask);
+            cliPrint("Enabled");
+          }
+          cliPrintLinef(" %s", featureNames[i]);
+          break;
         }
+      }
     }
-}
+  }
 
-#if defined(USE_BEEPER)
-static void printBeeper(uint8_t dumpMask, const uint32_t offFlags, const uint32_t offFlagsDefault, const char *name)
-{
-    const uint8_t beeperCount = beeperTableEntryCount();
-    for (int32_t i = 0; i < beeperCount - 1; i++) {
+  #if defined(USE_BEEPER)
+    static void printBeeper(uint8_t dumpMask, const uint32_t offFlags, const uint32_t offFlagsDefault, const char *name) {
+      const uint8_t beeperCount = beeperTableEntryCount();
+      for (int32_t i = 0; i < beeperCount - 1; i++) {
         const char *formatOff = "%s -%s";
         const char *formatOn = "%s %s";
         const uint32_t beeperModeMask = beeperModeMaskForTableIndex(i);
+
         cliDefaultPrintLinef(dumpMask, ~(offFlags ^ offFlagsDefault) & beeperModeMask, offFlags & beeperModeMask ? formatOn : formatOff, name, beeperNameForTableIndex(i));
         cliDumpPrintLinef(dumpMask, ~(offFlags ^ offFlagsDefault) & beeperModeMask, offFlags & beeperModeMask ? formatOff : formatOn, name, beeperNameForTableIndex(i));
+      }
     }
-}
 
-static void processBeeperCommand(char *cmdline, uint32_t *offFlags, const uint32_t allowedFlags)
-{
-    uint32_t len = strlen(cmdline);
-    uint8_t beeperCount = beeperTableEntryCount();
+    static void processBeeperCommand(char *cmdline, uint32_t *offFlags, const uint32_t allowedFlags) {
+      uint32_t len = strlen(cmdline);
+      uint8_t beeperCount = beeperTableEntryCount();
 
-    if (len == 0) {
+      if (len == 0) {
         cliPrintf("Disabled:");
         for (int32_t i = 0; ; i++) {
-            if (i == beeperCount - 1) {
-                if (*offFlags == 0)
-                    cliPrint("  none");
-                break;
-            }
+          if (i == beeperCount - 1) {
+            if (*offFlags == 0)
+              cliPrint("  none");
+            break;
+          }
 
-            if (beeperModeMaskForTableIndex(i) & *offFlags)
-                cliPrintf("  %s", beeperNameForTableIndex(i));
+          if (beeperModeMaskForTableIndex(i) & *offFlags)
+            cliPrintf("  %s", beeperNameForTableIndex(i));
         }
         cliPrintLinefeed();
-    } else if (strncasecmp(cmdline, "list", len) == 0) {
+      } else if (strncasecmp(cmdline, "list", len) == 0) {
         cliPrint("Available:");
         for (uint32_t i = 0; i < beeperCount; i++) {
-            if (beeperModeMaskForTableIndex(i) & allowedFlags) {
-                cliPrintf(" %s", beeperNameForTableIndex(i));
-            }
+          if (beeperModeMaskForTableIndex(i) & allowedFlags) {
+            cliPrintf(" %s", beeperNameForTableIndex(i));
+          }
         }
         cliPrintLinefeed();
-    } else {
+      } else {
         bool remove = false;
         if (cmdline[0] == '-') {
             remove = true;     // this is for beeper OFF condition
@@ -2372,275 +2336,239 @@ static void processBeeperCommand(char *cmdline, uint32_t *offFlags, const uint32
         }
 
         for (uint32_t i = 0; ; i++) {
-            if (i == beeperCount) {
-                cliPrintErrorLinef("Invalid name");
-                break;
-            }
-            if (strncasecmp(cmdline, beeperNameForTableIndex(i), len) == 0 && beeperModeMaskForTableIndex(i) & (allowedFlags | BEEPER_GET_FLAG(BEEPER_ALL))) {
-                if (remove) { // beeper off
-                    if (i == BEEPER_ALL - 1) {
-                        *offFlags = allowedFlags;
-                    } else {
-                        *offFlags |= beeperModeMaskForTableIndex(i);
-                    }
-                    cliPrint("Disabled");
-                }
-                else { // beeper on
-                    if (i == BEEPER_ALL - 1) {
-                        *offFlags = 0;
-                    } else {
-                        *offFlags &= ~beeperModeMaskForTableIndex(i);
-                    }
-                    cliPrint("Enabled");
-                }
-            cliPrintLinef(" %s", beeperNameForTableIndex(i));
+          if (i == beeperCount) {
+            cliPrintErrorLinef("Invalid name");
             break;
+          }
+          if (strncasecmp(cmdline, beeperNameForTableIndex(i), len) == 0 && beeperModeMaskForTableIndex(i) & (allowedFlags | BEEPER_GET_FLAG(BEEPER_ALL))) {
+            if (remove) { // beeper off
+              if (i == BEEPER_ALL - 1) {
+                *offFlags = allowedFlags;
+              } else {
+                *offFlags |= beeperModeMaskForTableIndex(i);
+              }
+              cliPrint("Disabled");
             }
+            else { // beeper on
+              if (i == BEEPER_ALL - 1) {
+                *offFlags = 0;
+              } else {
+                *offFlags &= ~beeperModeMaskForTableIndex(i);
+              }
+              cliPrint("Enabled");
+            }
+          cliPrintLinef(" %s", beeperNameForTableIndex(i));
+          break;
+          }
         }
+      }
     }
-}
 
-#if defined(USE_DSHOT)
-static void cliBeacon(char *cmdline)
-{
-    processBeeperCommand(cmdline, &(beeperConfigMutable()->dshotBeaconOffFlags), DSHOT_BEACON_ALLOWED_MODES);
-}
-#endif
+    #if defined(USE_DSHOT)
+      static void cliBeacon(char *cmdline) {
+        processBeeperCommand(cmdline, &(beeperConfigMutable()->dshotBeaconOffFlags), DSHOT_BEACON_ALLOWED_MODES);
+      }
+    #endif
 
-static void cliBeeper(char *cmdline)
-{
-    processBeeperCommand(cmdline, &(beeperConfigMutable()->beeper_off_flags), BEEPER_ALLOWED_MODES);
-}
-#endif
+    static void cliBeeper(char *cmdline) {
+      processBeeperCommand(cmdline, &(beeperConfigMutable()->beeper_off_flags), BEEPER_ALLOWED_MODES);
+    }
+  #endif
 
-#ifdef USE_RX_FRSKY_SPI
-void cliFrSkyBind(char *cmdline){
-    UNUSED(cmdline);
-    switch (rxSpiConfig()->rx_spi_protocol) {
-    case RX_SPI_FRSKY_D:
-    case RX_SPI_FRSKY_X:
+  #ifdef USE_RX_FRSKY_SPI
+    void cliFrSkyBind(char *cmdline){
+      UNUSED(cmdline);
+      switch (rxSpiConfig()->rx_spi_protocol) {
+      case RX_SPI_FRSKY_D:
+      case RX_SPI_FRSKY_X:
         frSkySpiBind();
-
         cliPrint("Binding...");
-
         break;
-    default:
+      default:
         cliPrint("Not supported.");
-
         break;
+      }
     }
-}
-#endif
+  #endif
 
-static void printMap(uint8_t dumpMask, const rxConfig_t *rxConfig, const rxConfig_t *defaultRxConfig)
-{
+  static void printMap(uint8_t dumpMask, const rxConfig_t *rxConfig, const rxConfig_t *defaultRxConfig) {
     bool equalsDefault = true;
     char buf[16];
     char bufDefault[16];
     uint32_t i;
+
     for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
-        buf[rxConfig->rcmap[i]] = rcChannelLetters[i];
-        if (defaultRxConfig) {
-            bufDefault[defaultRxConfig->rcmap[i]] = rcChannelLetters[i];
-            equalsDefault = equalsDefault && (rxConfig->rcmap[i] == defaultRxConfig->rcmap[i]);
-        }
+      buf[rxConfig->rcmap[i]] = rcChannelLetters[i];
+      if (defaultRxConfig) {
+        bufDefault[defaultRxConfig->rcmap[i]] = rcChannelLetters[i];
+        equalsDefault = equalsDefault && (rxConfig->rcmap[i] == defaultRxConfig->rcmap[i]);
+      }
     }
     buf[i] = '\0';
 
     const char *formatMap = "map %s";
     if (defaultRxConfig) {
-        bufDefault[i] = '\0';
-        cliDefaultPrintLinef(dumpMask, equalsDefault, formatMap, bufDefault);
+      bufDefault[i] = '\0';
+      cliDefaultPrintLinef(dumpMask, equalsDefault, formatMap, bufDefault);
     }
     cliDumpPrintLinef(dumpMask, equalsDefault, formatMap, buf);
-}
+  }
 
 
-static void cliMap(char *cmdline)
-{
+  static void cliMap(char *cmdline) {
     uint32_t i;
     char buf[RX_MAPPABLE_CHANNEL_COUNT + 1];
 
     uint32_t len = strlen(cmdline);
     if (len == RX_MAPPABLE_CHANNEL_COUNT) {
+      for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
+        buf[i] = toupper((unsigned char)cmdline[i]);
+      }
+      buf[i] = '\0';
 
-        for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
-            buf[i] = toupper((unsigned char)cmdline[i]);
+      for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
+        buf[i] = toupper((unsigned char)cmdline[i]);
+
+        if (strchr(rcChannelLetters, buf[i]) && !strchr(buf + i + 1, buf[i])) {
+          continue;
         }
-        buf[i] = '\0';
 
-        for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
-            buf[i] = toupper((unsigned char)cmdline[i]);
-
-            if (strchr(rcChannelLetters, buf[i]) && !strchr(buf + i + 1, buf[i]))
-                continue;
-
-            cliShowParseError();
-            return;
-        }
-        parseRcChannels(buf, rxConfigMutable());
-    } else if (len > 0) {
         cliShowParseError();
         return;
+      }
+      parseRcChannels(buf, rxConfigMutable());
+    } else if (len > 0) {
+      cliShowParseError();
+      return;
     }
 
     for (i = 0; i < RX_MAPPABLE_CHANNEL_COUNT; i++) {
-        buf[rxConfig()->rcmap[i]] = rcChannelLetters[i];
+      buf[rxConfig()->rcmap[i]] = rcChannelLetters[i];
     }
 
     buf[i] = '\0';
     cliPrintLinef("map %s", buf);
-}
+  }
 
-static char *skipSpace(char *buffer)
-{
+  static char *skipSpace(char *buffer) {
     while (*(buffer) == ' ') {
-        buffer++;
+      buffer++;
     }
+    return (buffer);
+  }
 
-    return buffer;
-}
-
-static char *checkCommand(char *cmdLine, const char *command)
-{
-    if (!strncasecmp(cmdLine, command, strlen(command))   // command names match
-        && (isspace((unsigned)cmdLine[strlen(command)]) || cmdLine[strlen(command)] == 0)) {
-        return skipSpace(cmdLine + strlen(command) + 1);
+  static char *checkCommand(char *cmdLine, const char *command) {
+    if (!strncasecmp(cmdLine, command, strlen(command)) && (isspace((unsigned)cmdLine[strlen(command)]) || cmdLine[strlen(command)] == 0)) {
+      return (skipSpace(cmdLine + strlen(command) + 1));
     } else {
-        return 0;
+      return 0;
     }
-}
+  }
 
-static void cliRebootEx(bool bootLoader)
-{
+  static void cliRebootEx(bool bootLoader) {
     cliPrint("\r\nRebooting");
     bufWriterFlush(cliWriter);
     waitForSerialPortToFinishTransmitting(cliPort);
     stopPwmAllMotors();
     if (bootLoader) {
-        systemResetToBootloader();
-        return;
+      systemResetToBootloader();
+      return;
     }
     systemReset();
-}
+  }
 
-static void cliReboot(void)
-{
+  static void cliReboot(void) {
     cliRebootEx(false);
-}
+  }
 
-static void cliBootloader(char *cmdLine)
-{
+  static void cliBootloader(char *cmdLine) {
     UNUSED(cmdLine);
 
     cliPrintHashLine("restarting in bootloader mode");
     cliRebootEx(true);
-}
+  }
 
 
-#ifdef MSP_OVER_CLI
-static void hex2byte(char *string, uint8_t *output)
-{
-    char tempBuff[3];
-    tempBuff[0] = string[0];
-    tempBuff[1] = string[1];
-    tempBuff[2] = 0;
-    *output = (uint8_t)strtol(tempBuff, NULL, 16);
-}
-#endif
-#ifdef USE_GYRO_IMUF9001
-
-
-static void cliImufBootloaderMode(char *cmdline)
-{
-    (void)(cmdline);
-    if(imufBootloader())
-    {
-        cliPrintLine("BOOTLOADER");
+  #ifdef MSP_OVER_CLI
+    static void hex2byte(char *string, uint8_t *output) {
+      char tempBuff[3];
+      tempBuff[0] = string[0];
+      tempBuff[1] = string[1];
+      tempBuff[2] = 0;
+      *output = (uint8_t)strtol(tempBuff, NULL, 16);
     }
-    else
-    {
+  #endif
+
+  #ifdef USE_GYRO_IMUF9001
+    static void cliImufBootloaderMode(char *cmdline) {
+      (void)(cmdline);
+      if(imufBootloader()) {
+        liPrintLine("BOOTLOADER");
+      }
+      else {
         cliPrintLine("FAIL");
+      }
     }
-}
 
+    static void cliImufLoadBin(char *cmdline) {
+      #define TEMP_BUFF 256
+      uint32_t dataSize;
+      uint8_t output;
+      uint8_t dataBuff[TEMP_BUFF] = {0,};
+      uint32_t x;
 
-static void cliImufLoadBin(char *cmdline)
-{
-    #define TEMP_BUFF 256
-    uint32_t dataSize;
-    uint8_t output;
-    uint8_t dataBuff[TEMP_BUFF] = {0,};
-    uint32_t x;
-
-    if(cmdline[0] == '!')
-    {
+      if(cmdline[0] == '!') {
         imuf_bin_safe = 1;
         imuf_buff_ptr = 0;
         imuf_checksum = 0;
         memset(imuf_custom_buff, 0, IMUF_CUSTOM_BUFF_LENGTH);
         cliPrintLine("SUCCESS");
-    }
-    else if(cmdline[0] == '.')
-    {
+      }
+      else if(cmdline[0] == '.') {
         cliPrintLinef("%d", imuf_buff_ptr);
-    }
-    else if(cmdline[0] == 'c')
-    {
+      }
+      else if(cmdline[0] == 'c') {
         cliPrintLinef("%d", imuf_checksum);
-    }
-    else if(cmdline[0] == 'l')
-    {
-        if (imuf_bin_safe)
-        {
-            //get the datasize
-            hex2byte(&cmdline[1], &output);
-            dataSize  = ((output & 0xff) << 0 );
-            hex2byte(&cmdline[3], &output);
-            dataSize += ((output & 0xff) << 8 );
-            hex2byte(&cmdline[5], &output);
-            dataSize += ((output & 0xff) << 16);
-            hex2byte(&cmdline[7], &output);
-            dataSize += ((output & 0xff) << 24);
+      }
+      else if(cmdline[0] == 'l') {
+        if (imuf_bin_safe) {
+          //get the datasize
+          hex2byte(&cmdline[1], &output);
+          dataSize  = ((output & 0xff) << 0 );
+          hex2byte(&cmdline[3], &output);
+          dataSize += ((output & 0xff) << 8 );
+          hex2byte(&cmdline[5], &output);
+          dataSize += ((output & 0xff) << 16);
+          hex2byte(&cmdline[7], &output);
+          dataSize += ((output & 0xff) << 24);
 
-            if(dataSize < TEMP_BUFF)
-            {
-                //fill the temp buffer
-                for(x=0; x< dataSize; x++)
-                {
-                    hex2byte(&cmdline[(x*2)+9], &output);
-                    dataBuff[x] = output;
-                    imuf_checksum += output;
-                    //cliPrintLinef("out:%d:%d:%d:%d", dataSize, x, (x*2)+9, output, checksum);
-                }
-                if ( (imuf_buff_ptr+dataSize) < IMUF_CUSTOM_BUFF_LENGTH )
-                {
-                    memcpy(imuf_custom_buff+imuf_buff_ptr, dataBuff, dataSize);
-                    imuf_buff_ptr += dataSize;
-                    cliPrintLine("LOADED");
-                }
-                else
-                {
-                    cliPrintLine("WOAH!");
-                }
+          if(dataSize < TEMP_BUFF) {
+            //fill the temp buffer
+            for(x=0; x< dataSize; x++) {
+              hex2byte(&cmdline[(x*2)+9], &output);
+              dataBuff[x] = output;
+              imuf_checksum += output;
+              //cliPrintLinef("out:%d:%d:%d:%d", dataSize, x, (x*2)+9, output, checksum);
             }
-            else
-            {
-                cliPrintLine("CRAP!");
+            if ( (imuf_buff_ptr+dataSize) < IMUF_CUSTOM_BUFF_LENGTH ) {
+              memcpy(imuf_custom_buff+imuf_buff_ptr, dataBuff, dataSize);
+              imuf_buff_ptr += dataSize;
+              cliPrintLine("LOADED");
+            } else {
+              cliPrintLine("WOAH!");
             }
+          } else {
+            cliPrintLine("CRAP!");
+          }
+        } else {
+          cliPrintLine("PFFFT!");
         }
-        else
-        {
-            cliPrintLine("PFFFT!");
-        }
+      }
     }
-}
 
-static void cliImufFlashBin(char *cmdline)
-{
-    (void)(cmdline);
-    if (imufUpdate(imuf_custom_buff, imuf_buff_ptr))
-    {
+    static void cliImufFlashBin(char *cmdline) {
+      (void)(cmdline);
+      if (imufUpdate(imuf_custom_buff, imuf_buff_ptr)) {
         cliPrintLine("SUCCESS");
         bufWriterFlush(cliWriter);
         delay(5000);
@@ -2651,453 +2579,401 @@ static void cliImufFlashBin(char *cmdline)
         // incase a motor was left running during motortest, clear it here
         mixerResetDisarmedMotors();
         cliReboot();
-
         cliWriter = NULL;
+      }
     }
-}
-#endif
+  #endif
 
-#ifdef MSP_OVER_CLI
-sbuf_t buft;
-uint8_t bufPtr[256];
+  #ifdef MSP_OVER_CLI
+    sbuf_t buft;
+    uint8_t bufPtr[256];
 
-void cliMsp(char *cmdline){
-    int len = strlen(cmdline);
-    if (len == 0) {
+    void cliMsp(char *cmdline) {
+      int len = strlen(cmdline);
+      if (len == 0) {
         cliPrintLine("No MSP command present");
-
         return;
-    } else {
+      } else {
         uint8_t mspCommand = atoi(cmdline);
         uint8_t start = 2;
+
         if (mspCommand > 99) {
-            start = 4;
+          start = 4;
         } else if (mspCommand > 9) {
-            start= 3;
+          start= 3;
         }
+
         uint8_t inBuff[len];
         uint8_t output;
         for (int i = 0; i < len; i++) {
-            hex2byte(&cmdline[(i*2) + start], &output);
-            inBuff[i] = output;
+          hex2byte(&cmdline[(i*2) + start], &output);
+          inBuff[i] = output;
         }
         sbuf_t inBuf = {.ptr = inBuff, .end = &inBuff[len-1]};
         //TODO need to fill inPtr with the rest of the bytes from the command line
 
         buft.ptr = buft.end = bufPtr;
-        if (mspCommonProcessOutCommand(mspCommand, &buft, NULL) || mspProcessOutCommand(mspCommand, &buft)
-          || mspCommonProcessInCommand(mspCommand, &inBuf, NULL) > -1 || mspProcessInCommand(mspCommand, &inBuf) > -1)
-        {
-
-            bufWriterAppend(cliWriter, '.');                 //"." is success
-            bufWriterAppend(cliWriter, mspCommand);          //msp command sent
-            bufWriterAppend(cliWriter, inBuf.ptr - inBuf.end);                  //msp command sent
-            bufWriterAppend(cliWriter, buft.ptr - buft.end); //number of chars
-
-            while (buft.end <= buft.ptr)
-                bufWriterAppend(cliWriter, *(buft.end)++); //send data
+        if (mspCommonProcessOutCommand(mspCommand, &buft, NULL) || mspProcessOutCommand(mspCommand, &buft) || mspCommonProcessInCommand(mspCommand, &inBuf, NULL) > -1 || mspProcessInCommand(mspCommand, &inBuf) > -1) {
+          bufWriterAppend(cliWriter, '.');                 //"." is success
+          bufWriterAppend(cliWriter, mspCommand);          //msp command sent
+          bufWriterAppend(cliWriter, inBuf.ptr - inBuf.end);                  //msp command sent
+          bufWriterAppend(cliWriter, buft.ptr - buft.end); //number of chars
+          while (buft.end <= buft.ptr) {
+            bufWriterAppend(cliWriter, *(buft.end)++); //send data
+          }
+        } else {
+          bufWriterAppend(cliWriter, '!'); //"!" is failure
         }
-        else
-        {
-            bufWriterAppend(cliWriter, '!'); //"!" is failure
-        }
+      }
     }
-}
-#endif
+  #endif
 
-static void cliExit(char *cmdline)
-{
+  static void cliExit(char *cmdline) {
     UNUSED(cmdline);
 
     cliPrintHashLine("leaving CLI mode, unsaved changes lost");
     bufWriterFlush(cliWriter);
-
     *cliBuffer = '\0';
     bufferIndex = 0;
     cliMode = 0;
     // incase a motor was left running during motortest, clear it here
     mixerResetDisarmedMotors();
     cliReboot();
-
     cliWriter = NULL;
-}
+  }
 
-#ifdef USE_GPS
-static void cliGpsPassthrough(char *cmdline)
-{
-    UNUSED(cmdline);
+  #ifdef USE_GPS
+    static void cliGpsPassthrough(char *cmdline) {
+      UNUSED(cmdline);
+      gpsEnablePassthrough(cliPort);
+    }
+  #endif
 
-    gpsEnablePassthrough(cliPort);
-}
-#endif
+  #if defined(USE_GYRO_REGISTER_DUMP) && !defined(SIMULATOR_BUILD)
+    static void cliPrintGyroRegisters(uint8_t whichSensor) {
+      cliPrintLinef("# WHO_AM_I    0x%X", gyroReadRegister(whichSensor, MPU_RA_WHO_AM_I));
+      cliPrintLinef("# CONFIG      0x%X", gyroReadRegister(whichSensor, MPU_RA_CONFIG));
+      cliPrintLinef("# GYRO_CONFIG 0x%X", gyroReadRegister(whichSensor, MPU_RA_GYRO_CONFIG));
+    }
 
-#if defined(USE_GYRO_REGISTER_DUMP) && !defined(SIMULATOR_BUILD)
-static void cliPrintGyroRegisters(uint8_t whichSensor)
-{
-    cliPrintLinef("# WHO_AM_I    0x%X", gyroReadRegister(whichSensor, MPU_RA_WHO_AM_I));
-    cliPrintLinef("# CONFIG      0x%X", gyroReadRegister(whichSensor, MPU_RA_CONFIG));
-    cliPrintLinef("# GYRO_CONFIG 0x%X", gyroReadRegister(whichSensor, MPU_RA_GYRO_CONFIG));
-}
-
-static void cliDumpGyroRegisters(char *cmdline)
-{
-#ifdef USE_DUAL_GYRO
-    if ((gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_1) || (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH)) {
-        cliPrintLinef("\r\n# Gyro 1");
+    static void cliDumpGyroRegisters(char *cmdline) {
+      #ifdef USE_DUAL_GYRO
+        if ((gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_1) || (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH)) {
+          cliPrintLinef("\r\n# Gyro 1");
+          cliPrintGyroRegisters(GYRO_CONFIG_USE_GYRO_1);
+        }
+        if ((gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_2) || (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH)) {
+          cliPrintLinef("\r\n# Gyro 2");
+          cliPrintGyroRegisters(GYRO_CONFIG_USE_GYRO_2);
+        }
+      #else
         cliPrintGyroRegisters(GYRO_CONFIG_USE_GYRO_1);
+      #endif // USE_DUAL_GYRO
+        UNUSED(cmdline);
     }
-    if ((gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_2) || (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH)) {
-        cliPrintLinef("\r\n# Gyro 2");
-        cliPrintGyroRegisters(GYRO_CONFIG_USE_GYRO_2);
-    }
-#else
-    cliPrintGyroRegisters(GYRO_CONFIG_USE_GYRO_1);
-#endif // USE_DUAL_GYRO
-    UNUSED(cmdline);
-}
-#endif
+  #endif //USE_GYRO_REGISTER_DUMP
 
-
-static int parseOutputIndex(char *pch, bool allowAllEscs) {
+  static int parseOutputIndex(char *pch, bool allowAllEscs) {
     int outputIndex = atoi(pch);
     if ((outputIndex >= 0) && (outputIndex < getMotorCount())) {
-        //cliPrintLinef("Using output %d.", outputIndex);
+      //cliPrintLinef("Using output %d.", outputIndex);
     } else if (allowAllEscs && outputIndex == ALL_MOTORS) {
-        //cliPrintLinef("Using all outputs.");
+      //cliPrintLinef("Using all outputs.");
     } else {
-        cliPrintErrorLinef("Invalid output number. Range: 0  %d.", getMotorCount() - 1);
-
-        return -1;
+      cliPrintErrorLinef("Invalid output number. Range: 0  %d.", getMotorCount() - 1);
+      return (-1);
     }
+      return (outputIndex);
+  }
 
-    return outputIndex;
-}
+  #if defined(USE_DSHOT)
+    #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
+      #define ESC_INFO_KISS_V1_EXPECTED_FRAME_SIZE 15
+      #define ESC_INFO_KISS_V2_EXPECTED_FRAME_SIZE 21
+      #define ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE 64
+      #define ESC_INFO_MAX_FRAME_SIZE 255
 
-#if defined(USE_DSHOT)
-#if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
+      enum {
+        ESC_INFO_KISS_V1,
+        ESC_INFO_KISS_V2,
+        ESC_INFO_BLHELI32
+      };
 
-#define ESC_INFO_KISS_V1_EXPECTED_FRAME_SIZE 15
-#define ESC_INFO_KISS_V2_EXPECTED_FRAME_SIZE 21
-#define ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE 64
-#define ESC_INFO_MAX_FRAME_SIZE 255
+      #define ESC_INFO_VERSION_POSITION 12
 
-enum {
-    ESC_INFO_KISS_V1,
-    ESC_INFO_KISS_V2,
-    ESC_INFO_BLHELI32
-};
+      void printEscInfo(const uint8_t *escInfoBuffer, uint8_t bytesRead) {
+        bool escInfoReceived = false;
 
-#define ESC_INFO_VERSION_POSITION 12
-
-void printEscInfo(const uint8_t *escInfoBuffer, uint8_t bytesRead)
-{
-    bool escInfoReceived = false;
-    if (bytesRead > ESC_INFO_VERSION_POSITION) {
-        uint8_t escInfoVersion;
-        uint8_t frameLength;
-        if (escInfoBuffer[ESC_INFO_VERSION_POSITION] == 254) {
+        if (bytesRead > ESC_INFO_VERSION_POSITION) {
+          uint8_t escInfoVersion;
+          uint8_t frameLength;
+          if (escInfoBuffer[ESC_INFO_VERSION_POSITION] == 254) {
             escInfoVersion = ESC_INFO_BLHELI32;
             frameLength = ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE;
-        } else if (escInfoBuffer[ESC_INFO_VERSION_POSITION] == 255) {
+          } else if (escInfoBuffer[ESC_INFO_VERSION_POSITION] == 255) {
             escInfoVersion = ESC_INFO_KISS_V2;
             frameLength = ESC_INFO_KISS_V2_EXPECTED_FRAME_SIZE;
-        } else {
+          } else {
             escInfoVersion = ESC_INFO_KISS_V1;
             frameLength = ESC_INFO_KISS_V1_EXPECTED_FRAME_SIZE;
-        }
+          }
 
-        if (bytesRead == frameLength) {
+          if (bytesRead == frameLength) {
             escInfoReceived = true;
 
             if (calculateCrc8(escInfoBuffer, frameLength - 1) == escInfoBuffer[frameLength - 1]) {
-                uint8_t firmwareVersion = 0;
-                uint8_t firmwareSubVersion = 0;
-                uint8_t escType = 0;
-                switch (escInfoVersion) {
+              uint8_t firmwareVersion = 0;
+              uint8_t firmwareSubVersion = 0;
+              uint8_t escType = 0;
+
+              switch (escInfoVersion) {
                 case ESC_INFO_KISS_V1:
-                    firmwareVersion = escInfoBuffer[12];
-                    firmwareSubVersion = (escInfoBuffer[13] & 0x1f) + 97;
-                    escType = (escInfoBuffer[13] & 0xe0) >> 5;
-
-                    break;
+                  firmwareVersion = escInfoBuffer[12];
+                  firmwareSubVersion = (escInfoBuffer[13] & 0x1f) + 97;
+                  escType = (escInfoBuffer[13] & 0xe0) >> 5;
+                  break;
                 case ESC_INFO_KISS_V2:
-                    firmwareVersion = escInfoBuffer[13];
-                    firmwareSubVersion = escInfoBuffer[14];
-                    escType = escInfoBuffer[15];
-
-                    break;
+                  firmwareVersion = escInfoBuffer[13];
+                  firmwareSubVersion = escInfoBuffer[14];
+                  escType = escInfoBuffer[15];
+                  break;
                 case ESC_INFO_BLHELI32:
-                    firmwareVersion = escInfoBuffer[13];
-                    firmwareSubVersion = escInfoBuffer[14];
-                    escType = escInfoBuffer[15];
+                  firmwareVersion = escInfoBuffer[13];
+                  firmwareSubVersion = escInfoBuffer[14];
+                  escType = escInfoBuffer[15];
+                  break;
+              }
 
-                    break;
-                }
-
-                cliPrint("ESC Type: ");
-                switch (escInfoVersion) {
+              cliPrint("ESC Type: ");
+              switch (escInfoVersion) {
                 case ESC_INFO_KISS_V1:
                 case ESC_INFO_KISS_V2:
-                    switch (escType) {
+                  switch (escType) {
                     case 1:
-                        cliPrintLine("KISS8A");
-
-                        break;
+                      cliPrintLine("KISS8A");
+                      break;
                     case 2:
-                        cliPrintLine("KISS16A");
-
-                        break;
+                      cliPrintLine("KISS16A");
+                      break;
                     case 3:
-                        cliPrintLine("KISS24A");
-
-                        break;
+                      cliPrintLine("KISS24A");
+                      break;
                     case 5:
-                        cliPrintLine("KISS Ultralite");
-
-                        break;
+                      cliPrintLine("KISS Ultralite");
+                      break;
                     default:
-                        cliPrintLine("unknown");
-
-                        break;
-                    }
-
-                    break;
+                      cliPrintLine("unknown");
+                      break;
+                  }
+                  break;
                 case ESC_INFO_BLHELI32:
-                    {
-                        char *escType = (char *)(escInfoBuffer + 31);
-                        escType[32] = 0;
-                        cliPrintLine(escType);
-                    }
+                  {
+                    char *escType = (char *)(escInfoBuffer + 31);
+                    escType[32] = 0;
+                    cliPrintLine(escType);
+                  }
+                  break;
+              }
 
-                    break;
+              cliPrint("MCU Serial No: 0x");
+              for (int i = 0; i < 12; i++) {
+                if (i && (i % 3 == 0)) {
+                  cliPrint("-");
                 }
+                cliPrintf("%02x", escInfoBuffer[i]);
+              }
+              cliPrintLinefeed();
 
-                cliPrint("MCU Serial No: 0x");
-                for (int i = 0; i < 12; i++) {
-                    if (i && (i % 3 == 0)) {
-                        cliPrint("-");
-                    }
-                    cliPrintf("%02x", escInfoBuffer[i]);
-                }
-                cliPrintLinefeed();
-
-                switch (escInfoVersion) {
+              switch (escInfoVersion) {
                 case ESC_INFO_KISS_V1:
                 case ESC_INFO_KISS_V2:
-                    cliPrintLinef("Firmware Version: %d.%02d%c", firmwareVersion / 100, firmwareVersion % 100, (char)firmwareSubVersion);
-
-                    break;
+                  cliPrintLinef("Firmware Version: %d.%02d%c", firmwareVersion / 100, firmwareVersion % 100, (char)firmwareSubVersion);
+                  break;
                 case ESC_INFO_BLHELI32:
-                    cliPrintLinef("Firmware Version: %d.%02d%", firmwareVersion, firmwareSubVersion);
+                  cliPrintLinef("Firmware Version: %d.%02d%", firmwareVersion, firmwareSubVersion);
+                  break;
+              }
+              if (escInfoVersion == ESC_INFO_KISS_V2 || escInfoVersion == ESC_INFO_BLHELI32) {
+                cliPrintLinef("Rotation Direction: %s", escInfoBuffer[16] ? "reversed" : "normal");
+                cliPrintLinef("3D: %s", escInfoBuffer[17] ? "on" : "off");
+                if (escInfoVersion == ESC_INFO_BLHELI32) {
+                  uint8_t setting = escInfoBuffer[18];
+                  cliPrint("Low voltage Limit: ");
+                  switch (setting) {
+                    case 0:
+                      cliPrintLine("off");
+                      break;
+                    case 255:
+                      cliPrintLine("unsupported");
+                      break;
+                    default:
+                      cliPrintLinef("%d.%01d", setting / 10, setting % 10);
+                      break;
+                  }
 
-                    break;
+                  setting = escInfoBuffer[19];
+                  cliPrint("Current Limit: ");
+                  switch (setting) {
+                    case 0:
+                      cliPrintLine("off");
+                      break;
+                    case 255:
+                      cliPrintLine("unsupported");
+                      break;
+                    default:
+                      cliPrintLinef("%d", setting);
+                      break;
+                  }
+
+                  for (int i = 0; i < 4; i++) {
+                    setting = escInfoBuffer[i + 20];
+                    cliPrintLinef("LED %d: %s", i, setting ? (setting == 255) ? "unsupported" : "on" : "off");
+                  }
                 }
-                if (escInfoVersion == ESC_INFO_KISS_V2 || escInfoVersion == ESC_INFO_BLHELI32) {
-                    cliPrintLinef("Rotation Direction: %s", escInfoBuffer[16] ? "reversed" : "normal");
-                    cliPrintLinef("3D: %s", escInfoBuffer[17] ? "on" : "off");
-                    if (escInfoVersion == ESC_INFO_BLHELI32) {
-                        uint8_t setting = escInfoBuffer[18];
-                        cliPrint("Low voltage Limit: ");
-                        switch (setting) {
-                        case 0:
-                            cliPrintLine("off");
-
-                            break;
-                        case 255:
-                            cliPrintLine("unsupported");
-
-                            break;
-                        default:
-                            cliPrintLinef("%d.%01d", setting / 10, setting % 10);
-
-                            break;
-                        }
-
-                        setting = escInfoBuffer[19];
-                        cliPrint("Current Limit: ");
-                        switch (setting) {
-                        case 0:
-                            cliPrintLine("off");
-
-                            break;
-                        case 255:
-                            cliPrintLine("unsupported");
-
-                            break;
-                        default:
-                            cliPrintLinef("%d", setting);
-
-                            break;
-                        }
-
-                        for (int i = 0; i < 4; i++) {
-                            setting = escInfoBuffer[i + 20];
-                            cliPrintLinef("LED %d: %s", i, setting ? (setting == 255) ? "unsupported" : "on" : "off");
-                        }
-                    }
-                }
+              }
             } else {
-                cliPrintErrorLinef("Checksum Error.");
+              cliPrintErrorLinef("Checksum Error.");
             }
+          }
         }
-    }
 
-    if (!escInfoReceived) {
-        //cliPrintLine("No Info.");
-        cliPrintLinef("%s", escInfoBuffer);
-    }
-}
+        if (!escInfoReceived) {
+          //cliPrintLine("No Info.");
+          cliPrintLinef("%s", escInfoBuffer);
+        }
+      }
 
-static void executeEscInfoCommand(uint8_t escIndex)
-{
-    cliPrintLinef("# Info for ESC %d:", escIndex);
+      static void executeEscInfoCommand(uint8_t escIndex) {
+        cliPrintLinef("# Info for ESC %d:", escIndex);
 
-    uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
-    memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
+        uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
+        memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
 
-    startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
+        startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
+        pwmWriteDshotCommand(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, true);
+        delay(10);
+        printEscInfo(escInfoBuffer, getNumberEscBytesRead());
+      }
+    #endif //USE_ESC_SENSOR && USE_ESC_SENSOR_INFO
 
-    pwmWriteDshotCommand(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, true);
-
-    delay(10);
-
-    printEscInfo(escInfoBuffer, getNumberEscBytesRead());
-}
-#endif // USE_ESC_SENSOR && USE_ESC_SENSOR_INFO
-
-static void cliDshotProg(char *cmdline)
-{
-    if (isEmpty(cmdline) || motorConfig()->dev.motorPwmProtocol < PWM_TYPE_DSHOT150) {
+    static void cliDshotProg(char *cmdline) {
+      if (isEmpty(cmdline) || motorConfig()->dev.motorPwmProtocol < PWM_TYPE_DSHOT150) {
         cliShowParseError();
-
         return;
-    }
+      }
 
-    char *saveptr;
-    char *pch = strtok_r(cmdline, " ", &saveptr);
-    int pos = 0;
-    int escIndex = 0;
-    bool firstCommand = true;
-    while (pch != NULL) {
+      char *saveptr;
+      char *pch = strtok_r(cmdline, " ", &saveptr);
+      int pos = 0;
+      int escIndex = 0;
+      bool firstCommand = true;
+
+      while (pch != NULL) {
         switch (pos) {
-        case 0:
+          case 0:
             escIndex = parseOutputIndex(pch, true);
             if (escIndex == -1) {
-                return;
+              return;
             }
-
             break;
-        default:
+          default:
             {
-                int command = atoi(pch);
-                if (command >= 0 && command < DSHOT_MIN_THROTTLE) {
-                    if (firstCommand) {
-                        pwmDisableMotors();
-
-                        if (command == DSHOT_CMD_ESC_INFO) {
-                            delay(5); // Wait for potential ESC telemetry transmission to finish
-                        } else {
-                            delay(1);
-                        }
-
-                        firstCommand = false;
-                    }
-
-                    if (command != DSHOT_CMD_ESC_INFO) {
-                        uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
-                        memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
-                        startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
-                        pwmWriteDshotCommand(escIndex, getMotorCount(), command, true);
-                        delay(10);
-                        cliPrintf("%s", escInfoBuffer);
-                    } else {
-#if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
-                        if (feature(FEATURE_ESC_SENSOR)) {
-                            if (escIndex != ALL_MOTORS) {
-                                executeEscInfoCommand(escIndex);
-                            } else {
-                                for (uint8_t i = 0; i < getMotorCount(); i++) {
-                                    executeEscInfoCommand(i);
-                                }
-                            }
-                        } else
-#endif
-                        {
-                            cliPrintLine("# Not supported.");
-                        }
-                    }
-
-                    //cliPrintLinef("Command Sent: %d", command);
-
-                } else {
-                    cliPrintErrorLinef("# Invalid command. Range: 1 - %d.", DSHOT_MIN_THROTTLE - 1);
+              int command = atoi(pch);
+              if (command >= 0 && command < DSHOT_MIN_THROTTLE) {
+                if (firstCommand) {
+                  pwmDisableMotors();
+                  if (command == DSHOT_CMD_ESC_INFO) {
+                    delay(5); // Wait for potential ESC telemetry transmission to finish
+                  } else {
+                    delay(1);
+                  }
+                  firstCommand = false;
                 }
-            }
 
+                if (command != DSHOT_CMD_ESC_INFO) {
+                  uint8_t escInfoBuffer[ESC_INFO_MAX_FRAME_SIZE];
+                  memset(escInfoBuffer, 0, ESC_INFO_MAX_FRAME_SIZE);
+                  startEscDataRead(escInfoBuffer, ESC_INFO_MAX_FRAME_SIZE);
+                  pwmWriteDshotCommand(escIndex, getMotorCount(), command, true);
+                  delay(10);
+                  cliPrintf("%s", escInfoBuffer);
+                } else {
+                  #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
+                    if (feature(FEATURE_ESC_SENSOR)) {
+                      if (escIndex != ALL_MOTORS) {
+                        executeEscInfoCommand(escIndex);
+                      } else {
+                        for (uint8_t i = 0; i < getMotorCount(); i++) {
+                          executeEscInfoCommand(i);
+                        }
+                      }
+                    } else
+                  #endif
+                    {
+                      cliPrintLine("# Not supported.");
+                    }
+                }
+                //cliPrintLinef("Command Sent: %d", command);
+              } else {
+                cliPrintErrorLinef("# Invalid command. Range: 1 - %d.", DSHOT_MIN_THROTTLE - 1);
+              }
+            }
             break;
         }
 
         pos++;
         pch = strtok_r(NULL, " ", &saveptr);
+      }
+        pwmEnableMotors();
     }
+  #endif //USE_DSHOT
 
-    pwmEnableMotors();
-}
-#endif // USE_DSHOT
-
-#ifdef USE_ESCSERIAL
-static void cliEscPassthrough(char *cmdline)
-{
-    if (isEmpty(cmdline)) {
+  #ifdef USE_ESCSERIAL
+    static void cliEscPassthrough(char *cmdline) {
+      if (isEmpty(cmdline)) {
         cliShowParseError();
-
         return;
-    }
+      }
 
-    char *saveptr;
-    char *pch = strtok_r(cmdline, " ", &saveptr);
-    int pos = 0;
-    uint8_t mode = 0;
-    int escIndex = 0;
-    while (pch != NULL) {
+      char *saveptr;
+      char *pch = strtok_r(cmdline, " ", &saveptr);
+      int pos = 0;
+      uint8_t mode = 0;
+      int escIndex = 0;
+
+      while (pch != NULL) {
         switch (pos) {
-        case 0:
+          case 0:
             if (strncasecmp(pch, "sk", strlen(pch)) == 0) {
-                mode = PROTOCOL_SIMONK;
+              mode = PROTOCOL_SIMONK;
             } else if (strncasecmp(pch, "bl", strlen(pch)) == 0) {
-                mode = PROTOCOL_BLHELI;
+              mode = PROTOCOL_BLHELI;
             } else if (strncasecmp(pch, "ki", strlen(pch)) == 0) {
-                mode = PROTOCOL_KISS;
+              mode = PROTOCOL_KISS;
             } else if (strncasecmp(pch, "cc", strlen(pch)) == 0) {
-                mode = PROTOCOL_KISSALL;
+              mode = PROTOCOL_KISSALL;
             } else {
-                cliShowParseError();
-
-                return;
+              cliShowParseError();
+              return;
             }
             break;
-        case 1:
+          case 1:
             escIndex = parseOutputIndex(pch, mode == PROTOCOL_KISS);
             if (escIndex == -1) {
-                return;
+              return;
             }
-
             break;
-        default:
+          default:
             cliShowParseError();
-
             return;
-
             break;
-
-        }
-        pos++;
-        pch = strtok_r(NULL, " ", &saveptr);
+          }
+          pos++;
+          pch = strtok_r(NULL, " ", &saveptr);
+      }
+      escEnablePassthrough(cliPort, escIndex, mode);
     }
-
-    escEnablePassthrough(cliPort, escIndex, mode);
-}
-#endif
+  #endif
 
 #ifndef USE_QUAD_MIXER_ONLY
 static void cliMixer(char *cmdline)
