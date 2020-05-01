@@ -1239,74 +1239,73 @@ uint8_t cliMode = 0;
     }
   #endif //USE_QUAD_MIXER_ONLY
 
-static void cliMotorMix(char *cmdline)
-{
-#ifdef USE_QUAD_MIXER_ONLY
-    UNUSED(cmdline);
-#else
-    int check = 0;
-    uint8_t len;
-    const char *ptr;
+  static void cliMotorMix(char *cmdline) {
+    #ifdef USE_QUAD_MIXER_ONLY
+      UNUSED(cmdline);
+    #else
+      int check = 0;
+      uint8_t len;
+      const char *ptr;
 
-    if (isEmpty(cmdline)) {
+      if (isEmpty(cmdline)) {
         printMotorMix(DUMP_MASTER, customMotorMixer(0), NULL);
-    } else if (strncasecmp(cmdline, "reset", 5) == 0) {
+      } else if (strncasecmp(cmdline, "reset", 5) == 0) {
         // erase custom mixer
         for (uint32_t i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
-            customMotorMixerMutable(i)->throttle = 0.0f;
+          customMotorMixerMutable(i)->throttle = 0.0f;
         }
-    } else if (strncasecmp(cmdline, "load", 4) == 0) {
+      } else if (strncasecmp(cmdline, "load", 4) == 0) {
         ptr = nextArg(cmdline);
         if (ptr) {
-            len = strlen(ptr);
-            for (uint32_t i = 0; ; i++) {
-                if (mixerNames[i] == NULL) {
-                    cliPrintErrorLinef("Invalid name");
-                    break;
-                }
-                if (strncasecmp(ptr, mixerNames[i], len) == 0) {
-                    mixerLoadMix(i, customMotorMixerMutable(0));
-                    cliPrintLinef("Loaded %s", mixerNames[i]);
-                    cliMotorMix("");
-                    break;
-                }
+          len = strlen(ptr);
+          for (uint32_t i = 0; ; i++) {
+            if (mixerNames[i] == NULL) {
+              cliPrintErrorLinef("Invalid name");
+              break;
             }
+            if (strncasecmp(ptr, mixerNames[i], len) == 0) {
+              mixerLoadMix(i, customMotorMixerMutable(0));
+              cliPrintLinef("Loaded %s", mixerNames[i]);
+              cliMotorMix("");
+              break;
+            }
+          }
         }
-    } else {
+      } else {
         ptr = cmdline;
         uint32_t i = atoi(ptr); // get motor number
         if (i < MAX_SUPPORTED_MOTORS) {
-            ptr = nextArg(ptr);
-            if (ptr) {
-                customMotorMixerMutable(i)->throttle = fastA2F(ptr);
-                check++;
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                customMotorMixerMutable(i)->roll = fastA2F(ptr);
-                check++;
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                customMotorMixerMutable(i)->pitch = fastA2F(ptr);
-                check++;
-            }
-            ptr = nextArg(ptr);
-            if (ptr) {
-                customMotorMixerMutable(i)->yaw = fastA2F(ptr);
-                check++;
-            }
-            if (check != 4) {
-                cliShowParseError();
-            } else {
-                printMotorMix(DUMP_MASTER, customMotorMixer(0), NULL);
-            }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            customMotorMixerMutable(i)->throttle = fastA2F(ptr);
+            check++;
+          }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            customMotorMixerMutable(i)->roll = fastA2F(ptr);
+            check++;
+          }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            customMotorMixerMutable(i)->pitch = fastA2F(ptr);
+            check++;
+          }
+          ptr = nextArg(ptr);
+          if (ptr) {
+            customMotorMixerMutable(i)->yaw = fastA2F(ptr);
+            check++;
+          }
+          if (check != 4) {
+            cliShowParseError();
+          } else {
+            printMotorMix(DUMP_MASTER, customMotorMixer(0), NULL);
+          }
         } else {
-            cliShowArgumentRangeError("index", 0, MAX_SUPPORTED_MOTORS - 1);
+          cliShowArgumentRangeError("index", 0, MAX_SUPPORTED_MOTORS - 1);
         }
-    }
-#endif
-}
+      }
+    #endif //USE_QUAD_MIXER_ONLY
+  }
 
 static void printRxRange(uint8_t dumpMask, const rxChannelRangeConfig_t *channelRangeConfigs, const rxChannelRangeConfig_t *defaultChannelRangeConfigs)
 {
