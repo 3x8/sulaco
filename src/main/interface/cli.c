@@ -3241,414 +3241,376 @@ uint8_t cliMode = 0;
     cliPrintErrorLinef("Invalid name");
   }
 
-#ifdef USE_PEGASUS_UI
-static const char * valueSectionMask[] = {
-    "GLOBAL", "PROFILE", "RATE"
-};
+  #ifdef USE_PEGASUS_UI
+    static const char * valueSectionMask[] = {
+      "GLOBAL", "PROFILE", "RATE"
+    };
 
-static const char * valueTypeMask[] = {
-    "UINT8", "INT8", "UINT16", "INT16"
-};
+    static const char * valueTypeMask[] = {
+      "UINT8", "INT8", "UINT16", "INT16"
+    };
 
-static const char * valueModeMask[] = {
-    "DIRECT", "LOOKUP", "ARRAY", "BITMASK"
-};
+    static const char * valueModeMask[] = {
+      "DIRECT", "LOOKUP", "ARRAY", "BITMASK"
+    };
 
-void cliPrintValueJson(int32_t i){
-    const clivalue_t *var = &valueTable[i];
-    cliPrintf("\"%s\":{\"scope\":\"%s\",\"type\":\"%s\",\"mode\":\"%s\",\"current\":\"",
-                var->name,
-                valueSectionMask[((var->type & VALUE_SECTION_MASK) >> VALUE_SECTION_OFFSET)],
-                valueTypeMask[((var->type & VALUE_TYPE_MASK) >> VALUE_TYPE_OFFSET)],
-                valueModeMask[((var->type & VALUE_MODE_MASK) >> VALUE_MODE_OFFSET)]);
-    cliPrintVar(var, false);
-    cliPrint("\",\"default\":\"");
-    const pgRegistry_t *pg = pgFind(var->pgn);
-    const int valueOffset = getValueOffset(var);
-    printValuePointer(var, (uint8_t*)pg->address + valueOffset, false);
-    cliPrint("\"");
-    if ((var->type & VALUE_MODE_MASK) == MODE_LOOKUP)
-    {
+    void cliPrintValueJson(int32_t i){
+      const clivalue_t *var = &valueTable[i];
+      cliPrintf("\"%s\":{\"scope\":\"%s\",\"type\":\"%s\",\"mode\":\"%s\",\"current\":\"",
+        var->name,
+        valueSectionMask[((var->type & VALUE_SECTION_MASK) >> VALUE_SECTION_OFFSET)],
+        valueTypeMask[((var->type & VALUE_TYPE_MASK) >> VALUE_TYPE_OFFSET)],
+        valueModeMask[((var->type & VALUE_MODE_MASK) >> VALUE_MODE_OFFSET)]);
+      cliPrintVar(var, false);
+      cliPrint("\",\"default\":\"");
+      const pgRegistry_t *pg = pgFind(var->pgn);
+      const int valueOffset = getValueOffset(var);
+      printValuePointer(var, (uint8_t*)pg->address + valueOffset, false);
+      cliPrint("\"");
+      if ((var->type & VALUE_MODE_MASK) == MODE_LOOKUP)
+      {
         const lookupTableEntry_t *tableEntry = &lookupTables[var->config.lookup.tableIndex];
         cliPrint(",\"values\":[");
         for (int32_t i = 0; i < tableEntry->valueCount ; i++) {
-            if (i > 0)
-            {
-                cliPrintLine(",");
-            }
-            cliPrintf("\"%s\"", tableEntry->values[i]);
+          if (i > 0)
+          {
+            cliPrintLine(",");
+          }
+          cliPrintf("\"%s\"", tableEntry->values[i]);
         }
         cliPrint("]");
-    }
-    if ((var->type & VALUE_MODE_MASK) == MODE_DIRECT) {
+      }
+      if ((var->type & VALUE_MODE_MASK) == MODE_DIRECT) {
         cliPrintf(",\"min\":\"%d\",\"max\":\"%d\"", var->config.minmax.min, var->config.minmax.max);
+      }
+      // if ((var->type & VALUE_MODE_MASK) == MODE_ARRAY) {
+      //   cliPrintf(",\"min\":\"%d\",\"max\":\"%d\"", var->config.minmax.min, var->config.minmax.max);
+      // }
+      cliPrint("}");
     }
-    // if ((var->type & VALUE_MODE_MASK) == MODE_ARRAY) {
-    //     cliPrintf(",\"min\":\"%d\",\"max\":\"%d\"", var->config.minmax.min, var->config.minmax.max);
-    // }
-    cliPrint("}");
-}
 
-static void printFeatureJson(const featureConfig_t *configCopy)
-{
-    const uint32_t mask = configCopy->enabledFeatures;
-    const uint32_t defaultMask = featureConfig()->enabledFeatures;
-    cliPrintf(",\"features\":{\"scope\":\"GLOBAL\",\"type\":\"UINT8\",\"mode\":\"ARRAY\",\"current\":\"%d\",\"values\":[", mask);
-    for (uint32_t i = 0; featureNames[i]; i++) { // disabled features first
+    static void printFeatureJson(const featureConfig_t *configCopy) {
+      const uint32_t mask = configCopy->enabledFeatures;
+      const uint32_t defaultMask = featureConfig()->enabledFeatures;
+      cliPrintf(",\"features\":{\"scope\":\"GLOBAL\",\"type\":\"UINT8\",\"mode\":\"ARRAY\",\"current\":\"%d\",\"values\":[", mask);
+      for (uint32_t i = 0; featureNames[i]; i++) { // disabled features first
         if (strcmp(featureNames[i], emptyString) != 0) { //Skip unused
-            if (i > 0)
-            {
-                cliPrint(",");
-            }
-            if ((~defaultMask | mask) & (1 << i)) {
-                cliPrintf("\"-%s\"", featureNames[i]);
-            } else {
-                cliPrintf("\"%s\"", featureNames[i]);
-            }
+          if (i > 0)
+          {
+            cliPrint(",");
+          }
+          if ((~defaultMask | mask) & (1 << i)) {
+            cliPrintf("\"-%s\"", featureNames[i]);
+          } else {
+            cliPrintf("\"%s\"", featureNames[i]);
+          }
         }
+      }
+      cliPrintf("]}");
     }
-    cliPrintf("]}");
-}
-static void printSerialJson(const serialConfig_t *serialConfig)
-{
-    cliPrint(",\"ports\":{\"scope\":\"GLOBAL\",\"type\":\"UINT16\",\"mode\":\"ARRAY\",\"values\":[");
-    for (uint32_t i = 0; i < SERIAL_PORT_COUNT && serialIsPortAvailable(serialConfig->portConfigs[i].identifier); i++) {
+
+    static void printSerialJson(const serialConfig_t *serialConfig) {
+      cliPrint(",\"ports\":{\"scope\":\"GLOBAL\",\"type\":\"UINT16\",\"mode\":\"ARRAY\",\"values\":[");
+      for (uint32_t i = 0; i < SERIAL_PORT_COUNT && serialIsPortAvailable(serialConfig->portConfigs[i].identifier); i++) {
         if (i > 0)
         {
-            cliPrint(",");
+          cliPrint(",");
         }
         cliPrintf("\"%d|%d|%ld|%ld|%ld|%ld\"",
-            serialConfig->portConfigs[i].identifier,
-            serialConfig->portConfigs[i].functionMask,
-            baudRates[serialConfig->portConfigs[i].msp_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].gps_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].telemetry_baudrateIndex],
-            baudRates[serialConfig->portConfigs[i].blackbox_baudrateIndex]);
+          serialConfig->portConfigs[i].identifier,
+          serialConfig->portConfigs[i].functionMask,
+          baudRates[serialConfig->portConfigs[i].msp_baudrateIndex],
+          baudRates[serialConfig->portConfigs[i].gps_baudrateIndex],
+          baudRates[serialConfig->portConfigs[i].telemetry_baudrateIndex],
+          baudRates[serialConfig->portConfigs[i].blackbox_baudrateIndex]);
+      }
+      cliPrintf("]}");
     }
-    cliPrintf("]}");
-}
 
-static void printAuxJson(const modeActivationCondition_t *modeActivationConditions)
-{
-    cliPrint(",\"modes\":{\"scope\":\"GLOBAL\",\"type\":\"UINT16\",\"mode\":\"ARRAY\",\"values\":[");
-    for (uint32_t i = 0; i < MAX_MODE_ACTIVATION_CONDITION_COUNT; i++) {
+    static void printAuxJson(const modeActivationCondition_t *modeActivationConditions) {
+      cliPrint(",\"modes\":{\"scope\":\"GLOBAL\",\"type\":\"UINT16\",\"mode\":\"ARRAY\",\"values\":[");
+      for (uint32_t i = 0; i < MAX_MODE_ACTIVATION_CONDITION_COUNT; i++) {
         if (i > 0)
         {
-            cliPrint(",");
+          cliPrint(",");
         }
         const modeActivationCondition_t *mac = &modeActivationConditions[i];
         const box_t *box = findBoxByBoxId(mac->modeId);
         if (box) {
-            cliPrintf("\"%u|%u|%u|%u|%u|%u\"",
-                i,
-                box->permanentId,
-                mac->auxChannelIndex,
-                MODE_STEP_TO_CHANNEL_VALUE(mac->range.startStep),
-                MODE_STEP_TO_CHANNEL_VALUE(mac->range.endStep),
-                mac->modeLogic
-            );
+          cliPrintf("\"%u|%u|%u|%u|%u|%u\"",
+            i,
+            box->permanentId,
+            mac->auxChannelIndex,
+            MODE_STEP_TO_CHANNEL_VALUE(mac->range.startStep),
+            MODE_STEP_TO_CHANNEL_VALUE(mac->range.endStep),
+            mac->modeLogic
+          );
         }
+      }
+      cliPrintf("]}");
     }
-    cliPrintf("]}");
-}
 
-static void printResourceJson() {
-    cliPrint(",\"resources\":{\"scope\":\"GLOBAL\",\"type\":\"string\",\"mode\":\"ARRAY\",\"values\":[");
-    for (int i = 0; i < DEFIO_IO_USED_COUNT; i++) {
+    static void printResourceJson() {
+      cliPrint(",\"resources\":{\"scope\":\"GLOBAL\",\"type\":\"string\",\"mode\":\"ARRAY\",\"values\":[");
+      for (int i = 0; i < DEFIO_IO_USED_COUNT; i++) {
         if (i > 0)
         {
-            cliPrint(",");
+          cliPrint(",");
         }
         const char* owner;
         owner = ownerNames[ioRecs[i].owner];
 
         cliPrintf("\"%c%02d|%s|", IO_GPIOPortIdx(ioRecs + i) + 'A', IO_GPIOPinIdx(ioRecs + i), owner);
         if (ioRecs[i].index > 0) {
-            cliPrintf("%d", ioRecs[i].index);
+          cliPrintf("%d", ioRecs[i].index);
         } else {
-            cliPrintf("0");
+          cliPrintf("0");
         }
         cliPrintf("\"");
         //cliPrintLinefeed();
+      }
+      cliPrintf("]}");
     }
-    cliPrintf("]}");
-}
 
-#ifdef USE_TPA_CURVES
-static void printTPACurveJson() {
-    cliPrint(",\"tpa_curves\":{\"kp\":[");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
-        if (i > 0)
-        {
+    #ifdef USE_TPA_CURVES
+      static void printTPACurveJson() {
+        cliPrint(",\"tpa_curves\":{\"kp\":[");
+        for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+          if (i > 0)
+          {
             cliPrint(",");
+          }
+          cliPrintf("\"%d\"", currentControlRateProfile->tpaKpCurve[i]);
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKpCurve[i]);
-    }
-    cliPrint("],\"kd\":[");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
-        if (i > 0)
-        {
+        cliPrint("],\"kd\":[");
+        for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+          if (i > 0)
+          {
             cliPrint(",");
+          }
+          cliPrintf("\"%d\"", currentControlRateProfile->tpaKdCurve[i]);
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKdCurve[i]);
-    }
-    cliPrint("],\"ki\":[");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
-        if (i > 0)
-        {
+        cliPrint("],\"ki\":[");
+        for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+          if (i > 0)
+          {
             cliPrint(",");
+          }
+          cliPrintf("\"%d\"", currentControlRateProfile->tpaKiCurve[i]);
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKiCurve[i]);
-    }
-    cliPrint("]}");
-}
-#endif
+        cliPrint("]}");
+      }
+    #endif
 
 
-#define PROFILE_JSON_STRING ",\"%s_profile\":{\"scope\":\"GLOBAL\",\"type\":\"UINT8\",\"mode\":\"LOOKUP\",\"current\":\"%d\",\"values\":[{"
+    #define PROFILE_JSON_STRING ",\"%s_profile\":{\"scope\":\"GLOBAL\",\"type\":\"UINT8\",\"mode\":\"LOOKUP\",\"current\":\"%d\",\"values\":[{"
 
-static void dumpProfileValueJson(uint16_t valueSection)
-{
-    bool foundFirst = false;
-    for (uint32_t i = 0; i < valueTableEntryCount; i++) {
+    static void dumpProfileValueJson(uint16_t valueSection) {
+      bool foundFirst = false;
+      for (uint32_t i = 0; i < valueTableEntryCount; i++) {
         const clivalue_t *value = &valueTable[i];
         if ((value->type & VALUE_SECTION_MASK) == valueSection) {
-            if (foundFirst)
-            {
-                cliPrint(",");
-            }
-            cliPrintValueJson(i);
-            foundFirst = true;
+          if (foundFirst)
+          {
+            cliPrint(",");
+          }
+          cliPrintValueJson(i);
+          foundFirst = true;
         }
+      }
     }
-}
 
-static void cliPidProfilesJson()
-{
-    cliPrintf(PROFILE_JSON_STRING, "pid", getCurrentPidProfileIndex());
-    const uint8_t saved = systemConfig_Copy.pidProfileIndex;
-    for (uint32_t i = 0; i < MAX_PROFILE_COUNT; i++) {
+    static void cliPidProfilesJson() {
+      cliPrintf(PROFILE_JSON_STRING, "pid", getCurrentPidProfileIndex());
+      const uint8_t saved = systemConfig_Copy.pidProfileIndex;
+      for (uint32_t i = 0; i < MAX_PROFILE_COUNT; i++) {
         changePidProfile(i);
         if (i > 0)
         {
-            cliPrint("},{");
+          cliPrint("},{");
         }
         dumpProfileValueJson(PROFILE_VALUE);
+      }
+      changePidProfile(saved);
+      cliPrint("}]}");
     }
-    changePidProfile(saved);
-    cliPrint("}]}");
-}
 
-static void cliRateProfilesJson()
-{
-    cliPrintf(PROFILE_JSON_STRING, "rate", getCurrentControlRateProfileIndex());
-    const uint8_t saved = systemConfig_Copy.activeRateProfile;
-    for (uint32_t i = 0; i < CONTROL_RATE_PROFILE_COUNT; i++) {
+    static void cliRateProfilesJson() {
+      cliPrintf(PROFILE_JSON_STRING, "rate", getCurrentControlRateProfileIndex());
+      const uint8_t saved = systemConfig_Copy.activeRateProfile;
+      for (uint32_t i = 0; i < CONTROL_RATE_PROFILE_COUNT; i++) {
         changeControlRateProfile(i);
         if (i > 0)
         {
-            cliPrint("},{");
+          cliPrint("},{");
         }
         dumpProfileValueJson(PROFILE_RATE_VALUE);
+      }
+      changeControlRateProfile(saved);
+      cliPrint("}]}");
     }
-    changeControlRateProfile(saved);
-    cliPrint("}]}");
-}
 
-void cliConfig(char *cmdline)
-{
-
-    UNUSED(cmdline);
-    cliPrintLine("{");
-    for (uint32_t i = 0; i < valueTableEntryCount; i++)
-    {
+    void cliConfig(char *cmdline) {
+      UNUSED(cmdline);
+      cliPrintLine("{");
+      for (uint32_t i = 0; i < valueTableEntryCount; i++) {
         if (i > 0)
         {
-            cliPrintLine(",");
+          cliPrintLine(",");
         }
         cliPrintValueJson(i);
+      }
+      cliPidProfilesJson();
+      cliRateProfilesJson();
+      printFeatureJson(&featureConfig_Copy);
+      printSerialJson(serialConfig());
+      printAuxJson(modeActivationConditions(0));
+      printResourceJson();
+      #ifdef USE_TPA_CURVES
+        printTPACurveJson();
+      #endif
+      cliPrintf(",\"name\":\"%s\"", pilotConfig()->name);
+      cliPrintf(",\"version\":\"%s|%s|%s|%s\"",FC_FIRMWARE_NAME, targetName, systemConfig()->boardIdentifier, FC_VERSION_STRING);
+      #ifdef USE_GYRO_IMUF9001
+        cliPrintf(",\"imuf\":\"%lu\"", imufCurrentVersion);
+      #endif
+      cliPrintLine("}");
     }
-    cliPidProfilesJson();
-    cliRateProfilesJson();
-    printFeatureJson(&featureConfig_Copy);
-    printSerialJson(serialConfig());
-    printAuxJson(modeActivationConditions(0));
-    printResourceJson();
-#ifdef USE_TPA_CURVES
-    printTPACurveJson();
-#endif
-    cliPrintf(",\"name\":\"%s\"", pilotConfig()->name);
-    cliPrintf(",\"version\":\"%s|%s|%s|%s\"",
-        FC_FIRMWARE_NAME,
-        targetName,
-        systemConfig()->boardIdentifier,
-        FC_VERSION_STRING
-    );
-#ifdef USE_GYRO_IMUF9001
-    cliPrintf(",\"imuf\":\"%lu\"", imufCurrentVersion);
-#endif
-    cliPrintLine("}");
-}
-#endif
+  #endif
 
-static uint8_t getWordLength(char *bufBegin, char *bufEnd)
-{
+  static uint8_t getWordLength(char *bufBegin, char *bufEnd) {
     while (*(bufEnd - 1) == ' ') {
-        bufEnd--;
+      bufEnd--;
     }
-
     return bufEnd - bufBegin;
-}
+  }
 
-STATIC_UNIT_TESTED void cliSet(char *cmdline)
-{
+  STATIC_UNIT_TESTED void cliSet(char *cmdline) {
     const uint32_t len = strlen(cmdline);
     char *eqptr;
 
     if (len == 0 || (len == 1 && cmdline[0] == '*')) {
-        cliPrintLine("Current settings: ");
+      cliPrintLine("Current settings: ");
 
-        for (uint32_t i = 0; i < valueTableEntryCount; i++) {
-            const clivalue_t *val = &valueTable[i];
-            cliPrintf("%s = ", valueTable[i].name);
-            cliPrintVar(val, len); // when len is 1 (when * is passed as argument), it will print min/max values as well, for gui
-            cliPrintLinefeed();
-        }
+      for (uint32_t i = 0; i < valueTableEntryCount; i++) {
+        const clivalue_t *val = &valueTable[i];
+        cliPrintf("%s = ", valueTable[i].name);
+        cliPrintVar(val, len); // when len is 1 (when * is passed as argument), it will print min/max values as well, for gui
+        cliPrintLinefeed();
+      }
     } else if ((eqptr = strstr(cmdline, "=")) != NULL) {
-        // has equals
+      // has equals
 
-        uint8_t variableNameLength = getWordLength(cmdline, eqptr);
+      uint8_t variableNameLength = getWordLength(cmdline, eqptr);
 
-        // skip the '=' and any ' ' characters
-        eqptr++;
-        eqptr = skipSpace(eqptr);
+      // skip the '=' and any ' ' characters
+      eqptr++;
+      eqptr = skipSpace(eqptr);
 
-        for (uint32_t i = 0; i < valueTableEntryCount; i++) {
-            const clivalue_t *val = &valueTable[i];
+      for (uint32_t i = 0; i < valueTableEntryCount; i++) {
+        const clivalue_t *val = &valueTable[i];
 
-            // ensure exact match when setting to prevent setting variables with shorter names
-            if (strncasecmp(cmdline, val->name, strlen(val->name)) == 0 && variableNameLength == strlen(val->name)) {
-
-                bool valueChanged = false;
-                int16_t value  = 0;
-                switch (val->type & VALUE_MODE_MASK) {
-                case MODE_DIRECT: {
-                        int16_t value = atoi(eqptr);
-
-                        if (value >= val->config.minmax.min && value <= val->config.minmax.max) {
-                            cliSetVar(val, value);
-                            valueChanged = true;
-                        }
-                    }
-
-                    break;
-                case MODE_LOOKUP:
-                case MODE_BITSET: {
-                        int tableIndex;
-                        if ((val->type & VALUE_MODE_MASK) == MODE_BITSET) {
-                            tableIndex = TABLE_OFF_ON;
-                        } else {
-                            tableIndex = val->config.lookup.tableIndex;
-                        }
-                        const lookupTableEntry_t *tableEntry = &lookupTables[tableIndex];
-                        bool matched = false;
-                        for (uint32_t tableValueIndex = 0; tableValueIndex < tableEntry->valueCount && !matched; tableValueIndex++) {
-                            matched = tableEntry->values[tableValueIndex] && strcasecmp(tableEntry->values[tableValueIndex], eqptr) == 0;
-
-                            if (matched) {
-                                value = tableValueIndex;
-
-                                cliSetVar(val, value);
-                                valueChanged = true;
-                            }
-                        }
-                    }
-
-                    break;
-
-                case MODE_ARRAY: {
-                        const uint8_t arrayLength = val->config.array.length;
-                        char *valPtr = eqptr;
-
-                        int i = 0;
-                        while (i < arrayLength && valPtr != NULL) {
-                            // skip spaces
-                            valPtr = skipSpace(valPtr);
-
-                            // process substring starting at valPtr
-                            // note: no need to copy substrings for atoi()
-                            //       it stops at the first character that cannot be converted...
-                            switch (val->type & VALUE_TYPE_MASK) {
-                            default:
-                            case VAR_UINT8:
-                                {
-                                    // fetch data pointer
-                                    uint8_t *data = (uint8_t *)cliGetValuePointer(val) + i;
-                                    // store value
-                                    *data = (uint8_t)atoi((const char*) valPtr);
-                                }
-
-                                break;
-                            case VAR_INT8:
-                                {
-                                    // fetch data pointer
-                                    int8_t *data = (int8_t *)cliGetValuePointer(val) + i;
-                                    // store value
-                                    *data = (int8_t)atoi((const char*) valPtr);
-                                }
-
-                                break;
-                            case VAR_UINT16:
-                                {
-                                    // fetch data pointer
-                                    uint16_t *data = (uint16_t *)cliGetValuePointer(val) + i;
-                                    // store value
-                                    *data = (uint16_t)atoi((const char*) valPtr);
-                                }
-
-                                break;
-                            case VAR_INT16:
-                                {
-                                    // fetch data pointer
-                                    int16_t *data = (int16_t *)cliGetValuePointer(val) + i;
-                                    // store value
-                                    *data = (int16_t)atoi((const char*) valPtr);
-                                }
-
-                                break;
-                            }
-
-                            // find next comma (or end of string)
-                            valPtr = strchr(valPtr, ',') + 1;
-
-                            i++;
-                        }
-                    }
-
-                    // mark as changed
-                    valueChanged = true;
-
-                    break;
-
+        // ensure exact match when setting to prevent setting variables with shorter names
+        if (strncasecmp(cmdline, val->name, strlen(val->name)) == 0 && variableNameLength == strlen(val->name)) {
+          bool valueChanged = false;
+          int16_t value  = 0;
+          switch (val->type & VALUE_MODE_MASK) {
+            case MODE_DIRECT: {
+                int16_t value = atoi(eqptr);
+                if (value >= val->config.minmax.min && value <= val->config.minmax.max) {
+                  cliSetVar(val, value);
+                  valueChanged = true;
                 }
-
-                if (valueChanged) {
-                    cliPrintf("%s set to ", val->name);
-                    cliPrintVar(val, 0);
+              }
+              break;
+            case MODE_LOOKUP:
+            case MODE_BITSET: {
+                int tableIndex;
+                if ((val->type & VALUE_MODE_MASK) == MODE_BITSET) {
+                  tableIndex = TABLE_OFF_ON;
                 } else {
-                    cliPrintErrorLinef("Invalid value");
-                    cliPrintVarRange(val);
+                  tableIndex = val->config.lookup.tableIndex;
                 }
+                const lookupTableEntry_t *tableEntry = &lookupTables[tableIndex];
+                bool matched = false;
+                for (uint32_t tableValueIndex = 0; tableValueIndex < tableEntry->valueCount && !matched; tableValueIndex++) {
+                  matched = tableEntry->values[tableValueIndex] && strcasecmp(tableEntry->values[tableValueIndex], eqptr) == 0;
+                  if (matched) {
+                    value = tableValueIndex;
+                    cliSetVar(val, value);
+                    valueChanged = true;
+                  }
+                }
+              }
+              break;
 
-                return;
-            }
+            case MODE_ARRAY: {
+                const uint8_t arrayLength = val->config.array.length;
+                char *valPtr = eqptr;
+                int i = 0;
+                while (i < arrayLength && valPtr != NULL) {
+                  // skip spaces
+                  valPtr = skipSpace(valPtr);
+                  // process substring starting at valPtr
+                  // note: no need to copy substrings for atoi()
+                  //       it stops at the first character that cannot be converted...
+                  switch (val->type & VALUE_TYPE_MASK) {
+                    default:
+                    case VAR_UINT8: {
+                        // fetch data pointer
+                        uint8_t *data = (uint8_t *)cliGetValuePointer(val) + i;
+                        // store value
+                        *data = (uint8_t)atoi((const char*) valPtr);
+                      }
+                      break;
+                    case VAR_INT8: {
+                        // fetch data pointer
+                        int8_t *data = (int8_t *)cliGetValuePointer(val) + i;
+                        // store value
+                        *data = (int8_t)atoi((const char*) valPtr);
+                      }
+                      break;
+                    case VAR_UINT16:  {
+                        // fetch data pointer
+                        uint16_t *data = (uint16_t *)cliGetValuePointer(val) + i;
+                        // store value
+                        *data = (uint16_t)atoi((const char*) valPtr);
+                      }
+                      break;
+                    case VAR_INT16: {
+                        // fetch data pointer
+                        int16_t *data = (int16_t *)cliGetValuePointer(val) + i;
+                        // store value
+                        *data = (int16_t)atoi((const char*) valPtr);
+                      }
+                      break;
+                  }
+                  // find next comma (or end of string)
+                  valPtr = strchr(valPtr, ',') + 1;
+                  i++;
+                }
+              }
+              // mark as changed
+              valueChanged = true;
+              break;
+          }
+
+          if (valueChanged) {
+            cliPrintf("%s set to ", val->name);
+            cliPrintVar(val, 0);
+          } else {
+            cliPrintErrorLinef("Invalid value");
+            cliPrintVarRange(val);
+          }
+          return;
         }
-        cliPrintErrorLinef("Invalid name");
+      }
+      cliPrintErrorLinef("Invalid name");
     } else {
-        // no equals, check for matching variables.
-        cliGet(cmdline);
+      // no equals, check for matching variables.
+      cliGet(cmdline);
     }
-}
+  }
 
 static void cliStatus(char *cmdline)
 {
