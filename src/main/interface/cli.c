@@ -4664,10 +4664,11 @@ uint8_t cliMode = 0;
               break;
             }
           }
-          if (cmd < cmdTable + ARRAYLEN(cmdTable))
+          if (cmd < cmdTable + ARRAYLEN(cmdTable)) {
             cmd->func(options);
-          else
+          } else {
             cliPrint("Unknown command, try 'help'");
+          }
           bufferIndex = 0;
         }
 
