@@ -4203,11 +4203,7 @@ uint8_t cliMode = 0;
           uint8_t index = 1;
           for (unsigned i = 0; i < USABLE_TIMER_CHANNEL_COUNT; i++) {
             if (timerHardware[i].tag == ioTag) {
-              cliPrintLinef("# %d. TIM%d CH%d",
-                index,
-                timerGetTIMNumber(timerHardware[i].tim),
-                CC_INDEX_FROM_CHANNEL(timerHardware[i].channel)
-              );
+              cliPrintLinef("# %d. TIM%d CH%d", index, timerGetTIMNumber(timerHardware[i].tim), CC_INDEX_FROM_CHANNEL(timerHardware[i].channel));
               index++;
             }
           }
@@ -4231,193 +4227,172 @@ uint8_t cliMode = 0;
     }
   #endif
 
-static void printConfig(char *cmdline, bool doDiff)
-{
+  static void printConfig(char *cmdline, bool doDiff) {
     uint8_t dumpMask = DUMP_MASTER;
     char *options;
     if ((options = checkCommand(cmdline, "master"))) {
-        dumpMask = DUMP_MASTER; // only
+      dumpMask = DUMP_MASTER; // only
     } else if ((options = checkCommand(cmdline, "profile"))) {
-        dumpMask = DUMP_PROFILE; // only
+      dumpMask = DUMP_PROFILE; // only
     } else if ((options = checkCommand(cmdline, "rates"))) {
-        dumpMask = DUMP_RATES; // only
+      dumpMask = DUMP_RATES; // only
     } else if ((options = checkCommand(cmdline, "all"))) {
-        dumpMask = DUMP_ALL;   // all profiles and rates
+      dumpMask = DUMP_ALL;   // all profiles and rates
     } else {
-        options = cmdline;
+      options = cmdline;
     }
 
     if (doDiff) {
-        dumpMask = dumpMask | DO_DIFF;
+      dumpMask = dumpMask | DO_DIFF;
     }
 
     backupAndResetConfigs();
     if (checkCommand(options, "defaults")) {
-        dumpMask = dumpMask | SHOW_DEFAULTS;   // add default values as comments for changed values
+      dumpMask = dumpMask | SHOW_DEFAULTS;   // add default values as comments for changed values
     }
 
     if ((dumpMask & DUMP_MASTER) || (dumpMask & DUMP_ALL)) {
-        cliPrintHashLine("version");
-        cliVersion(NULL);
-        cliPrintLinefeed();
-
-#if defined(USE_BOARD_INFO)
+      cliPrintHashLine("version");
+      cliVersion(NULL);
+      cliPrintLinefeed();
+      #if defined(USE_BOARD_INFO)
         cliBoardName("");
         cliManufacturerId("");
-#endif
+      #endif
 
-        if (dumpMask & DUMP_ALL) {
-            cliMcuId(NULL);
-#if defined(USE_BOARD_INFO) && defined(USE_SIGNATURE)
-        cliSignature("");
-#endif
-        }
+      if (dumpMask & DUMP_ALL) {
+        cliMcuId(NULL);
+        #if defined(USE_BOARD_INFO) && defined(USE_SIGNATURE)
+          cliSignature("");
+        #endif
+      }
 
-        if ((dumpMask & (DUMP_ALL | DO_DIFF)) == (DUMP_ALL | DO_DIFF)) {
-            cliPrintHashLine("reset configuration to default settings");
-            cliPrint("defaults nosave");
-            cliPrintLinefeed();
-        }
+      if ((dumpMask & (DUMP_ALL | DO_DIFF)) == (DUMP_ALL | DO_DIFF)) {
+        cliPrintHashLine("reset configuration to default settings");
+        cliPrint("defaults nosave");
+        cliPrintLinefeed();
+      }
 
-        cliPrintHashLine("name");
-        printName(dumpMask, &pilotConfig_Copy);
+      cliPrintHashLine("name");
+      printName(dumpMask, &pilotConfig_Copy);
 
-#ifdef USE_RESOURCE_MGMT
+      #ifdef USE_RESOURCE_MGMT
         cliPrintHashLine("resources");
         printResource(dumpMask);
-#endif
+      #endif
 
-#ifndef USE_QUAD_MIXER_ONLY
+      #ifndef USE_QUAD_MIXER_ONLY
         cliPrintHashLine("mixer");
         const bool equalsDefault = mixerConfig_Copy.mixerMode == mixerConfig()->mixerMode;
         const char *formatMixer = "mixer %s";
         cliDefaultPrintLinef(dumpMask, equalsDefault, formatMixer, mixerNames[mixerConfig()->mixerMode - 1]);
         cliDumpPrintLinef(dumpMask, equalsDefault, formatMixer, mixerNames[mixerConfig_Copy.mixerMode - 1]);
-
         cliDumpPrintLinef(dumpMask, customMotorMixer(0)->throttle == 0.0f, "\r\nmmix reset\r\n");
-
         printMotorMix(dumpMask, customMotorMixer_CopyArray, customMotorMixer(0));
 
-#ifdef USE_SERVOS
-        cliPrintHashLine("servo");
-        printServo(dumpMask, servoParams_CopyArray, servoParams(0));
+        #ifdef USE_SERVOS
+          cliPrintHashLine("servo");
+          printServo(dumpMask, servoParams_CopyArray, servoParams(0));
+          cliPrintHashLine("servo mix");
+          // print custom servo mixer if exists
+          cliDumpPrintLinef(dumpMask, customServoMixers(0)->rate == 0, "smix reset\r\n");
+          printServoMix(dumpMask, customServoMixers_CopyArray, customServoMixers(0));
+        #endif //USE_SERVOS
+      #endif //USE_QUAD_MIXER_ONLY
 
-        cliPrintHashLine("servo mix");
-        // print custom servo mixer if exists
-        cliDumpPrintLinef(dumpMask, customServoMixers(0)->rate == 0, "smix reset\r\n");
-        printServoMix(dumpMask, customServoMixers_CopyArray, customServoMixers(0));
-#endif
-#endif
+      cliPrintHashLine("feature");
+      printFeature(dumpMask, &featureConfig_Copy, featureConfig());
 
-        cliPrintHashLine("feature");
-        printFeature(dumpMask, &featureConfig_Copy, featureConfig());
-
-#if defined(USE_BEEPER)
+      #if defined(USE_BEEPER)
         cliPrintHashLine("beeper");
         printBeeper(dumpMask, beeperConfig_Copy.beeper_off_flags, beeperConfig()->beeper_off_flags, "beeper");
 
-#if defined(USE_DSHOT)
-        cliPrintHashLine("beacon");
-        printBeeper(dumpMask, beeperConfig_Copy.dshotBeaconOffFlags, beeperConfig()->dshotBeaconOffFlags, "beacon");
-#endif
-#endif // USE_BEEPER
+        #if defined(USE_DSHOT)
+          cliPrintHashLine("beacon");
+          printBeeper(dumpMask, beeperConfig_Copy.dshotBeaconOffFlags, beeperConfig()->dshotBeaconOffFlags, "beacon");
+        #endif
+      #endif //USE_BEEPER
 
-        cliPrintHashLine("map");
-        printMap(dumpMask, &rxConfig_Copy, rxConfig());
+      cliPrintHashLine("map");
+      printMap(dumpMask, &rxConfig_Copy, rxConfig());
+      cliPrintHashLine("serial");
+      printSerial(dumpMask, &serialConfig_Copy, serialConfig());
 
-        cliPrintHashLine("serial");
-        printSerial(dumpMask, &serialConfig_Copy, serialConfig());
-
-#ifdef USE_LED_STRIP
+      #ifdef USE_LED_STRIP
         cliPrintHashLine("led");
         printLed(dumpMask, ledStripConfig_Copy.ledConfigs, ledStripConfig()->ledConfigs);
-
         cliPrintHashLine("color");
         printColor(dumpMask, ledStripConfig_Copy.colors, ledStripConfig()->colors);
-
         cliPrintHashLine("mode_color");
         printModeColor(dumpMask, &ledStripConfig_Copy, ledStripConfig());
-#endif
+      #endif
 
-        cliPrintHashLine("aux");
-        printAux(dumpMask, modeActivationConditions_CopyArray, modeActivationConditions(0));
+      cliPrintHashLine("aux");
+      printAux(dumpMask, modeActivationConditions_CopyArray, modeActivationConditions(0));
+      cliPrintHashLine("adjrange");
+      printAdjustmentRange(dumpMask, adjustmentRanges_CopyArray, adjustmentRanges(0));
+      cliPrintHashLine("rxrange");
+      printRxRange(dumpMask, rxChannelRangeConfigs_CopyArray, rxChannelRangeConfigs(0));
 
-        cliPrintHashLine("adjrange");
-        printAdjustmentRange(dumpMask, adjustmentRanges_CopyArray, adjustmentRanges(0));
-
-        cliPrintHashLine("rxrange");
-        printRxRange(dumpMask, rxChannelRangeConfigs_CopyArray, rxChannelRangeConfigs(0));
-
-#ifdef USE_VTX_CONTROL
+      #ifdef USE_VTX_CONTROL
         cliPrintHashLine("vtx");
         printVtx(dumpMask, &vtxConfig_Copy, vtxConfig());
-#endif
+      #endif
 
-        cliPrintHashLine("rxfail");
-        printRxFailsafe(dumpMask, rxFailsafeChannelConfigs_CopyArray, rxFailsafeChannelConfigs(0));
-
-        cliPrintHashLine("master");
-        dumpAllValues(MASTER_VALUE, dumpMask);
+      cliPrintHashLine("rxfail");
+      printRxFailsafe(dumpMask, rxFailsafeChannelConfigs_CopyArray, rxFailsafeChannelConfigs(0));
+      cliPrintHashLine("master");
+      dumpAllValues(MASTER_VALUE, dumpMask);
 
         if (dumpMask & DUMP_ALL) {
-            for (uint32_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
-                cliDumpPidProfile(pidProfileIndex, dumpMask);
-            }
-            cliPrintHashLine("restore original profile selection");
+          for (uint32_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
+            cliDumpPidProfile(pidProfileIndex, dumpMask);
+          }
 
-            pidProfileIndexToUse = systemConfig_Copy.pidProfileIndex;
+          cliPrintHashLine("restore original profile selection");
+          pidProfileIndexToUse = systemConfig_Copy.pidProfileIndex;
+          cliProfile("");
+          pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
 
-            cliProfile("");
+          for (uint32_t rateIndex = 0; rateIndex < CONTROL_RATE_PROFILE_COUNT; rateIndex++) {
+            cliDumpRateProfile(rateIndex, dumpMask);
+          }
 
-            pidProfileIndexToUse = CURRENT_PROFILE_INDEX;
-
-            for (uint32_t rateIndex = 0; rateIndex < CONTROL_RATE_PROFILE_COUNT; rateIndex++) {
-                cliDumpRateProfile(rateIndex, dumpMask);
-            }
-            cliPrintHashLine("restore original rateprofile selection");
-
-            rateProfileIndexToUse = systemConfig_Copy.activeRateProfile;
-
-            cliRateProfile("");
-
-            rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
-
-            cliPrintHashLine("save configuration");
-            cliPrint("save");
+          cliPrintHashLine("restore original rateprofile selection");
+          rateProfileIndexToUse = systemConfig_Copy.activeRateProfile;
+          cliRateProfile("");
+          rateProfileIndexToUse = CURRENT_PROFILE_INDEX;
+          cliPrintHashLine("save configuration");
+          cliPrint("save");
         } else {
-            cliDumpPidProfile(systemConfig_Copy.pidProfileIndex, dumpMask);
-
-            cliDumpRateProfile(systemConfig_Copy.activeRateProfile, dumpMask);
+          cliDumpPidProfile(systemConfig_Copy.pidProfileIndex, dumpMask);
+          cliDumpRateProfile(systemConfig_Copy.activeRateProfile, dumpMask);
         }
-    }
+      }
 
-    if (dumpMask & DUMP_PROFILE) {
+      if (dumpMask & DUMP_PROFILE) {
         cliDumpPidProfile(systemConfig_Copy.pidProfileIndex, dumpMask);
-    }
+      }
 
-    if (dumpMask & DUMP_RATES) {
+      if (dumpMask & DUMP_RATES) {
         cliDumpRateProfile(systemConfig_Copy.activeRateProfile, dumpMask);
-    }
-    // restore configs from copies
-    restoreConfigs();
-}
+      }
+      // restore configs from copies
+      restoreConfigs();
+  }
 
-static void cliDump(char *cmdline)
-{
+  static void cliDump(char *cmdline) {
     printConfig(cmdline, false);
-}
+  }
 
-static void cliDiff(char *cmdline)
-{
+  static void cliDiff(char *cmdline) {
     printConfig(cmdline, true);
-}
+  }
 
-#if defined(USE_USB_MSC)
-static void cliMsc(char *cmdline)
-{
-    UNUSED(cmdline);
-
-    if (mscCheckFilesystemReady()) {
+  #if defined(USE_USB_MSC)
+    static void cliMsc(char *cmdline) {
+      UNUSED(cmdline);
+      if (mscCheckFilesystemReady()) {
         cliPrintHashLine("Restarting in mass storage mode");
         cliPrint("\r\nRebooting");
         bufWriterFlush(cliWriter);
@@ -4425,345 +4400,317 @@ static void cliMsc(char *cmdline)
         stopPwmAllMotors();
 
         systemResetToMsc();
-    } else {
+      } else {
         cliPrintHashLine("Storage not present or failed to initialize!");
+      }
     }
-}
-#endif
+  #endif
 
-typedef struct {
+  typedef struct {
     const char *name;
-#ifndef MINIMAL_CLI
-    const char *description;
-    const char *args;
-#endif
+    #ifndef MINIMAL_CLI
+      const char *description;
+      const char *args;
+    #endif
     void (*func)(char *cmdline);
-} clicmd_t;
+  } clicmd_t;
 
-#ifndef MINIMAL_CLI
-#define CLI_COMMAND_DEF(name, description, args, method) \
-{ \
-    name , \
-    description , \
-    args , \
-    method \
-}
-#else
-#define CLI_COMMAND_DEF(name, description, args, method) \
-{ \
-    name, \
-    method \
-}
-#endif
+  #ifndef MINIMAL_CLI
+    #define CLI_COMMAND_DEF(name, description, args, method) { name , description , args , method }
+  #else
+    #define CLI_COMMAND_DEF(name, description, args, method) { name, method }
+  #endif
 
-#ifdef USE_GYRO_IMUF9001
-static void cliReportImufErrors(char *cmdline);
-#endif
+  #ifdef USE_GYRO_IMUF9001
+    static void cliReportImufErrors(char *cmdline);
+  #endif
 
-static void cliHelp(char *cmdline);
+  static void cliHelp(char *cmdline);
 
-// should be sorted a..z for bsearch()
-const clicmd_t cmdTable[] = {
+  // should be sorted a..z for bsearch()
+  const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("adjrange", "configure adjustment ranges", NULL, cliAdjustmentRange),
     CLI_COMMAND_DEF("aux", "configure modes", "<index> <mode> <aux> <start> <end> <logic>", cliAux),
-#if defined(USE_BEEPER)
-#if defined(USE_DSHOT)
-    CLI_COMMAND_DEF("beacon", "enable/disable Dshot beacon for a condition", "list\r\n"
-        "\t<->[name]", cliBeacon),
-#endif
-    CLI_COMMAND_DEF("beeper", "enable/disable beeper for a condition", "list\r\n"
-        "\t<->[name]", cliBeeper),
-#endif // USE_BEEPER
+    #if defined(USE_BEEPER)
+      #if defined(USE_DSHOT)
+        CLI_COMMAND_DEF("beacon", "enable/disable Dshot beacon for a condition", "list\r\n" "\t<->[name]", cliBeacon),
+      #endif
+      CLI_COMMAND_DEF("beeper", "enable/disable beeper for a condition", "list\r\n" "\t<->[name]", cliBeeper),
+    #endif //USE_BEEPER
     CLI_COMMAND_DEF("bl", "reboot into bootloader", NULL, cliBootloader),
-#if defined(USE_BOARD_INFO)
-    CLI_COMMAND_DEF("board_name", "get / set the name of the board model", "[board name]", cliBoardName),
-#endif
-#ifdef USE_LED_STRIP
-    CLI_COMMAND_DEF("color", "configure colors", NULL, cliColor),
-#endif
+    #if defined(USE_BOARD_INFO)
+      CLI_COMMAND_DEF("board_name", "get / set the name of the board model", "[board name]", cliBoardName),
+    #endif
+    #ifdef USE_LED_STRIP
+      CLI_COMMAND_DEF("color", "configure colors", NULL, cliColor),
+    #endif
     CLI_COMMAND_DEF("defaults", "reset to defaults and reboot", "[nosave]", cliDefaults),
     CLI_COMMAND_DEF("diff", "list configuration changes from default", "[master|profile|rates|all] {defaults}", cliDiff),
-#ifdef USE_RESOURCE_MGMT
-    CLI_COMMAND_DEF("dma", "list dma utilisation", NULL, cliDma),
-#endif
-#ifdef USE_DSHOT
-    CLI_COMMAND_DEF("dshotprog", "program DShot ESC(s)", "<index> <command>+", cliDshotProg),
-#endif
-    CLI_COMMAND_DEF("dump", "dump configuration",
-        "[master|profile|rates|all] {defaults}", cliDump),
-#ifdef USE_ESCSERIAL
-    CLI_COMMAND_DEF("escprog", "passthrough esc to serial", "<mode [sk/bl/ki/cc]> <index>", cliEscPassthrough),
-#endif
-#ifdef USE_GYRO_IMUF9001
-    CLI_COMMAND_DEF("imufbootloader", NULL, NULL, cliImufBootloaderMode),
-    CLI_COMMAND_DEF("imufloadbin", NULL, NULL, cliImufLoadBin),
-    CLI_COMMAND_DEF("imufflashbin", NULL, NULL, cliImufFlashBin),
-#endif
-#ifdef MSP_OVER_CLI
-    CLI_COMMAND_DEF("msp", NULL, NULL, cliMsp),
-#endif
+    #ifdef USE_RESOURCE_MGMT
+      CLI_COMMAND_DEF("dma", "list dma utilisation", NULL, cliDma),
+    #endif
+    #ifdef USE_DSHOT
+      CLI_COMMAND_DEF("dshotprog", "program DShot ESC(s)", "<index> <command>+", cliDshotProg),
+    #endif
+    CLI_COMMAND_DEF("dump", "dump configuration","[master|profile|rates|all] {defaults}", cliDump),
+    #ifdef USE_ESCSERIAL
+      CLI_COMMAND_DEF("escprog", "passthrough esc to serial", "<mode [sk/bl/ki/cc]> <index>", cliEscPassthrough),
+    #endif
+    #ifdef USE_GYRO_IMUF9001
+      CLI_COMMAND_DEF("imufbootloader", NULL, NULL, cliImufBootloaderMode),
+      CLI_COMMAND_DEF("imufloadbin", NULL, NULL, cliImufLoadBin),
+      CLI_COMMAND_DEF("imufflashbin", NULL, NULL, cliImufFlashBin),
+    #endif
+    #ifdef MSP_OVER_CLI
+      CLI_COMMAND_DEF("msp", NULL, NULL, cliMsp),
+    #endif
     CLI_COMMAND_DEF("exit", NULL, NULL, cliExit),
-    CLI_COMMAND_DEF("feature", "configure features",
-        "list\r\n"
-        "\t<+|->[name]", cliFeature),
-#ifdef USE_FLASHFS
-    CLI_COMMAND_DEF("flash_erase", "erase flash chip", NULL, cliFlashErase),
-    CLI_COMMAND_DEF("flash_info", "show flash chip info", NULL, cliFlashInfo),
-#ifdef USE_FLASH_TOOLS
-    CLI_COMMAND_DEF("flash_read", NULL, "<length> <address>", cliFlashRead),
-    CLI_COMMAND_DEF("flash_write", NULL, "<address> <message>", cliFlashWrite),
-#endif
-#endif
-#ifdef USE_RX_FRSKY_SPI
-    CLI_COMMAND_DEF("frsky_bind", "initiate binding for FrSky SPI RX", NULL, cliFrSkyBind),
-#endif
+    CLI_COMMAND_DEF("feature", "configure features","list\r\n" "\t<+|->[name]", cliFeature),
+    #ifdef USE_FLASHFS
+      CLI_COMMAND_DEF("flash_erase", "erase flash chip", NULL, cliFlashErase),
+      CLI_COMMAND_DEF("flash_info", "show flash chip info", NULL, cliFlashInfo),
+      #ifdef USE_FLASH_TOOLS
+        CLI_COMMAND_DEF("flash_read", NULL, "<length> <address>", cliFlashRead),
+        CLI_COMMAND_DEF("flash_write", NULL, "<address> <message>", cliFlashWrite),
+      #endif
+    #endif //USE_FLASHFS
+    #ifdef USE_RX_FRSKY_SPI
+      CLI_COMMAND_DEF("frsky_bind", "initiate binding for FrSky SPI RX", NULL, cliFrSkyBind),
+    #endif
     CLI_COMMAND_DEF("get", "get variable value", "[name]", cliGet),
 
-#ifdef USE_PEGASUS_UI
-    CLI_COMMAND_DEF("config", "get all configuration information", NULL, cliConfig),
-#endif
-#ifdef USE_GPS
-    CLI_COMMAND_DEF("gpspassthrough", "passthrough gps to serial", NULL, cliGpsPassthrough),
-#endif
-#if defined(USE_GYRO_REGISTER_DUMP) && !defined(SIMULATOR_BUILD)
-    CLI_COMMAND_DEF("gyroregisters", "dump gyro config registers contents", NULL, cliDumpGyroRegisters),
-#endif
-#ifdef USE_GYRO_IMUF9001
-    CLI_COMMAND_DEF("reportimuferrors", "report imu-f comm errors", NULL, cliReportImufErrors),
-#endif
-#ifdef USE_TPA_CURVES
-    CLI_COMMAND_DEF("tpacurve", "set rf1 tpa", "[kp, ki, kd]", cliTPACurve),
-#endif
-
+    #ifdef USE_PEGASUS_UI
+      CLI_COMMAND_DEF("config", "get all configuration information", NULL, cliConfig),
+    #endif
+    #ifdef USE_GPS
+      CLI_COMMAND_DEF("gpspassthrough", "passthrough gps to serial", NULL, cliGpsPassthrough),
+    #endif
+    #if defined(USE_GYRO_REGISTER_DUMP) && !defined(SIMULATOR_BUILD)
+      CLI_COMMAND_DEF("gyroregisters", "dump gyro config registers contents", NULL, cliDumpGyroRegisters),
+    #endif
+    #ifdef USE_GYRO_IMUF9001
+      CLI_COMMAND_DEF("reportimuferrors", "report imu-f comm errors", NULL, cliReportImufErrors),
+    #endif
+    #ifdef USE_TPA_CURVES
+      CLI_COMMAND_DEF("tpacurve", "set rf1 tpa", "[kp, ki, kd]", cliTPACurve),
+    #endif
     CLI_COMMAND_DEF("help", NULL, NULL, cliHelp),
-#ifdef USE_LED_STRIP
-    CLI_COMMAND_DEF("led", "configure leds", NULL, cliLed),
-#endif
-#if defined(USE_BOARD_INFO)
-    CLI_COMMAND_DEF("manufacturer_id", "get / set the id of the board manufacturer", "[manufacturer id]", cliManufacturerId),
-#endif
+    #ifdef USE_LED_STRIP
+      CLI_COMMAND_DEF("led", "configure leds", NULL, cliLed),
+    #endif
+    #if defined(USE_BOARD_INFO)
+      CLI_COMMAND_DEF("manufacturer_id", "get / set the id of the board manufacturer", "[manufacturer id]", cliManufacturerId),
+    #endif
     CLI_COMMAND_DEF("map", "configure rc channel order", "[<map>]", cliMap),
     CLI_COMMAND_DEF("mcu_id", "id of the microcontroller", NULL, cliMcuId),
-#ifndef USE_QUAD_MIXER_ONLY
-    CLI_COMMAND_DEF("mixer", "configure mixer", "list\r\n\t<name>", cliMixer),
-#endif
+    #ifndef USE_QUAD_MIXER_ONLY
+      CLI_COMMAND_DEF("mixer", "configure mixer", "list\r\n\t<name>", cliMixer),
+    #endif
     CLI_COMMAND_DEF("mmix", "custom motor mixer", NULL, cliMotorMix),
-#ifdef USE_LED_STRIP
-    CLI_COMMAND_DEF("mode_color", "configure mode and special colors", NULL, cliModeColor),
-#endif
+    #ifdef USE_LED_STRIP
+      CLI_COMMAND_DEF("mode_color", "configure mode and special colors", NULL, cliModeColor),
+    #endif
     CLI_COMMAND_DEF("motor",  "get/set motor", "<index> [<value>]", cliMotor),
-#ifdef USE_USB_MSC
-    CLI_COMMAND_DEF("msc", "switch into msc mode", NULL, cliMsc),
-#endif
+    #ifdef USE_USB_MSC
+      CLI_COMMAND_DEF("msc", "switch into msc mode", NULL, cliMsc),
+    #endif
     CLI_COMMAND_DEF("name", "name of craft", NULL, cliName),
-#ifndef MINIMAL_CLI
-    CLI_COMMAND_DEF("play_sound", NULL, "[<index>]", cliPlaySound),
-#endif
+    #ifndef MINIMAL_CLI
+      CLI_COMMAND_DEF("play_sound", NULL, "[<index>]", cliPlaySound),
+    #endif
     CLI_COMMAND_DEF("profile", "change profile", "[<index>]", cliProfile),
     CLI_COMMAND_DEF("rateprofile", "change rate profile", "[<index>]", cliRateProfile),
-#ifdef USE_RC_SMOOTHING_FILTER
-    CLI_COMMAND_DEF("rc_smoothing_info", "show rc_smoothing operational settings", NULL, cliRcSmoothing),
-#endif // USE_RC_SMOOTHING_FILTER
-#ifdef USE_RESOURCE_MGMT
-    CLI_COMMAND_DEF("resource", "show/set resources", NULL, cliResource),
-#endif
+    #ifdef USE_RC_SMOOTHING_FILTER
+      CLI_COMMAND_DEF("rc_smoothing_info", "show rc_smoothing operational settings", NULL, cliRcSmoothing),
+    #endif
+    #ifdef USE_RESOURCE_MGMT
+      CLI_COMMAND_DEF("resource", "show/set resources", NULL, cliResource),
+    #endif
     CLI_COMMAND_DEF("rxfail", "show/set rx failsafe settings", NULL, cliRxFailsafe),
     CLI_COMMAND_DEF("rxrange", "configure rx channel ranges", NULL, cliRxRange),
     CLI_COMMAND_DEF("save", "save and reboot", NULL, cliSave),
-#ifdef USE_SDCARD
-    CLI_COMMAND_DEF("sd_info", "sdcard info", NULL, cliSdInfo),
-#endif
+    #ifdef USE_SDCARD
+      CLI_COMMAND_DEF("sd_info", "sdcard info", NULL, cliSdInfo),
+    #endif
     CLI_COMMAND_DEF("serial", "configure serial ports", NULL, cliSerial),
-#ifndef SKIP_SERIAL_PASSTHROUGH
-    CLI_COMMAND_DEF("serialpassthrough", "passthrough serial data to port", "<id> [baud] [mode] [DTR PINIO]: passthrough to serial", cliSerialPassthrough),
-#endif
-#ifdef USE_SERVOS
-    CLI_COMMAND_DEF("servo", "configure servos", NULL, cliServo),
-#endif
+    #ifndef SKIP_SERIAL_PASSTHROUGH
+      CLI_COMMAND_DEF("serialpassthrough", "passthrough serial data to port", "<id> [baud] [mode] [DTR PINIO]: passthrough to serial", cliSerialPassthrough),
+    #endif
+    #ifdef USE_SERVOS
+      CLI_COMMAND_DEF("servo", "configure servos", NULL, cliServo),
+    #endif
     CLI_COMMAND_DEF("set", "change setting", "[<name>=<value>]", cliSet),
-#if defined(USE_BOARD_INFO) && defined(USE_SIGNATURE)
-    CLI_COMMAND_DEF("signature", "get / set the board type signature", "[signature]", cliSignature),
-#endif
-#ifdef USE_SERVOS
-    CLI_COMMAND_DEF("smix", "servo mixer", "<rule> <servo> <source> <rate> <speed> <min> <max> <box>\r\n"
-        "\treset\r\n"
-        "\tload <mixer>\r\n"
-        "\treverse <servo> <source> r|n", cliServoMix),
-#endif
+    #if defined(USE_BOARD_INFO) && defined(USE_SIGNATURE)
+      CLI_COMMAND_DEF("signature", "get / set the board type signature", "[signature]", cliSignature),
+    #endif
+    #ifdef USE_SERVOS
+      CLI_COMMAND_DEF("smix", "servo mixer", "<rule> <servo> <source> <rate> <speed> <min> <max> <box>\r\n" "\treset\r\n" "\tload <mixer>\r\n" "\treverse <servo> <source> r|n", cliServoMix),
+    #endif
     CLI_COMMAND_DEF("status", "show status", NULL, cliStatus),
-#ifndef SKIP_TASK_STATISTICS
-    CLI_COMMAND_DEF("tasks", "show task stats", NULL, cliTasks),
-#endif
-#ifdef USE_TIMER_MGMT
-    CLI_COMMAND_DEF("timer", "show timer configuration", NULL, cliTimer),
-#endif
+    #ifndef SKIP_TASK_STATISTICS
+      CLI_COMMAND_DEF("tasks", "show task stats", NULL, cliTasks),
+    #endif
+    #ifdef USE_TIMER_MGMT
+      CLI_COMMAND_DEF("timer", "show timer configuration", NULL, cliTimer),
+    #endif
     CLI_COMMAND_DEF("version", "show version", NULL, cliVersion),
-#ifdef USE_VTX_CONTROL
-    CLI_COMMAND_DEF("vtx", "vtx channels on switch", NULL, cliVtx),
-#endif
-};
+    #ifdef USE_VTX_CONTROL
+      CLI_COMMAND_DEF("vtx", "vtx channels on switch", NULL, cliVtx),
+    #endif
+  };
 
-#ifdef USE_GYRO_IMUF9001
-static void cliReportImufErrors(char *cmdline)
-{
-    UNUSED(cmdline);
-    cliPrintf("Current Comm Errors: %lu", crcErrorCount);
-    cliPrintLinefeed();
-}
-#endif
+  #ifdef USE_GYRO_IMUF9001
+    static void cliReportImufErrors(char *cmdline) {
+      UNUSED(cmdline);
+      cliPrintf("Current Comm Errors: %lu", crcErrorCount);
+      cliPrintLinefeed();
+    }
+  #endif
 
-static void cliHelp(char *cmdline)
-{
+  static void cliHelp(char *cmdline) {
     UNUSED(cmdline);
 
     for (uint32_t i = 0; i < ARRAYLEN(cmdTable); i++) {
-        cliPrint(cmdTable[i].name);
-#ifndef MINIMAL_CLI
+      cliPrint(cmdTable[i].name);
+      #ifndef MINIMAL_CLI
         if (cmdTable[i].description) {
-            cliPrintf(" - %s", cmdTable[i].description);
+          cliPrintf(" - %s", cmdTable[i].description);
         }
         if (cmdTable[i].args) {
-            cliPrintf("\r\n\t%s", cmdTable[i].args);
+          cliPrintf("\r\n\t%s", cmdTable[i].args);
         }
-#endif
-        cliPrintLinefeed();
+      #endif
+      cliPrintLinefeed();
     }
-}
+  }
 
-void cliProcess(void)
-{
+  void cliProcess(void) {
     if (!cliWriter) {
-        return;
+      return;
     }
 
     // Be a little bit tricky.  Flush the last inputs buffer, if any.
     bufWriterFlush(cliWriter);
-
     while (serialRxBytesWaiting(cliPort)) {
+      uint8_t c = serialRead(cliPort);
 
-        uint8_t c = serialRead(cliPort);
-
-        if (c == '\t' || c == '?') {
-            // do tab completion
-            const clicmd_t *cmd, *pstart = NULL, *pend = NULL;
-            uint32_t i = bufferIndex;
-            for (cmd = cmdTable; cmd < cmdTable + ARRAYLEN(cmdTable); cmd++) {
-                if (bufferIndex && (strncasecmp(cliBuffer, cmd->name, bufferIndex) != 0))
-                    continue;
-                if (!pstart)
-                    pstart = cmd;
-                pend = cmd;
+      if (c == '\t' || c == '?') {
+        // do tab completion
+        const clicmd_t *cmd, *pstart = NULL, *pend = NULL;
+        uint32_t i = bufferIndex;
+        for (cmd = cmdTable; cmd < cmdTable + ARRAYLEN(cmdTable); cmd++) {
+          if (bufferIndex && (strncasecmp(cliBuffer, cmd->name, bufferIndex) != 0))
+            continue;
+          if (!pstart)
+            pstart = cmd;
+          pend = cmd;
+        }
+        if (pstart) {    /* Buffer matches one or more commands */
+          for (; ; bufferIndex++) {
+            if (pstart->name[bufferIndex] != pend->name[bufferIndex])
+              break;
+            if (!pstart->name[bufferIndex] && bufferIndex < sizeof(cliBuffer) - 2) {
+              /* Unambiguous -- append a space */
+              cliBuffer[bufferIndex++] = ' ';
+              cliBuffer[bufferIndex] = '\0';
+              break;
             }
-            if (pstart) {    /* Buffer matches one or more commands */
-                for (; ; bufferIndex++) {
-                    if (pstart->name[bufferIndex] != pend->name[bufferIndex])
-                        break;
-                    if (!pstart->name[bufferIndex] && bufferIndex < sizeof(cliBuffer) - 2) {
-                        /* Unambiguous -- append a space */
-                        cliBuffer[bufferIndex++] = ' ';
-                        cliBuffer[bufferIndex] = '\0';
-                        break;
-                    }
-                    cliBuffer[bufferIndex] = pstart->name[bufferIndex];
-                }
-            }
-            if (!bufferIndex || pstart != pend) {
-                /* Print list of ambiguous matches */
-                cliPrint("\r\033[K");
-                for (cmd = pstart; cmd <= pend; cmd++) {
-                    cliPrint(cmd->name);
-                    cliWrite('\t');
-                }
-                cliPrompt();
-                i = 0;    /* Redraw prompt */
-            }
-            for (; i < bufferIndex; i++)
-                cliWrite(cliBuffer[i]);
-        } else if (!bufferIndex && c == 4) {   // CTRL-D
-            cliExit(cliBuffer);
-            return;
-        } else if (c == 12) {                  // NewPage / CTRL-L
-            // clear screen
-            cliPrint("\033[2J\033[1;1H");
-            cliPrompt();
-        } else if (bufferIndex && (c == '\n' || c == '\r')) {
-            // enter pressed
-            cliPrintLinefeed();
+            cliBuffer[bufferIndex] = pstart->name[bufferIndex];
+          }
+        }
+        if (!bufferIndex || pstart != pend) {
+          /* Print list of ambiguous matches */
+          cliPrint("\r\033[K");
+          for (cmd = pstart; cmd <= pend; cmd++) {
+            cliPrint(cmd->name);
+            cliWrite('\t');
+          }
+          cliPrompt();
+          i = 0;    /* Redraw prompt */
+        }
+        for (; i < bufferIndex; i++)
+          cliWrite(cliBuffer[i]);
+      } else if (!bufferIndex && c == 4) {   // CTRL-D
+        cliExit(cliBuffer);
+        return;
+      } else if (c == 12) {                  // NewPage / CTRL-L
+        // clear screen
+        cliPrint("\033[2J\033[1;1H");
+        cliPrompt();
+      } else if (bufferIndex && (c == '\n' || c == '\r')) {
+        // enter pressed
+        cliPrintLinefeed();
 
-            // Strip comment starting with # from line
-            char *p = cliBuffer;
-            p = strchr(p, '#');
-            if (NULL != p) {
-                bufferIndex = (uint32_t)(p - cliBuffer);
-            }
-
-            // Strip trailing whitespace
-            while (bufferIndex > 0 && cliBuffer[bufferIndex - 1] == ' ') {
-                bufferIndex--;
-            }
-
-            // Process non-empty lines
-            if (bufferIndex > 0) {
-                cliBuffer[bufferIndex] = 0; // null terminate
-
-                const clicmd_t *cmd;
-                char *options;
-                for (cmd = cmdTable; cmd < cmdTable + ARRAYLEN(cmdTable); cmd++) {
-                    if ((options = checkCommand(cliBuffer, cmd->name))) {
-                        break;
-                    }
-                }
-                if (cmd < cmdTable + ARRAYLEN(cmdTable))
-                    cmd->func(options);
-                else
-                    cliPrint("Unknown command, try 'help'");
-                bufferIndex = 0;
-            }
-
-            memset(cliBuffer, 0, sizeof(cliBuffer));
-
-            // 'exit' will reset this flag, so we don't need to print prompt again
-            if (!cliMode)
-                return;
-
-            cliPrompt();
-        } else if (c == 127) {
-            // backspace
-            if (bufferIndex) {
-                cliBuffer[--bufferIndex] = 0;
-                cliPrint("\010 \010");
-            }
-        } else if (bufferIndex < sizeof(cliBuffer) && c >= 32 && c <= 126) {
-            if (!bufferIndex && c == ' ')
-                continue; // Ignore leading spaces
-            cliBuffer[bufferIndex++] = c;
-            cliWrite(c);
+        // Strip comment starting with # from line
+        char *p = cliBuffer;
+        p = strchr(p, '#');
+        if (NULL != p) {
+            bufferIndex = (uint32_t)(p - cliBuffer);
         }
 
-    }
-}
+        // Strip trailing whitespace
+        while (bufferIndex > 0 && cliBuffer[bufferIndex - 1] == ' ') {
+            bufferIndex--;
+        }
 
-void cliEnter(serialPort_t *serialPort)
-{
+        // Process non-empty lines
+        if (bufferIndex > 0) {
+          cliBuffer[bufferIndex] = 0; // null terminate
+
+          const clicmd_t *cmd;
+          char *options;
+          for (cmd = cmdTable; cmd < cmdTable + ARRAYLEN(cmdTable); cmd++) {
+            if ((options = checkCommand(cliBuffer, cmd->name))) {
+              break;
+            }
+          }
+          if (cmd < cmdTable + ARRAYLEN(cmdTable))
+            cmd->func(options);
+          else
+            cliPrint("Unknown command, try 'help'");
+          bufferIndex = 0;
+        }
+
+        memset(cliBuffer, 0, sizeof(cliBuffer));
+
+        // 'exit' will reset this flag, so we don't need to print prompt again
+        if (!cliMode) {
+          return;
+        }
+
+        cliPrompt();
+      } else if (c == 127) {
+        // backspace
+        if (bufferIndex) {
+          cliBuffer[--bufferIndex] = 0;
+          cliPrint("\010 \010");
+        }
+      } else if (bufferIndex < sizeof(cliBuffer) && c >= 32 && c <= 126) {
+        if (!bufferIndex && c == ' ')
+          continue; // Ignore leading spaces
+        cliBuffer[bufferIndex++] = c;
+        cliWrite(c);
+      }
+    }
+  }
+
+  void cliEnter(serialPort_t *serialPort) {
     cliMode = 1;
     cliPort = serialPort;
     setPrintfSerialPort(cliPort);
     cliWriter = bufWriterInit(cliWriteBuffer, sizeof(cliWriteBuffer), (bufWrite_t)serialWriteBufShim, serialPort);
-
     schedulerSetCalulateTaskStatistics(systemConfig()->task_statistics);
 
-#ifndef MINIMAL_CLI
-    cliPrintLine("\r\nEntering CLI Mode, type 'exit' to return, or 'help'");
-#else
-    cliPrintLine("\r\nCLI");
-#endif
+    #ifndef MINIMAL_CLI
+      cliPrintLine("\r\nEntering CLI Mode, type 'exit' to return, or 'help'");
+    #else
+      cliPrintLine("\r\nCLI");
+    #endif
     cliPrompt();
-
     setArmingDisabled(ARMING_DISABLED_CLI);
-}
+  }
 
-void cliInit(const serialConfig_t *serialConfig)
-{
+  void cliInit(const serialConfig_t *serialConfig) {
     UNUSED(serialConfig);
-}
-#endif // USE_CLI
+  }
+#endif //USE_CLI
