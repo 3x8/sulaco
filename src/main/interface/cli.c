@@ -3612,158 +3612,151 @@ uint8_t cliMode = 0;
     }
   }
 
-static void cliStatus(char *cmdline)
-{
+  static void cliStatus(char *cmdline) {
     UNUSED(cmdline);
 
     cliPrintLinef("System Uptime: %d seconds", millis() / 1000);
-
     #ifdef USE_RTC_TIME
     char buf[FORMATTED_DATE_TIME_BUFSIZE];
     dateTime_t dt;
     if (rtcGetDateTime(&dt)) {
-        dateTimeFormatLocal(buf, &dt);
-        cliPrintLinef("Current Time: %s", buf);
+      dateTimeFormatLocal(buf, &dt);
+      cliPrintLinef("Current Time: %s", buf);
     }
     #endif
 
     cliPrintLinef("Voltage: %d * 0.1V (%dS battery - %s)", getBatteryVoltage(), getBatteryCellCount(), getBatteryStateString());
-
     cliPrintf("CPU Clock=%dMHz", (SystemCoreClock / 1000000));
 
-#ifdef USE_ADC_INTERNAL
-    uint16_t vrefintMv = getVrefMv();
-    int16_t coretemp = getCoreTemperatureCelsius();
-    cliPrintf(", Vref=%d.%2dV, Core temp=%ddegC", vrefintMv / 1000, (vrefintMv % 1000) / 10, coretemp);
-#endif
+    #ifdef USE_ADC_INTERNAL
+      uint16_t vrefintMv = getVrefMv();
+      int16_t coretemp = getCoreTemperatureCelsius();
+      cliPrintf(", Vref=%d.%2dV, Core temp=%ddegC", vrefintMv / 1000, (vrefintMv % 1000) / 10, coretemp);
+    #endif
 
-#if defined(USE_SENSOR_NAMES) && !defined(USE_GYRO_IMUF9001)
-    const uint32_t detectedSensorsMask = sensorsMask();
-    for (uint32_t i = 0; ; i++) {
+    #if defined(USE_SENSOR_NAMES) && !defined(USE_GYRO_IMUF9001)
+      const uint32_t detectedSensorsMask = sensorsMask();
+      for (uint32_t i = 0; ; i++) {
         if (sensorTypeNames[i] == NULL) {
-            break;
+          break;
         }
         const uint32_t mask = (1 << i);
         if ((detectedSensorsMask & mask) && (mask & SENSOR_NAMES_MASK)) {
-            const uint8_t sensorHardwareIndex = detectedSensors[i];
-            const char *sensorHardware = sensorHardwareNames[i][sensorHardwareIndex];
-            cliPrintf(", %s=%s", sensorTypeNames[i], sensorHardware);
-            if (mask == SENSOR_ACC && acc.dev.revisionCode) {
-                cliPrintf(".%c", acc.dev.revisionCode);
-            }
+          const uint8_t sensorHardwareIndex = detectedSensors[i];
+          const char *sensorHardware = sensorHardwareNames[i][sensorHardwareIndex];
+          cliPrintf(", %s=%s", sensorTypeNames[i], sensorHardware);
+          if (mask == SENSOR_ACC && acc.dev.revisionCode) {
+            cliPrintf(".%c", acc.dev.revisionCode);
+          }
         }
-    }
-#else
-    #if defined(USE_GYRO_IMUF9001)
-    UNUSED(sensorHardwareNames);
-    UNUSED(sensorTypeNames);
-    cliPrintf(" | IMU-F Version: %lu", imufCurrentVersion);
-    #endif
-#endif /* USE_SENSOR_NAMES */
+      }
+    #else
+      #if defined(USE_GYRO_IMUF9001)
+        UNUSED(sensorHardwareNames);
+        UNUSED(sensorTypeNames);
+        cliPrintf(" | IMU-F Version: %lu", imufCurrentVersion);
+      #endif
+    #endif /* USE_SENSOR_NAMES */
     cliPrintLinefeed();
 
-#ifdef USE_SDCARD
-    cliSdInfo(NULL);
-#endif
+    #ifdef USE_SDCARD
+      cliSdInfo(NULL);
+    #endif
 
-#ifdef USE_I2C
-    const uint16_t i2cErrorCounter = i2cGetErrorCounter();
-#else
-    const uint16_t i2cErrorCounter = 0;
-#endif
+    #ifdef USE_I2C
+      const uint16_t i2cErrorCounter = i2cGetErrorCounter();
+    #else
+      const uint16_t i2cErrorCounter = 0;
+    #endif
 
-#ifdef STACK_CHECK
-    cliPrintf("Stack used: %d, ", stackUsedSize());
-#endif
-    cliPrintLinef("Stack size: %d, Stack address: 0x%x", stackTotalSize(), stackHighMem());
-#ifdef EEPROM_IN_RAM
-#define CONFIG_SIZE EEPROM_SIZE
-#else
-#define CONFIG_SIZE (&__config_end - &__config_start)
-#endif
+    #ifdef STACK_CHECK
+      cliPrintf("Stack used: %d, ", stackUsedSize());
+    #endif
+      cliPrintLinef("Stack size: %d, Stack address: 0x%x", stackTotalSize(), stackHighMem());
+    #ifdef EEPROM_IN_RAM
+      #define CONFIG_SIZE EEPROM_SIZE
+    #else
+      #define CONFIG_SIZE (&__config_end - &__config_start)
+    #endif
     cliPrintLinef("I2C Errors: %d, config size: %d, max available config: %d", i2cErrorCounter, getEEPROMConfigSize(), CONFIG_SIZE);
 
     const int gyroRate = getTaskDeltaTime(TASK_GYROPID) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTime(TASK_GYROPID)));
     const int rxRate = currentRxRefreshRate == 0 ? 0 : (int)(1000000.0f / ((float)currentRxRefreshRate));
     const int systemRate = getTaskDeltaTime(TASK_SYSTEM) == 0 ? 0 : (int)(1000000.0f / ((float)getTaskDeltaTime(TASK_SYSTEM)));
     cliPrintLinef("CPU:%d%%, cycle time: %d, GYRO rate: %d, RX rate: %d, System rate: %d",
-            constrain(averageSystemLoadPercent, 0, 100), getTaskDeltaTime(TASK_GYROPID), gyroRate, rxRate, systemRate);
+      constrain(averageSystemLoadPercent, 0, 100), getTaskDeltaTime(TASK_GYROPID), gyroRate, rxRate, systemRate);
     cliPrint("Arming disable flags:");
     armingDisableFlags_e flags = getArmingDisableFlags();
     while (flags) {
-        const int bitpos = ffs(flags) - 1;
-        flags &= ~(1 << bitpos);
-        cliPrintf(" %s", armingDisableFlagNames[bitpos]);
+      const int bitpos = ffs(flags) - 1;
+      flags &= ~(1 << bitpos);
+      cliPrintf(" %s", armingDisableFlagNames[bitpos]);
     }
     cliPrintLinefeed();
-}
+  }
 
-#ifndef SKIP_TASK_STATISTICS
-static void cliTasks(char *cmdline)
-{
-    UNUSED(cmdline);
-    int maxLoadSum = 0;
-    int averageLoadSum = 0;
+  #ifndef SKIP_TASK_STATISTICS
+    static void cliTasks(char *cmdline) {
+      UNUSED(cmdline);
+      int maxLoadSum = 0;
+      int averageLoadSum = 0;
 
-#ifndef MINIMAL_CLI
-    if (systemConfig()->task_statistics) {
-        cliPrintLine("Task list             rate/hz  max/us  avg/us maxload avgload     total/ms");
-    } else {
-        cliPrintLine("Task list");
-    }
-#endif
-    for (cfTaskId_e taskId = 0; taskId < TASK_COUNT; taskId++) {
-        cfTaskInfo_t taskInfo;
-        getTaskInfo(taskId, &taskInfo);
-        if (taskInfo.isEnabled) {
+      #ifndef MINIMAL_CLI
+        if (systemConfig()->task_statistics) {
+          cliPrintLine("Task list             rate/hz  max/us  avg/us maxload avgload     total/ms");
+        } else {
+          cliPrintLine("Task list");
+        }
+      #endif
+        for (cfTaskId_e taskId = 0; taskId < TASK_COUNT; taskId++) {
+          cfTaskInfo_t taskInfo;
+          getTaskInfo(taskId, &taskInfo);
+          if (taskInfo.isEnabled) {
             int taskFrequency;
             int subTaskFrequency = 0;
             if (taskId == TASK_GYROPID) {
-                subTaskFrequency = taskInfo.latestDeltaTime == 0 ? 0 : (int)(1000000.0f / ((float)taskInfo.latestDeltaTime));
-                taskFrequency = subTaskFrequency / pidConfig()->pid_process_denom;
-                if (pidConfig()->pid_process_denom > 1) {
-                    cliPrintf("%02d - (%15s) ", taskId, taskInfo.taskName);
-                } else {
-                    taskFrequency = subTaskFrequency;
-                    cliPrintf("%02d - (%11s/%3s) ", taskId, taskInfo.subTaskName, taskInfo.taskName);
-                }
-            } else {
-                taskFrequency = taskInfo.latestDeltaTime == 0 ? 0 : (int)(1000000.0f / ((float)taskInfo.latestDeltaTime));
+              subTaskFrequency = taskInfo.latestDeltaTime == 0 ? 0 : (int)(1000000.0f / ((float)taskInfo.latestDeltaTime));
+              taskFrequency = subTaskFrequency / pidConfig()->pid_process_denom;
+              if (pidConfig()->pid_process_denom > 1) {
                 cliPrintf("%02d - (%15s) ", taskId, taskInfo.taskName);
+              } else {
+                taskFrequency = subTaskFrequency;
+                cliPrintf("%02d - (%11s/%3s) ", taskId, taskInfo.subTaskName, taskInfo.taskName);
+              }
+            } else {
+              taskFrequency = taskInfo.latestDeltaTime == 0 ? 0 : (int)(1000000.0f / ((float)taskInfo.latestDeltaTime));
+              cliPrintf("%02d - (%15s) ", taskId, taskInfo.taskName);
             }
             const int maxLoad = taskInfo.maxExecutionTime == 0 ? 0 :(taskInfo.maxExecutionTime * taskFrequency) / 1000;
             const int averageLoad = taskInfo.averageExecutionTime == 0 ? 0 : (taskInfo.averageExecutionTime * taskFrequency) / 1000;
             if (taskId != TASK_SERIAL) {
-                maxLoadSum += maxLoad;
-                averageLoadSum += averageLoad;
+              maxLoadSum += maxLoad;
+              averageLoadSum += averageLoad;
             }
             if (systemConfig()->task_statistics) {
-                cliPrintLinef("%6d %7d %7d %4d.%1d%% %4d.%1d%% %9d",
-                        taskFrequency, taskInfo.maxExecutionTime, taskInfo.averageExecutionTime,
-                        maxLoad/10, maxLoad%10, averageLoad/10, averageLoad%10, taskInfo.totalExecutionTime / 1000);
+              cliPrintLinef("%6d %7d %7d %4d.%1d%% %4d.%1d%% %9d",
+                taskFrequency, taskInfo.maxExecutionTime, taskInfo.averageExecutionTime,
+                maxLoad/10, maxLoad%10, averageLoad/10, averageLoad%10, taskInfo.totalExecutionTime / 1000);
             } else {
-                cliPrintLinef("%6d", taskFrequency);
+              cliPrintLinef("%6d", taskFrequency);
             }
             if (taskId == TASK_GYROPID && pidConfig()->pid_process_denom > 1) {
-                cliPrintLinef("   - (%15s) %6d", taskInfo.subTaskName, subTaskFrequency);
+              cliPrintLinef("   - (%15s) %6d", taskInfo.subTaskName, subTaskFrequency);
             }
-
             schedulerResetTaskMaxExecutionTime(taskId);
+          }
+        }
+        if (systemConfig()->task_statistics) {
+          cfCheckFuncInfo_t checkFuncInfo;
+          getCheckFuncInfo(&checkFuncInfo);
+          cliPrintLinef("RX Check Function %19d %7d %25d", checkFuncInfo.maxExecutionTime, checkFuncInfo.averageExecutionTime, checkFuncInfo.totalExecutionTime / 1000);
+          cliPrintLinef("Total (excluding SERIAL) %25d.%1d%% %4d.%1d%%", maxLoadSum/10, maxLoadSum%10, averageLoadSum/10, averageLoadSum%10);
         }
     }
-    if (systemConfig()->task_statistics) {
-        cfCheckFuncInfo_t checkFuncInfo;
-        getCheckFuncInfo(&checkFuncInfo);
-        cliPrintLinef("RX Check Function %19d %7d %25d", checkFuncInfo.maxExecutionTime, checkFuncInfo.averageExecutionTime, checkFuncInfo.totalExecutionTime / 1000);
-        cliPrintLinef("Total (excluding SERIAL) %25d.%1d%% %4d.%1d%%", maxLoadSum/10, maxLoadSum%10, averageLoadSum/10, averageLoadSum%10);
-    }
-}
-#endif
+  #endif
 
-static void cliVersion(char *cmdline)
-{
+  static void cliVersion(char *cmdline) {
     UNUSED(cmdline);
-
     cliPrintLinef("# %s / %s (%s) %s %s / %s (%s) MSP API: %s",
         FC_FIRMWARE_NAME,
         targetName,
@@ -3774,517 +3767,469 @@ static void cliVersion(char *cmdline)
         shortGitRevision,
         MSP_API_VERSION_STRING
     );
-#ifdef USE_GYRO_IMUF9001
-    cliPrintLinef("# IMU-F Version: %lu", imufCurrentVersion);
-#endif
+    #ifdef USE_GYRO_IMUF9001
+      cliPrintLinef("# IMU-F Version: %lu", imufCurrentVersion);
+    #endif
     cliMcuId(NULL);
-}
+  }
 
-#ifdef USE_RC_SMOOTHING_FILTER
-static void cliRcSmoothing(char *cmdline)
-{
-    UNUSED(cmdline);
-    cliPrint("# RC Smoothing Type: ");
-    if (rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_FILTER) {
+  #ifdef USE_RC_SMOOTHING_FILTER
+    static void cliRcSmoothing(char *cmdline) {
+      UNUSED(cmdline);
+      cliPrint("# RC Smoothing Type: ");
+      if (rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_FILTER) {
         cliPrintLine("FILTER");
         uint16_t avgRxFrameMs = rcSmoothingGetValue(RC_SMOOTHING_VALUE_AVERAGE_FRAME);
         if (rcSmoothingAutoCalculate()) {
-            cliPrint("# Detected RX frame rate: ");
-            if (avgRxFrameMs == 0) {
-                cliPrintLine("NO SIGNAL");
-            } else {
-                cliPrintLinef("%d.%dms", avgRxFrameMs / 1000, avgRxFrameMs % 1000);
-            }
+          cliPrint("# Detected RX frame rate: ");
+          if (avgRxFrameMs == 0) {
+            cliPrintLine("NO SIGNAL");
+          } else {
+            cliPrintLinef("%d.%dms", avgRxFrameMs / 1000, avgRxFrameMs % 1000);
+          }
         }
         cliPrint("# Input filter type: ");
         cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_INPUT_TYPE].values[rxConfig()->rc_smoothing_input_type]);
         cliPrintf("# Active input cutoff: %dhz ", rcSmoothingGetValue(RC_SMOOTHING_VALUE_INPUT_ACTIVE));
         if (rxConfig()->rc_smoothing_input_cutoff == 0) {
-            cliPrintLine("(auto)");
+          cliPrintLine("(auto)");
         } else {
-            cliPrintLine("(manual)");
+          cliPrintLine("(manual)");
         }
         cliPrint("# Derivative filter type: ");
         cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_DERIVATIVE_TYPE].values[rxConfig()->rc_smoothing_derivative_type]);
         cliPrintf("# Active derivative cutoff: %dhz (", rcSmoothingGetValue(RC_SMOOTHING_VALUE_DERIVATIVE_ACTIVE));
         if (rxConfig()->rc_smoothing_derivative_type == RC_SMOOTHING_DERIVATIVE_OFF) {
-            cliPrintLine("off)");
+          cliPrintLine("off)");
         } else {
-            if (rxConfig()->rc_smoothing_derivative_cutoff == 0) {
-                cliPrintLine("auto)");
-            } else {
-                cliPrintLine("manual)");
-            }
+          if (rxConfig()->rc_smoothing_derivative_cutoff == 0) {
+            cliPrintLine("auto)");
+          } else {
+            cliPrintLine("manual)");
+          }
         }
-    } else {
+      } else {
         cliPrintLine("INTERPOLATION");
+      }
     }
-}
-#endif // USE_RC_SMOOTHING_FILTER
+  #endif //USE_RC_SMOOTHING_FILTER
 
-#if defined(USE_RESOURCE_MGMT)
+  #if defined(USE_RESOURCE_MGMT)
+    #define MAX_RESOURCE_INDEX(x) ((x) == 0 ? 1 : (x))
 
-#define MAX_RESOURCE_INDEX(x) ((x) == 0 ? 1 : (x))
+    typedef struct {
+      const uint8_t owner;
+      pgn_t pgn;
+      uint8_t stride;
+      uint8_t offset;
+      const uint8_t maxIndex;
+    } cliResourceValue_t;
 
-typedef struct {
-    const uint8_t owner;
-    pgn_t pgn;
-    uint8_t stride;
-    uint8_t offset;
-    const uint8_t maxIndex;
-} cliResourceValue_t;
+    // Handy macros for keeping the table tidy.
+    // DEFS : Single entry
+    // DEFA : Array of uint8_t (stride = 1)
+    // DEFW : Wider stride case; array of structs.
+    #define DEFS(owner, pgn, type, member) { owner, pgn, 0, offsetof(type, member), 0 }
+    #define DEFA(owner, pgn, type, member, max) { owner, pgn, sizeof(ioTag_t), offsetof(type, member), max }
+    #define DEFW(owner, pgn, type, member, max) { owner, pgn, sizeof(type), offsetof(type, member), max }
 
-// Handy macros for keeping the table tidy.
-// DEFS : Single entry
-// DEFA : Array of uint8_t (stride = 1)
-// DEFW : Wider stride case; array of structs.
+    const cliResourceValue_t resourceTable[] = {
+    #ifdef USE_BEEPER
+      DEFS( OWNER_BEEPER,        PG_BEEPER_DEV_CONFIG, beeperDevConfig_t, ioTag) ,
+    #endif
+      DEFA( OWNER_MOTOR,         PG_MOTOR_CONFIG, motorConfig_t, dev.ioTags[0], MAX_SUPPORTED_MOTORS ),
+    #ifdef USE_SERVOS
+      DEFA( OWNER_SERVO,         PG_SERVO_CONFIG, servoConfig_t, dev.ioTags[0], MAX_SUPPORTED_SERVOS ),
+    #endif
+    #if defined(USE_PPM)
+      DEFS( OWNER_PPMINPUT,      PG_PPM_CONFIG, ppmConfig_t, ioTag ),
+    #endif
+    #if defined(USE_PWM)
+      DEFA( OWNER_PWMINPUT,      PG_PWM_CONFIG, pwmConfig_t, ioTags[0], PWM_INPUT_PORT_COUNT ),
+    #endif
+    #ifdef USE_RANGEFINDER_HCSR04
+      DEFS( OWNER_SONAR_TRIGGER, PG_SONAR_CONFIG, sonarConfig_t, triggerTag ),
+      DEFS( OWNER_SONAR_ECHO,    PG_SONAR_CONFIG, sonarConfig_t, echoTag ),
+    #endif
+    #ifdef USE_LED_STRIP
+      DEFS( OWNER_LED_STRIP,     PG_LED_STRIP_CONFIG, ledStripConfig_t, ioTag ),
+    #endif
+      DEFA( OWNER_SERIAL_TX,     PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagTx[0], SERIAL_PORT_MAX_INDEX ),
+      DEFA( OWNER_SERIAL_RX,     PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagRx[0], SERIAL_PORT_MAX_INDEX ),
+    #ifdef USE_INVERTER
+      DEFA( OWNER_INVERTER,      PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagInverter[0], SERIAL_PORT_MAX_INDEX ),
+    #endif
+    #ifdef USE_I2C
+      DEFW( OWNER_I2C_SCL,       PG_I2C_CONFIG, i2cConfig_t, ioTagScl, I2CDEV_COUNT ),
+      DEFW( OWNER_I2C_SDA,       PG_I2C_CONFIG, i2cConfig_t, ioTagSda, I2CDEV_COUNT ),
+    #endif
+      DEFA( OWNER_LED,           PG_STATUS_LED_CONFIG, statusLedConfig_t, ioTags[0], STATUS_LED_NUMBER ),
+    #ifdef USE_SPEKTRUM_BIND
+      DEFS( OWNER_RX_BIND,       PG_RX_CONFIG, rxConfig_t, spektrum_bind_pin_override_ioTag ),
+      DEFS( OWNER_RX_BIND_PLUG,  PG_RX_CONFIG, rxConfig_t, spektrum_bind_plug_ioTag ),
+    #endif
+    #ifdef USE_TRANSPONDER
+      DEFS( OWNER_TRANSPONDER,   PG_TRANSPONDER_CONFIG, transponderConfig_t, ioTag ),
+    #endif
+    #ifdef USE_SPI
+      DEFW( OWNER_SPI_SCK,       PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagSck, SPIDEV_COUNT ),
+      DEFW( OWNER_SPI_MISO,      PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagMiso, SPIDEV_COUNT ),
+      DEFW( OWNER_SPI_MOSI,      PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagMosi, SPIDEV_COUNT ),
+    #endif
+    #ifdef USE_ESCSERIAL
+      DEFS( OWNER_ESCSERIAL,     PG_ESCSERIAL_CONFIG, escSerialConfig_t, ioTag ),
+    #endif
+    #ifdef USE_CAMERA_CONTROL
+      DEFS( OWNER_CAMERA_CONTROL, PG_CAMERA_CONTROL_CONFIG, cameraControlConfig_t, ioTag ),
+    #endif
+    #ifdef USE_ADC
+      DEFS( OWNER_ADC_BATT,      PG_ADC_CONFIG, adcConfig_t, vbat.ioTag ),
+      DEFS( OWNER_ADC_RSSI,      PG_ADC_CONFIG, adcConfig_t, rssi.ioTag ),
+      DEFS( OWNER_ADC_CURR,      PG_ADC_CONFIG, adcConfig_t, current.ioTag ),
+      DEFS( OWNER_ADC_EXT,       PG_ADC_CONFIG, adcConfig_t, external1.ioTag ),
+    #endif
+    #ifdef USE_BARO
+      DEFS( OWNER_BARO_CS,       PG_BAROMETER_CONFIG, barometerConfig_t, baro_spi_csn ),
+    #endif
+    #ifdef USE_MAG
+      DEFS( OWNER_COMPASS_CS,    PG_COMPASS_CONFIG, compassConfig_t, mag_spi_csn ),
+    #ifdef USE_MAG_DATA_READY_SIGNAL
+      DEFS( OWNER_COMPASS_EXTI,  PG_COMPASS_CONFIG, compassConfig_t, interruptTag ),
+    #endif
+    #endif
+    #ifdef USE_SDCARD
+      DEFS( OWNER_SDCARD_CS,     PG_SDCARD_CONFIG, sdcardConfig_t, chipSelectTag ),
+      DEFS( OWNER_SDCARD_DETECT, PG_SDCARD_CONFIG, sdcardConfig_t, cardDetectTag ),
+    #endif
+    #ifdef USE_PINIO
+      DEFA( OWNER_PINIO,         PG_PINIO_CONFIG, pinioConfig_t, ioTag, PINIO_COUNT ),
+    #endif
+    #if defined(USE_USB_MSC)
+      DEFS( OWNER_USB_MSC_PIN,   PG_USB_CONFIG, usbDev_t, mscButtonPin ),
+    #endif
+    #ifdef USE_FLASH
+        DEFS( OWNER_FLASH_CS,      PG_FLASH_CONFIG, flashConfig_t, csTag ),
+    #endif
+    #ifdef USE_MAX7456
+      DEFS( OWNER_OSD_CS,        PG_MAX7456_CONFIG, max7456Config_t, csTag ),
+    #endif
+    #ifdef USE_SPI
+      DEFA( OWNER_SPI_PREINIT_IPU, PG_SPI_PREINIT_IPU_CONFIG, spiCs_t, csnTag, SPI_PREINIT_IPU_COUNT ),
+      DEFA( OWNER_SPI_PREINIT_OPU, PG_SPI_PREINIT_OPU_CONFIG, spiCs_t, csnTag, SPI_PREINIT_OPU_COUNT ),
+    #endif
+    #ifdef USE_RX_SPI
+      DEFS( OWNER_RX_SPI_CS,     PG_RX_SPI_CONFIG, rxSpiConfig_t, csnTag ),
+    #endif
+    };
 
-#define DEFS(owner, pgn, type, member) \
-    { owner, pgn, 0, offsetof(type, member), 0 }
+    #undef DEFS
+    #undef DEFA
+    #undef DEFW
 
-#define DEFA(owner, pgn, type, member, max) \
-    { owner, pgn, sizeof(ioTag_t), offsetof(type, member), max }
+    static ioTag_t *getIoTag(const cliResourceValue_t value, uint8_t index) {
+      const pgRegistry_t* rec = pgFind(value.pgn);
+      return (CONST_CAST(ioTag_t *, rec->address + value.stride * index + value.offset));
+    }
 
-#define DEFW(owner, pgn, type, member, max) \
-    { owner, pgn, sizeof(type), offsetof(type, member), max }
-
-const cliResourceValue_t resourceTable[] = {
-#ifdef USE_BEEPER
-    DEFS( OWNER_BEEPER,        PG_BEEPER_DEV_CONFIG, beeperDevConfig_t, ioTag) ,
-#endif
-    DEFA( OWNER_MOTOR,         PG_MOTOR_CONFIG, motorConfig_t, dev.ioTags[0], MAX_SUPPORTED_MOTORS ),
-#ifdef USE_SERVOS
-    DEFA( OWNER_SERVO,         PG_SERVO_CONFIG, servoConfig_t, dev.ioTags[0], MAX_SUPPORTED_SERVOS ),
-#endif
-#if defined(USE_PPM)
-    DEFS( OWNER_PPMINPUT,      PG_PPM_CONFIG, ppmConfig_t, ioTag ),
-#endif
-#if defined(USE_PWM)
-    DEFA( OWNER_PWMINPUT,      PG_PWM_CONFIG, pwmConfig_t, ioTags[0], PWM_INPUT_PORT_COUNT ),
-#endif
-#ifdef USE_RANGEFINDER_HCSR04
-    DEFS( OWNER_SONAR_TRIGGER, PG_SONAR_CONFIG, sonarConfig_t, triggerTag ),
-    DEFS( OWNER_SONAR_ECHO,    PG_SONAR_CONFIG, sonarConfig_t, echoTag ),
-#endif
-#ifdef USE_LED_STRIP
-    DEFS( OWNER_LED_STRIP,     PG_LED_STRIP_CONFIG, ledStripConfig_t, ioTag ),
-#endif
-    DEFA( OWNER_SERIAL_TX,     PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagTx[0], SERIAL_PORT_MAX_INDEX ),
-    DEFA( OWNER_SERIAL_RX,     PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagRx[0], SERIAL_PORT_MAX_INDEX ),
-#ifdef USE_INVERTER
-    DEFA( OWNER_INVERTER,      PG_SERIAL_PIN_CONFIG, serialPinConfig_t, ioTagInverter[0], SERIAL_PORT_MAX_INDEX ),
-#endif
-#ifdef USE_I2C
-    DEFW( OWNER_I2C_SCL,       PG_I2C_CONFIG, i2cConfig_t, ioTagScl, I2CDEV_COUNT ),
-    DEFW( OWNER_I2C_SDA,       PG_I2C_CONFIG, i2cConfig_t, ioTagSda, I2CDEV_COUNT ),
-#endif
-    DEFA( OWNER_LED,           PG_STATUS_LED_CONFIG, statusLedConfig_t, ioTags[0], STATUS_LED_NUMBER ),
-#ifdef USE_SPEKTRUM_BIND
-    DEFS( OWNER_RX_BIND,       PG_RX_CONFIG, rxConfig_t, spektrum_bind_pin_override_ioTag ),
-    DEFS( OWNER_RX_BIND_PLUG,  PG_RX_CONFIG, rxConfig_t, spektrum_bind_plug_ioTag ),
-#endif
-#ifdef USE_TRANSPONDER
-    DEFS( OWNER_TRANSPONDER,   PG_TRANSPONDER_CONFIG, transponderConfig_t, ioTag ),
-#endif
-#ifdef USE_SPI
-    DEFW( OWNER_SPI_SCK,       PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagSck, SPIDEV_COUNT ),
-    DEFW( OWNER_SPI_MISO,      PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagMiso, SPIDEV_COUNT ),
-    DEFW( OWNER_SPI_MOSI,      PG_SPI_PIN_CONFIG, spiPinConfig_t, ioTagMosi, SPIDEV_COUNT ),
-#endif
-#ifdef USE_ESCSERIAL
-    DEFS( OWNER_ESCSERIAL,     PG_ESCSERIAL_CONFIG, escSerialConfig_t, ioTag ),
-#endif
-#ifdef USE_CAMERA_CONTROL
-    DEFS( OWNER_CAMERA_CONTROL, PG_CAMERA_CONTROL_CONFIG, cameraControlConfig_t, ioTag ),
-#endif
-#ifdef USE_ADC
-    DEFS( OWNER_ADC_BATT,      PG_ADC_CONFIG, adcConfig_t, vbat.ioTag ),
-    DEFS( OWNER_ADC_RSSI,      PG_ADC_CONFIG, adcConfig_t, rssi.ioTag ),
-    DEFS( OWNER_ADC_CURR,      PG_ADC_CONFIG, adcConfig_t, current.ioTag ),
-    DEFS( OWNER_ADC_EXT,       PG_ADC_CONFIG, adcConfig_t, external1.ioTag ),
-#endif
-#ifdef USE_BARO
-    DEFS( OWNER_BARO_CS,       PG_BAROMETER_CONFIG, barometerConfig_t, baro_spi_csn ),
-#endif
-#ifdef USE_MAG
-    DEFS( OWNER_COMPASS_CS,    PG_COMPASS_CONFIG, compassConfig_t, mag_spi_csn ),
-#ifdef USE_MAG_DATA_READY_SIGNAL
-    DEFS( OWNER_COMPASS_EXTI,  PG_COMPASS_CONFIG, compassConfig_t, interruptTag ),
-#endif
-#endif
-#ifdef USE_SDCARD
-    DEFS( OWNER_SDCARD_CS,     PG_SDCARD_CONFIG, sdcardConfig_t, chipSelectTag ),
-    DEFS( OWNER_SDCARD_DETECT, PG_SDCARD_CONFIG, sdcardConfig_t, cardDetectTag ),
-#endif
-#ifdef USE_PINIO
-    DEFA( OWNER_PINIO,         PG_PINIO_CONFIG, pinioConfig_t, ioTag, PINIO_COUNT ),
-#endif
-#if defined(USE_USB_MSC)
-    DEFS( OWNER_USB_MSC_PIN,   PG_USB_CONFIG, usbDev_t, mscButtonPin ),
-#endif
-#ifdef USE_FLASH
-    DEFS( OWNER_FLASH_CS,      PG_FLASH_CONFIG, flashConfig_t, csTag ),
-#endif
-#ifdef USE_MAX7456
-    DEFS( OWNER_OSD_CS,        PG_MAX7456_CONFIG, max7456Config_t, csTag ),
-#endif
-#ifdef USE_SPI
-    DEFA( OWNER_SPI_PREINIT_IPU, PG_SPI_PREINIT_IPU_CONFIG, spiCs_t, csnTag, SPI_PREINIT_IPU_COUNT ),
-    DEFA( OWNER_SPI_PREINIT_OPU, PG_SPI_PREINIT_OPU_CONFIG, spiCs_t, csnTag, SPI_PREINIT_OPU_COUNT ),
-#endif
-#ifdef USE_RX_SPI
-    DEFS( OWNER_RX_SPI_CS,     PG_RX_SPI_CONFIG, rxSpiConfig_t, csnTag ),
-#endif
-};
-
-#undef DEFS
-#undef DEFA
-#undef DEFW
-
-static ioTag_t *getIoTag(const cliResourceValue_t value, uint8_t index)
-{
-    const pgRegistry_t* rec = pgFind(value.pgn);
-    return CONST_CAST(ioTag_t *, rec->address + value.stride * index + value.offset);
-}
-
-static void printResource(uint8_t dumpMask)
-{
-    for (unsigned int i = 0; i < ARRAYLEN(resourceTable); i++) {
+    static void printResource(uint8_t dumpMask) {
+      for (unsigned int i = 0; i < ARRAYLEN(resourceTable); i++) {
         const char* owner = ownerNames[resourceTable[i].owner];
         const pgRegistry_t* pg = pgFind(resourceTable[i].pgn);
         const void *currentConfig;
         const void *defaultConfig;
         if (configIsInCopy) {
-            currentConfig = pg->copy;
-            defaultConfig = pg->address;
+          currentConfig = pg->copy;
+          defaultConfig = pg->address;
         } else {
-            currentConfig = pg->address;
-            defaultConfig = NULL;
+          currentConfig = pg->address;
+          defaultConfig = NULL;
         }
 
         for (int index = 0; index < MAX_RESOURCE_INDEX(resourceTable[i].maxIndex); index++) {
-            const ioTag_t ioTag = *(ioTag_t *)((const uint8_t *)currentConfig + resourceTable[i].stride * index + resourceTable[i].offset);
-            ioTag_t ioTagDefault = NULL;
-            if (defaultConfig) {
-                ioTagDefault = *(ioTag_t *)((const uint8_t *)defaultConfig + resourceTable[i].stride * index + resourceTable[i].offset);
-            }
+          const ioTag_t ioTag = *(ioTag_t *)((const uint8_t *)currentConfig + resourceTable[i].stride * index + resourceTable[i].offset);
+          ioTag_t ioTagDefault = NULL;
+          if (defaultConfig) {
+            ioTagDefault = *(ioTag_t *)((const uint8_t *)defaultConfig + resourceTable[i].stride * index + resourceTable[i].offset);
+          }
 
-            const bool equalsDefault = ioTag == ioTagDefault;
-            const char *format = "resource %s %d %c%02d";
-            const char *formatUnassigned = "resource %s %d NONE";
-            if (ioTagDefault) {
-                cliDefaultPrintLinef(dumpMask, equalsDefault, format, owner, RESOURCE_INDEX(index), IO_GPIOPortIdxByTag(ioTagDefault) + 'A', IO_GPIOPinIdxByTag(ioTagDefault));
-            } else if (defaultConfig) {
-                cliDefaultPrintLinef(dumpMask, equalsDefault, formatUnassigned, owner, RESOURCE_INDEX(index));
-            }
-            if (ioTag) {
-                cliDumpPrintLinef(dumpMask, equalsDefault, format, owner, RESOURCE_INDEX(index), IO_GPIOPortIdxByTag(ioTag) + 'A', IO_GPIOPinIdxByTag(ioTag));
-            } else if (!(dumpMask & HIDE_UNUSED)) {
-                cliDumpPrintLinef(dumpMask, equalsDefault, formatUnassigned, owner, RESOURCE_INDEX(index));
-            }
+          const bool equalsDefault = ioTag == ioTagDefault;
+          const char *format = "resource %s %d %c%02d";
+          const char *formatUnassigned = "resource %s %d NONE";
+          if (ioTagDefault) {
+            cliDefaultPrintLinef(dumpMask, equalsDefault, format, owner, RESOURCE_INDEX(index), IO_GPIOPortIdxByTag(ioTagDefault) + 'A', IO_GPIOPinIdxByTag(ioTagDefault));
+          } else if (defaultConfig) {
+            cliDefaultPrintLinef(dumpMask, equalsDefault, formatUnassigned, owner, RESOURCE_INDEX(index));
+          }
+          if (ioTag) {
+            cliDumpPrintLinef(dumpMask, equalsDefault, format, owner, RESOURCE_INDEX(index), IO_GPIOPortIdxByTag(ioTag) + 'A', IO_GPIOPinIdxByTag(ioTag));
+          } else if (!(dumpMask & HIDE_UNUSED)) {
+            cliDumpPrintLinef(dumpMask, equalsDefault, formatUnassigned, owner, RESOURCE_INDEX(index));
+          }
         }
+      }
     }
-}
 
-static void printResourceOwner(uint8_t owner, uint8_t index)
-{
-    cliPrintf("%s", ownerNames[resourceTable[owner].owner]);
-
-    if (resourceTable[owner].maxIndex > 0) {
+    static void printResourceOwner(uint8_t owner, uint8_t index) {
+      cliPrintf("%s", ownerNames[resourceTable[owner].owner]);
+      if (resourceTable[owner].maxIndex > 0) {
         cliPrintf(" %d", RESOURCE_INDEX(index));
+      }
     }
-}
 
-static void resourceCheck(uint8_t resourceIndex, uint8_t index, ioTag_t newTag)
-{
-    if (!newTag) {
+    static void resourceCheck(uint8_t resourceIndex, uint8_t index, ioTag_t newTag) {
+      if (!newTag) {
         return;
-    }
-
-    const char * format = "\r\nNOTE: %c%02d already assigned to ";
-    for (int r = 0; r < (int)ARRAYLEN(resourceTable); r++) {
+      }
+      const char * format = "\r\nNOTE: %c%02d already assigned to ";
+      for (int r = 0; r < (int)ARRAYLEN(resourceTable); r++) {
         for (int i = 0; i < MAX_RESOURCE_INDEX(resourceTable[r].maxIndex); i++) {
-            ioTag_t *tag = getIoTag(resourceTable[r], i);
-            if (*tag == newTag) {
-                bool cleared = false;
-                if (r == resourceIndex) {
-                    if (i == index) {
-                        continue;
-                    }
-                    *tag = IO_TAG_NONE;
-                    cleared = true;
-                }
-
-                cliPrintf(format, DEFIO_TAG_GPIOID(newTag) + 'A', DEFIO_TAG_PIN(newTag));
-
-                printResourceOwner(r, i);
-
-                if (cleared) {
-                    cliPrintf(". ");
-                    printResourceOwner(r, i);
-                    cliPrintf(" disabled");
-                }
-
-                cliPrintLine(".");
+          ioTag_t *tag = getIoTag(resourceTable[r], i);
+          if (*tag == newTag) {
+            bool cleared = false;
+            if (r == resourceIndex) {
+              if (i == index) {
+                continue;
+              }
+              *tag = IO_TAG_NONE;
+              cleared = true;
             }
+            cliPrintf(format, DEFIO_TAG_GPIOID(newTag) + 'A', DEFIO_TAG_PIN(newTag));
+            printResourceOwner(r, i);
+            if (cleared) {
+              cliPrintf(". ");
+              printResourceOwner(r, i);
+              cliPrintf(" disabled");
+            }
+            cliPrintLine(".");
+          }
         }
+      }
     }
-}
 
-static bool strToPin(char *pch, ioTag_t *tag)
-{
-    if (strcasecmp(pch, "NONE") == 0) {
+    static bool strToPin(char *pch, ioTag_t *tag) {
+      if (strcasecmp(pch, "NONE") == 0) {
         *tag = IO_TAG_NONE;
         return true;
-    } else {
+      } else {
         unsigned pin = 0;
         unsigned port = (*pch >= 'a') ? *pch - 'a' : *pch - 'A';
 
         if (port < 8) {
-            pch++;
-            pin = atoi(pch);
-            if (pin < 16) {
-                *tag = DEFIO_TAG_MAKE(port, pin);
-                return true;
-            }
+          pch++;
+          pin = atoi(pch);
+          if (pin < 16) {
+            *tag = DEFIO_TAG_MAKE(port, pin);
+            return (true);
+          }
         }
+      }
+      return (false);
     }
-    return false;
-}
 
-static void cliResource(char *cmdline)
-{
-    int len = strlen(cmdline);
+    static void cliResource(char *cmdline) {
+      int len = strlen(cmdline);
 
-    if (len == 0) {
+      if (len == 0) {
         printResource(DUMP_MASTER | HIDE_UNUSED);
-
         return;
-    } else if (strncasecmp(cmdline, "list", len) == 0) {
-#ifdef MINIMAL_CLI
-        cliPrintLine("IO");
-#else
-        cliPrintLine("Currently active IO resource assignments:\r\n(reboot to update)");
-        cliRepeat('-', 20);
-#endif
+      } else if (strncasecmp(cmdline, "list", len) == 0) {
+        #ifdef MINIMAL_CLI
+          cliPrintLine("IO");
+        #else
+          cliPrintLine("Currently active IO resource assignments:\r\n(reboot to update)");
+          cliRepeat('-', 20);
+        #endif
         for (int i = 0; i < DEFIO_IO_USED_COUNT; i++) {
-            const char* owner;
-            owner = ownerNames[ioRecs[i].owner];
-
-            cliPrintf("%c%02d: %s", IO_GPIOPortIdx(ioRecs + i) + 'A', IO_GPIOPinIdx(ioRecs + i), owner);
-            if (ioRecs[i].index > 0) {
-                cliPrintf(" %d", ioRecs[i].index);
-            }
-            cliPrintLinefeed();
+          const char* owner;
+          owner = ownerNames[ioRecs[i].owner];
+          cliPrintf("%c%02d: %s", IO_GPIOPortIdx(ioRecs + i) + 'A', IO_GPIOPinIdx(ioRecs + i), owner);
+          if (ioRecs[i].index > 0) {
+            cliPrintf(" %d", ioRecs[i].index);
+          }
+          cliPrintLinefeed();
         }
-
-#ifndef MINIMAL_CLI
-        cliPrintLine("\r\nUse: 'resource' to see how to change resources.");
-#endif
-
+        #ifndef MINIMAL_CLI
+          cliPrintLine("\r\nUse: 'resource' to see how to change resources.");
+        #endif
         return;
-    }
+      }
 
-    uint8_t resourceIndex = 0;
-    int index = 0;
-    char *pch = NULL;
-    char *saveptr;
+      uint8_t resourceIndex = 0;
+      int index = 0;
+      char *pch = NULL;
+      char *saveptr;
 
-    pch = strtok_r(cmdline, " ", &saveptr);
-    for (resourceIndex = 0; ; resourceIndex++) {
+      pch = strtok_r(cmdline, " ", &saveptr);
+      for (resourceIndex = 0; ; resourceIndex++) {
         if (resourceIndex >= ARRAYLEN(resourceTable)) {
-            cliPrintErrorLinef("Invalid");
-            return;
+          cliPrintErrorLinef("Invalid");
+          return;
         }
 
         if (strncasecmp(pch, ownerNames[resourceTable[resourceIndex].owner], len) == 0) {
-            break;
+          break;
         }
-    }
+      }
 
-    pch = strtok_r(NULL, " ", &saveptr);
-    index = atoi(pch);
-
-    if (resourceTable[resourceIndex].maxIndex > 0 || index > 0) {
+      pch = strtok_r(NULL, " ", &saveptr);
+      index = atoi(pch);
+      if (resourceTable[resourceIndex].maxIndex > 0 || index > 0) {
         if (index <= 0 || index > MAX_RESOURCE_INDEX(resourceTable[resourceIndex].maxIndex)) {
-            cliShowArgumentRangeError("index", 1, MAX_RESOURCE_INDEX(resourceTable[resourceIndex].maxIndex));
-            return;
+          cliShowArgumentRangeError("index", 1, MAX_RESOURCE_INDEX(resourceTable[resourceIndex].maxIndex));
+          return;
         }
         index -= 1;
-
         pch = strtok_r(NULL, " ", &saveptr);
-    }
-
-    ioTag_t *tag = getIoTag(resourceTable[resourceIndex], index);
-
-    if (strlen(pch) > 0) {
+      }
+      ioTag_t *tag = getIoTag(resourceTable[resourceIndex], index);
+      if (strlen(pch) > 0) {
         if (strToPin(pch, tag)) {
-            if (*tag == IO_TAG_NONE) {
-#ifdef MINIMAL_CLI
-                cliPrintLine("Freed");
-#else
-                cliPrintLine("Resource is freed");
-#endif
-                return;
+          if (*tag == IO_TAG_NONE) {
+            #ifdef MINIMAL_CLI
+              cliPrintLine("Freed");
+            #else
+              cliPrintLine("Resource is freed");
+            #endif
+              return;
+          } else {
+            ioRec_t *rec = IO_Rec(IOGetByTag(*tag));
+            if (rec) {
+              resourceCheck(resourceIndex, index, *tag);
+              #ifdef MINIMAL_CLI
+                cliPrintLinef(" %c%02d set", IO_GPIOPortIdx(rec) + 'A', IO_GPIOPinIdx(rec));
+              #else
+                cliPrintLinef("\r\nResource is set to %c%02d", IO_GPIOPortIdx(rec) + 'A', IO_GPIOPinIdx(rec));
+              #endif
             } else {
-                ioRec_t *rec = IO_Rec(IOGetByTag(*tag));
-                if (rec) {
-                    resourceCheck(resourceIndex, index, *tag);
-#ifdef MINIMAL_CLI
-                    cliPrintLinef(" %c%02d set", IO_GPIOPortIdx(rec) + 'A', IO_GPIOPinIdx(rec));
-#else
-                    cliPrintLinef("\r\nResource is set to %c%02d", IO_GPIOPortIdx(rec) + 'A', IO_GPIOPinIdx(rec));
-#endif
-                } else {
-                    cliShowParseError();
-                }
-                return;
+              cliShowParseError();
             }
+            return;
+          }
         }
+      }
+      cliShowParseError();
     }
 
-    cliShowParseError();
-}
-
-static void printDma(void)
-{
-    cliPrintLinefeed();
-
-#ifdef MINIMAL_CLI
-    cliPrintLine("DMA:");
-#else
-    cliPrintLine("Currently active DMA:");
-    cliRepeat('-', 20);
-#endif
-    for (int i = 1; i <= DMA_LAST_HANDLER; i++) {
+    static void printDma(void) {
+      cliPrintLinefeed();
+      #ifdef MINIMAL_CLI
+        cliPrintLine("DMA:");
+      #else
+        cliPrintLine("Currently active DMA:");
+        cliRepeat('-', 20);
+      #endif
+      for (int i = 1; i <= DMA_LAST_HANDLER; i++) {
         const char* owner;
         owner = ownerNames[dmaGetOwner(i)];
-
         cliPrintf(DMA_OUTPUT_STRING, DMA_DEVICE_NO(i), DMA_DEVICE_INDEX(i));
         uint8_t resourceIndex = dmaGetResourceIndex(i);
         if (resourceIndex > 0) {
-            cliPrintLinef(" %s %d", owner, resourceIndex);
+          cliPrintLinef(" %s %d", owner, resourceIndex);
         } else {
-            cliPrintLinef(" %s", owner);
+          cliPrintLinef(" %s", owner);
         }
+      }
     }
-}
 
-static void cliDma(char* cmdLine)
-{
-    UNUSED(cmdLine);
-    printDma();
-}
-#endif /* USE_RESOURCE_MGMT */
+    static void cliDma(char* cmdLine) {
+      UNUSED(cmdLine);
+      printDma();
+    }
+  #endif //USE_RESOURCE_MGMT
 
-#ifdef USE_TIMER_MGMT
-
-static void printTimer(uint8_t dumpMask)
-{
-    cliPrintLine("# examples: ");
-    const char *format = "timer %c%02d %d";
-    cliPrint("#");
-    cliPrintLinef(format, 'A', 1, 1);
-
-    cliPrint("#");
-    cliPrintLinef(format, 'A', 1, 0);
-
-    for (unsigned int i = 0; i < MAX_TIMER_PINMAP_COUNT; i++) {
-
+  #ifdef USE_TIMER_MGMT
+    static void printTimer(uint8_t dumpMask) {
+      cliPrintLine("# examples: ");
+      const char *format = "timer %c%02d %d";
+      cliPrint("#");
+      cliPrintLinef(format, 'A', 1, 1);
+      cliPrint("#");
+      cliPrintLinef(format, 'A', 1, 0);
+      for (unsigned int i = 0; i < MAX_TIMER_PINMAP_COUNT; i++) {
         const ioTag_t ioTag = timerIOConfig(i)->ioTag;
         const uint8_t timerIndex = timerIOConfig(i)->index;
-
         if (!ioTag) {
-            continue;
+          continue;
         }
-
         if (timerIndex != 0 && !(dumpMask & HIDE_UNUSED)) {
-            cliDumpPrintLinef(dumpMask, false, format,
-                IO_GPIOPortIdxByTag(ioTag) + 'A',
-                IO_GPIOPinIdxByTag(ioTag),
-                timerIndex
-                );
+          cliDumpPrintLinef(dumpMask, false, format, IO_GPIOPortIdxByTag(ioTag) + 'A', IO_GPIOPinIdxByTag(ioTag), timerIndex);
         }
+      }
     }
-}
 
-static void cliTimer(char *cmdline)
-{
-    int len = strlen(cmdline);
+    static void cliTimer(char *cmdline) {
+      int len = strlen(cmdline);
 
-    if (len == 0) {
+      if (len == 0) {
         printTimer(DUMP_MASTER | HIDE_UNUSED);
         return;
-    } else if (strncasecmp(cmdline, "list", len) == 0) {
+      } else if (strncasecmp(cmdline, "list", len) == 0) {
         printTimer(DUMP_MASTER);
         return;
-    }
+      }
 
-    char *pch = NULL;
-    char *saveptr;
-    int timerIOIndex = -1;
+      char *pch = NULL;
+      char *saveptr;
+      int timerIOIndex = -1;
 
-    ioTag_t ioTag = 0;
-    pch = strtok_r(cmdline, " ", &saveptr);
-    if (!pch || !(strToPin(pch, &ioTag) && IOGetByTag(ioTag))) {
+      ioTag_t ioTag = 0;
+      pch = strtok_r(cmdline, " ", &saveptr);
+      if (!pch || !(strToPin(pch, &ioTag) && IOGetByTag(ioTag))) {
         goto error;
-    }
+      }
 
-    /* find existing entry, or go for next available */
-    for (unsigned i = 0; i < MAX_TIMER_PINMAP_COUNT; i++) {
+      /* find existing entry, or go for next available */
+      for (unsigned i = 0; i < MAX_TIMER_PINMAP_COUNT; i++) {
         if (timerIOConfig(i)->ioTag == ioTag) {
-            timerIOIndex = i;
-            break;
+          timerIOIndex = i;
+          break;
         }
 
         /* first available empty slot */
         if (timerIOIndex < 0 && timerIOConfig(i)->ioTag == IO_TAG_NONE) {
-            timerIOIndex = i;
+          timerIOIndex = i;
         }
-    }
-
-    if (timerIOIndex < 0) {
+      }
+      if (timerIOIndex < 0) {
         cliPrintErrorLinef("Index out of range.");
         return;
-    }
+      }
 
-    uint8_t timerIndex = 0;
-    pch = strtok_r(NULL, " ", &saveptr);
-    if (pch) {
+      uint8_t timerIndex = 0;
+      pch = strtok_r(NULL, " ", &saveptr);
+      if (pch) {
         if (strcasecmp(pch, "list") == 0) {
-            /* output the list of available options */
-            uint8_t index = 1;
-            for (unsigned i = 0; i < USABLE_TIMER_CHANNEL_COUNT; i++) {
-                if (timerHardware[i].tag == ioTag) {
-                    cliPrintLinef("# %d. TIM%d CH%d",
-                        index,
-                        timerGetTIMNumber(timerHardware[i].tim),
-                        CC_INDEX_FROM_CHANNEL(timerHardware[i].channel)
-                    );
-                    index++;
-                }
+          /* output the list of available options */
+          uint8_t index = 1;
+          for (unsigned i = 0; i < USABLE_TIMER_CHANNEL_COUNT; i++) {
+            if (timerHardware[i].tag == ioTag) {
+              cliPrintLinef("# %d. TIM%d CH%d",
+                index,
+                timerGetTIMNumber(timerHardware[i].tim),
+                CC_INDEX_FROM_CHANNEL(timerHardware[i].channel)
+              );
+              index++;
             }
-            return;
+          }
+          return;
         } else if (strcasecmp(pch, "none") == 0) {
-            goto success;
+          goto success;
         } else {
-            timerIndex = atoi(pch);
+          timerIndex = atoi(pch);
         }
-    } else {
+      } else {
         goto error;
+      }
+
+      success:
+        timerIOConfigMutable(timerIOIndex)->ioTag = timerIndex == 0 ? IO_TAG_NONE : ioTag;
+        timerIOConfigMutable(timerIOIndex)->index = timerIndex;
+        cliPrintLine("Success");
+        return;
+      error:
+        cliShowParseError();
     }
-
-success:
-    timerIOConfigMutable(timerIOIndex)->ioTag = timerIndex == 0 ? IO_TAG_NONE : ioTag;
-    timerIOConfigMutable(timerIOIndex)->index = timerIndex;
-
-    cliPrintLine("Success");
-    return;
-
-error:
-    cliShowParseError();
-}
-#endif
+  #endif
 
 static void printConfig(char *cmdline, bool doDiff)
 {
