@@ -15,6 +15,8 @@
 
 #define CAMERA_CONTROL_PIN      PB3
 
+#define USE_BUTTERED_PIDS       true
+
 // EXTI ICM20601 allways 125us -> 8kHz (some lost at 250us ... at 16K and 32K gyro rate ... also)
 //#define DEBUG_MPU_DATA_READY_INTERRUPT
 
