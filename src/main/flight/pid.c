@@ -38,12 +38,7 @@
 
 #define ITERM_RELAX_SETPOINT_THRESHOLD 30.0f
 
-const char pidNames[] =
-    "ROLL;"
-    "PITCH;"
-    "YAW;"
-    "LEVEL;"
-    "MAG;";
+const char pidNames[] = {"ROLL;" "PITCH;" "YAW;" "LEVEL;" "MAG;"};
 
 FAST_RAM_ZERO_INIT uint32_t targetPidLooptime;
 FAST_RAM_ZERO_INIT pidAxisData_t pidData[XYZ_AXIS_COUNT];
