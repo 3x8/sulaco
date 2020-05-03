@@ -772,7 +772,7 @@ static void rotateITermAndAxisError() {
       }
     }
   }
-#endif // USE_SMART_FEEDFORWARD
+#endif //USE_SMART_FEEDFORWARD
 
 static FAST_RAM_ZERO_INIT float previousRateError[3];
 static FAST_RAM_ZERO_INIT timeUs_t crashDetectedAtUs;
