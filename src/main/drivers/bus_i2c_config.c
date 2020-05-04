@@ -7,11 +7,9 @@
 #if defined(USE_I2C) && !defined(SOFT_I2C)
   #include "build/build_config.h"
   #include "build/debug.h"
-
   #include "drivers/bus_i2c.h"
   #include "drivers/bus_i2c_impl.h"
   #include "drivers/io.h"
-
   #include "pg/bus_i2c.h"
 
   // Backward compatibility for overclocking and internal pullup.
