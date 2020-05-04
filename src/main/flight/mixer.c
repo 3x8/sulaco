@@ -47,50 +47,50 @@
 PG_REGISTER_WITH_RESET_TEMPLATE(mixerConfig_t, mixerConfig, PG_MIXER_CONFIG, 0);
 
 #ifndef TARGET_DEFAULT_MIXER
-#define TARGET_DEFAULT_MIXER    MIXER_QUADX
+  #define TARGET_DEFAULT_MIXER    MIXER_QUADX
 #endif
+
 PG_RESET_TEMPLATE(mixerConfig_t, mixerConfig,
-    .mixerMode = TARGET_DEFAULT_MIXER,
-    .yaw_motors_reversed = false,
-    .crashflip_motor_percent = 0,
+  .mixerMode = TARGET_DEFAULT_MIXER,
+  .yaw_motors_reversed = false,
+  .crashflip_motor_percent = 0,
 );
 
 PG_REGISTER_WITH_RESET_FN(motorConfig_t, motorConfig, PG_MOTOR_CONFIG, 1);
 
-void pgResetFn_motorConfig(motorConfig_t *motorConfig)
-{
-#ifdef BRUSHED_MOTORS
+void pgResetFn_motorConfig(motorConfig_t *motorConfig) {
+  #ifdef BRUSHED_MOTORS
     motorConfig->minthrottle = 1000;
     motorConfig->dev.motorPwmRate = BRUSHED_MOTORS_PWM_RATE;
     motorConfig->dev.motorPwmProtocol = PWM_TYPE_BRUSHED;
     motorConfig->dev.useUnsyncedPwm = true;
-#else
-#ifdef USE_BRUSHED_ESC_AUTODETECT
-    if (hardwareMotorType == MOTOR_BRUSHED) {
+  #else
+    #ifdef USE_BRUSHED_ESC_AUTODETECT
+      if (hardwareMotorType == MOTOR_BRUSHED) {
         motorConfig->minthrottle = 1000;
         motorConfig->dev.motorPwmRate = BRUSHED_MOTORS_PWM_RATE;
         motorConfig->dev.motorPwmProtocol = PWM_TYPE_BRUSHED;
         motorConfig->dev.useUnsyncedPwm = true;
-    } else
-#endif
+      } else
+    #endif
     {
-        motorConfig->minthrottle = 1070;
-        motorConfig->dev.motorPwmRate = BRUSHLESS_MOTORS_PWM_RATE;
-        motorConfig->dev.motorPwmProtocol = PWM_TYPE_ONESHOT125;
+      motorConfig->minthrottle = 1070;
+      motorConfig->dev.motorPwmRate = BRUSHLESS_MOTORS_PWM_RATE;
+      motorConfig->dev.motorPwmProtocol = PWM_TYPE_ONESHOT125;
     }
-#endif
+  #endif
     motorConfig->maxthrottle = 2000;
     motorConfig->mincommand = 1000;
     motorConfig->digitalIdleOffsetValue = 450;
-#ifdef USE_DSHOT_DMAR
+  #ifdef USE_DSHOT_DMAR
     motorConfig->dev.useBurstDshot = ENABLE_DSHOT_DMAR;
-#endif
+  #endif
 
-    for (int motorIndex = 0; motorIndex < MAX_SUPPORTED_MOTORS; motorIndex++) {
-        motorConfig->dev.ioTags[motorIndex] = timerioTagGetByUsage(TIM_USE_MOTOR, motorIndex);
-    }
+  for (int motorIndex = 0; motorIndex < MAX_SUPPORTED_MOTORS; motorIndex++) {
+    motorConfig->dev.ioTags[motorIndex] = timerioTagGetByUsage(TIM_USE_MOTOR, motorIndex);
+  }
 
-    motorConfig->motorPoleCount = 14;   // Most brushes motors that we use are 14 poles
+  motorConfig->motorPoleCount = 14;   // Most brushes motors that we use are 14 poles
 }
 
 PG_REGISTER_ARRAY(motorMixer_t, MAX_SUPPORTED_MOTORS, customMotorMixer, PG_MOTOR_MIXER, 0);
@@ -99,173 +99,171 @@ PG_REGISTER_ARRAY(motorMixer_t, MAX_SUPPORTED_MOTORS, customMotorMixer, PG_MOTOR
 
 static FAST_RAM_ZERO_INIT uint8_t motorCount;
 static FAST_RAM_ZERO_INIT float motorMixRange;
-
 float FAST_RAM_ZERO_INIT motor[MAX_SUPPORTED_MOTORS];
 float motor_disarmed[MAX_SUPPORTED_MOTORS];
-
 mixerMode_e currentMixerMode;
 static motorMixer_t currentMixer[MAX_SUPPORTED_MOTORS];
 
 static FAST_RAM_ZERO_INIT int throttleAngleCorrection;
 
-
 static const motorMixer_t mixerQuadX[] = {
-    { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R
-    { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R
-    { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L
-    { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L
+  { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R
+  { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R
+  { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L
+  { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L
 };
+
 #ifndef USE_QUAD_MIXER_ONLY
-static const motorMixer_t mixerTricopter[] = {
+  static const motorMixer_t mixerTricopter[] = {
     { 1.0f,  0.0f,  1.333333f,  0.0f },     // REAR
     { 1.0f, -1.0f, -0.666667f,  0.0f },     // RIGHT
     { 1.0f,  1.0f, -0.666667f,  0.0f },     // LEFT
-};
+  };
 
-static const motorMixer_t mixerQuadP[] = {
+  static const motorMixer_t mixerQuadP[] = {
     { 1.0f,  0.0f,  1.0f, -1.0f },          // REAR
     { 1.0f, -1.0f,  0.0f,  1.0f },          // RIGHT
     { 1.0f,  1.0f,  0.0f,  1.0f },          // LEFT
     { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
-};
+  };
 
-#if defined(USE_UNCOMMON_MIXERS)
-static const motorMixer_t mixerBicopter[] = {
-    { 1.0f,  1.0f,  0.0f,  0.0f },          // LEFT
-    { 1.0f, -1.0f,  0.0f,  0.0f },          // RIGHT
-};
-#else
-#define mixerBicopter NULL
-#endif
+  #if defined(USE_UNCOMMON_MIXERS)
+    static const motorMixer_t mixerBicopter[] = {
+      { 1.0f,  1.0f,  0.0f,  0.0f },          // LEFT
+      { 1.0f, -1.0f,  0.0f,  0.0f },          // RIGHT
+    };
+  #else
+    #define mixerBicopter NULL
+  #endif
 
-static const motorMixer_t mixerY4[] = {
+  static const motorMixer_t mixerY4[] = {
     { 1.0f,  0.0f,  1.0f, -1.0f },          // REAR_TOP CW
     { 1.0f, -1.0f, -1.0f,  0.0f },          // FRONT_R CCW
     { 1.0f,  0.0f,  1.0f,  1.0f },          // REAR_BOTTOM CCW
     { 1.0f,  1.0f, -1.0f,  0.0f },          // FRONT_L CW
-};
+  };
 
+  #if (MAX_SUPPORTED_MOTORS >= 6)
+    static const motorMixer_t mixerHex6X[] = {
+      { 1.0f, -0.5f,  0.866025f,  1.0f },     // REAR_R
+      { 1.0f, -0.5f, -0.866025f,  1.0f },     // FRONT_R
+      { 1.0f,  0.5f,  0.866025f, -1.0f },     // REAR_L
+      { 1.0f,  0.5f, -0.866025f, -1.0f },     // FRONT_L
+      { 1.0f, -1.0f,  0.0f,      -1.0f },     // RIGHT
+      { 1.0f,  1.0f,  0.0f,       1.0f },     // LEFT
+    };
 
-#if (MAX_SUPPORTED_MOTORS >= 6)
-static const motorMixer_t mixerHex6X[] = {
-    { 1.0f, -0.5f,  0.866025f,  1.0f },     // REAR_R
-    { 1.0f, -0.5f, -0.866025f,  1.0f },     // FRONT_R
-    { 1.0f,  0.5f,  0.866025f, -1.0f },     // REAR_L
-    { 1.0f,  0.5f, -0.866025f, -1.0f },     // FRONT_L
-    { 1.0f, -1.0f,  0.0f,      -1.0f },     // RIGHT
-    { 1.0f,  1.0f,  0.0f,       1.0f },     // LEFT
-};
+    #if defined(USE_UNCOMMON_MIXERS)
+      static const motorMixer_t mixerHex6H[] = {
+        { 1.0f, -1.0f,  1.0f, -1.0f },     // REAR_R
+        { 1.0f, -1.0f, -1.0f,  1.0f },     // FRONT_R
+        { 1.0f,  1.0f,  1.0f,  1.0f },     // REAR_L
+        { 1.0f,  1.0f, -1.0f, -1.0f },     // FRONT_L
+        { 1.0f,  0.0f,  0.0f,  0.0f },     // RIGHT
+        { 1.0f,  0.0f,  0.0f,  0.0f },     // LEFT
+      };
 
-#if defined(USE_UNCOMMON_MIXERS)
-static const motorMixer_t mixerHex6H[] = {
-    { 1.0f, -1.0f,  1.0f, -1.0f },     // REAR_R
-    { 1.0f, -1.0f, -1.0f,  1.0f },     // FRONT_R
-    { 1.0f,  1.0f,  1.0f,  1.0f },     // REAR_L
-    { 1.0f,  1.0f, -1.0f, -1.0f },     // FRONT_L
-    { 1.0f,  0.0f,  0.0f,  0.0f },     // RIGHT
-    { 1.0f,  0.0f,  0.0f,  0.0f },     // LEFT
-};
+      static const motorMixer_t mixerHex6P[] = {
+        { 1.0f, -0.866025f,  0.5f,  1.0f },     // REAR_R
+        { 1.0f, -0.866025f, -0.5f, -1.0f },     // FRONT_R
+        { 1.0f,  0.866025f,  0.5f,  1.0f },     // REAR_L
+        { 1.0f,  0.866025f, -0.5f, -1.0f },     // FRONT_L
+        { 1.0f,  0.0f,      -1.0f,  1.0f },     // FRONT
+        { 1.0f,  0.0f,       1.0f, -1.0f },     // REAR
+      };
 
-static const motorMixer_t mixerHex6P[] = {
-    { 1.0f, -0.866025f,  0.5f,  1.0f },     // REAR_R
-    { 1.0f, -0.866025f, -0.5f, -1.0f },     // FRONT_R
-    { 1.0f,  0.866025f,  0.5f,  1.0f },     // REAR_L
-    { 1.0f,  0.866025f, -0.5f, -1.0f },     // FRONT_L
-    { 1.0f,  0.0f,      -1.0f,  1.0f },     // FRONT
-    { 1.0f,  0.0f,       1.0f, -1.0f },     // REAR
-};
-static const motorMixer_t mixerY6[] = {
-    { 1.0f,  0.0f,  1.333333f,  1.0f },     // REAR
-    { 1.0f, -1.0f, -0.666667f, -1.0f },     // RIGHT
-    { 1.0f,  1.0f, -0.666667f, -1.0f },     // LEFT
-    { 1.0f,  0.0f,  1.333333f, -1.0f },     // UNDER_REAR
-    { 1.0f, -1.0f, -0.666667f,  1.0f },     // UNDER_RIGHT
-    { 1.0f,  1.0f, -0.666667f,  1.0f },     // UNDER_LEFT
-};
-#else
-#define mixerHex6H NULL
-#define mixerHex6P NULL
-#define mixerY6 NULL
-#endif // USE_UNCOMMON_MIXERS
-#else
-#define mixerHex6X NULL
-#endif // MAX_SUPPORTED_MOTORS >= 6
+      static const motorMixer_t mixerY6[] = {
+        { 1.0f,  0.0f,  1.333333f,  1.0f },     // REAR
+        { 1.0f, -1.0f, -0.666667f, -1.0f },     // RIGHT
+        { 1.0f,  1.0f, -0.666667f, -1.0f },     // LEFT
+        { 1.0f,  0.0f,  1.333333f, -1.0f },     // UNDER_REAR
+        { 1.0f, -1.0f, -0.666667f,  1.0f },     // UNDER_RIGHT
+        { 1.0f,  1.0f, -0.666667f,  1.0f },     // UNDER_LEFT
+      };
+    #else
+      #define mixerHex6H NULL
+      #define mixerHex6P NULL
+      #define mixerY6 NULL
+    #endif //USE_UNCOMMON_MIXERS
+  #else
+    #define mixerHex6X NULL
+  #endif //MAX_SUPPORTED_MOTORS >= 6
 
-#if defined(USE_UNCOMMON_MIXERS) && (MAX_SUPPORTED_MOTORS >= 8)
-static const motorMixer_t mixerOctoX8[] = {
-    { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R
-    { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R
-    { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L
-    { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L
-    { 1.0f, -1.0f,  1.0f,  1.0f },          // UNDER_REAR_R
-    { 1.0f, -1.0f, -1.0f, -1.0f },          // UNDER_FRONT_R
-    { 1.0f,  1.0f,  1.0f, -1.0f },          // UNDER_REAR_L
-    { 1.0f,  1.0f, -1.0f,  1.0f },          // UNDER_FRONT_L
-};
+  #if defined(USE_UNCOMMON_MIXERS) && (MAX_SUPPORTED_MOTORS >= 8)
+    static const motorMixer_t mixerOctoX8[] = {
+      { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R
+      { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R
+      { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L
+      { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L
+      { 1.0f, -1.0f,  1.0f,  1.0f },          // UNDER_REAR_R
+      { 1.0f, -1.0f, -1.0f, -1.0f },          // UNDER_FRONT_R
+      { 1.0f,  1.0f,  1.0f, -1.0f },          // UNDER_REAR_L
+      { 1.0f,  1.0f, -1.0f,  1.0f },          // UNDER_FRONT_L
+    };
 
-static const motorMixer_t mixerOctoFlatP[] = {
-    { 1.0f,  0.707107f, -0.707107f,  1.0f },    // FRONT_L
-    { 1.0f, -0.707107f, -0.707107f,  1.0f },    // FRONT_R
-    { 1.0f, -0.707107f,  0.707107f,  1.0f },    // REAR_R
-    { 1.0f,  0.707107f,  0.707107f,  1.0f },    // REAR_L
-    { 1.0f,  0.0f, -1.0f, -1.0f },              // FRONT
-    { 1.0f, -1.0f,  0.0f, -1.0f },              // RIGHT
-    { 1.0f,  0.0f,  1.0f, -1.0f },              // REAR
-    { 1.0f,  1.0f,  0.0f, -1.0f },              // LEFT
-};
+    static const motorMixer_t mixerOctoFlatP[] = {
+      { 1.0f,  0.707107f, -0.707107f,  1.0f },    // FRONT_L
+      { 1.0f, -0.707107f, -0.707107f,  1.0f },    // FRONT_R
+      { 1.0f, -0.707107f,  0.707107f,  1.0f },    // REAR_R
+      { 1.0f,  0.707107f,  0.707107f,  1.0f },    // REAR_L
+      { 1.0f,  0.0f, -1.0f, -1.0f },              // FRONT
+      { 1.0f, -1.0f,  0.0f, -1.0f },              // RIGHT
+      { 1.0f,  0.0f,  1.0f, -1.0f },              // REAR
+      { 1.0f,  1.0f,  0.0f, -1.0f },              // LEFT
+    };
 
-static const motorMixer_t mixerOctoFlatX[] = {
-    { 1.0f,  1.0f, -0.414178f,  1.0f },      // MIDFRONT_L
-    { 1.0f, -0.414178f, -1.0f,  1.0f },      // FRONT_R
-    { 1.0f, -1.0f,  0.414178f,  1.0f },      // MIDREAR_R
-    { 1.0f,  0.414178f,  1.0f,  1.0f },      // REAR_L
-    { 1.0f,  0.414178f, -1.0f, -1.0f },      // FRONT_L
-    { 1.0f, -1.0f, -0.414178f, -1.0f },      // MIDFRONT_R
-    { 1.0f, -0.414178f,  1.0f, -1.0f },      // REAR_R
-    { 1.0f,  1.0f,  0.414178f, -1.0f },      // MIDREAR_L
-};
-#else
-#define mixerOctoX8 NULL
-#define mixerOctoFlatP NULL
-#define mixerOctoFlatX NULL
-#endif
+    static const motorMixer_t mixerOctoFlatX[] = {
+      { 1.0f,  1.0f, -0.414178f,  1.0f },      // MIDFRONT_L
+      { 1.0f, -0.414178f, -1.0f,  1.0f },      // FRONT_R
+      { 1.0f, -1.0f,  0.414178f,  1.0f },      // MIDREAR_R
+      { 1.0f,  0.414178f,  1.0f,  1.0f },      // REAR_L
+      { 1.0f,  0.414178f, -1.0f, -1.0f },      // FRONT_L
+      { 1.0f, -1.0f, -0.414178f, -1.0f },      // MIDFRONT_R
+      { 1.0f, -0.414178f,  1.0f, -1.0f },      // REAR_R
+      { 1.0f,  1.0f,  0.414178f, -1.0f },      // MIDREAR_L
+    };
+  #else
+    #define mixerOctoX8 NULL
+    #define mixerOctoFlatP NULL
+    #define mixerOctoFlatX NULL
+  #endif
 
-static const motorMixer_t mixerVtail4[] = {
+  static const motorMixer_t mixerVtail4[] = {
     { 1.0f,  -0.58f,  0.58f, 1.0f },        // REAR_R
     { 1.0f,  -0.46f, -0.39f, -0.5f },       // FRONT_R
     { 1.0f,  0.58f,  0.58f, -1.0f },        // REAR_L
     { 1.0f,  0.46f, -0.39f, 0.5f },         // FRONT_L
-};
+  };
 
-static const motorMixer_t mixerAtail4[] = {
+  static const motorMixer_t mixerAtail4[] = {
     { 1.0f, -0.58f,  0.58f, -1.0f },          // REAR_R
     { 1.0f, -0.46f, -0.39f,  0.5f },          // FRONT_R
     { 1.0f,  0.58f,  0.58f,  1.0f },          // REAR_L
     { 1.0f,  0.46f, -0.39f, -0.5f },          // FRONT_L
-};
+  };
 
-#if defined(USE_UNCOMMON_MIXERS)
-static const motorMixer_t mixerDualcopter[] = {
-    { 1.0f,  0.0f,  0.0f, -1.0f },          // LEFT
-    { 1.0f,  0.0f,  0.0f,  1.0f },          // RIGHT
-};
-#else
-#define mixerDualcopter NULL
-#endif
+  #if defined(USE_UNCOMMON_MIXERS)
+    static const motorMixer_t mixerDualcopter[] = {
+      { 1.0f,  0.0f,  0.0f, -1.0f },          // LEFT
+      { 1.0f,  0.0f,  0.0f,  1.0f },          // RIGHT
+    };
+  #else
+    #define mixerDualcopter NULL
+  #endif
 
-static const motorMixer_t mixerSingleProp[] = {
+  static const motorMixer_t mixerSingleProp[] = {
     { 1.0f,  0.0f,  0.0f, 0.0f },
-};
+  };
 
-static const motorMixer_t mixerQuadX1234[] = {
+  static const motorMixer_t mixerQuadX1234[] = {
     { 1.0f,  1.0f, -1.0f, -1.0f },          // FRONT_L
     { 1.0f, -1.0f, -1.0f,  1.0f },          // FRONT_R
     { 1.0f, -1.0f,  1.0f, -1.0f },          // REAR_R
     { 1.0f,  1.0f,  1.0f,  1.0f },          // REAR_L
-};
+  };
 
-// Keep synced with mixerMode_e
-const mixer_t mixers[] = {
+  // Keep synced with mixerMode_e
+  const mixer_t mixers[] = {
     // motors, use servo, motor mixer
     { 0, false, NULL },                // entry 0
     { 3, true,  mixerTricopter },      // MIXER_TRI
@@ -294,205 +292,184 @@ const mixer_t mixers[] = {
     { 2, true,  NULL },                // MIXER_CUSTOM_AIRPLANE
     { 3, true,  NULL },                // MIXER_CUSTOM_TRI
     { 4, false, mixerQuadX1234 },
-};
-#endif // !USE_QUAD_MIXER_ONLY
+  };
+#endif //!USE_QUAD_MIXER_ONLY
 
 FAST_RAM_ZERO_INIT float motorOutputHigh, motorOutputLow;
-
 static FAST_RAM_ZERO_INIT float disarmMotorOutput, deadbandMotor3dHigh, deadbandMotor3dLow;
 static FAST_RAM_ZERO_INIT float rcCommandThrottleRange;
 
-uint8_t getMotorCount(void)
-{
-    return motorCount;
+uint8_t getMotorCount(void) {
+  return (motorCount);
 }
 
-float getMotorMixRange(void)
-{
-    return motorMixRange;
+float getMotorMixRange(void) {
+    return (motorMixRange);
 }
 
-bool areMotorsRunning(void)
-{
-    bool motorsRunning = false;
-    if (ARMING_FLAG(ARMED)) {
+bool areMotorsRunning(void) {
+  bool motorsRunning = false;
+  if (ARMING_FLAG(ARMED)) {
+    motorsRunning = true;
+  } else {
+    for (int i = 0; i < motorCount; i++) {
+      if (motor_disarmed[i] != disarmMotorOutput) {
         motorsRunning = true;
-    } else {
-        for (int i = 0; i < motorCount; i++) {
-            if (motor_disarmed[i] != disarmMotorOutput) {
-                motorsRunning = true;
-
-                break;
-            }
-        }
+        break;
+      }
     }
+  }
 
-    return motorsRunning;
+  return (motorsRunning);
 }
 
-bool mixerIsTricopter(void)
-{
-#ifdef USE_SERVOS
+bool mixerIsTricopter(void) {
+  #ifdef USE_SERVOS
     return (currentMixerMode == MIXER_TRI || currentMixerMode == MIXER_CUSTOM_TRI);
-#else
-    return false;
-#endif
+  #else
+    return (false);
+  #endif
 }
 
-bool mixerIsOutputSaturated(int axis, float errorRate)
-{
+bool mixerIsOutputSaturated(int axis, float errorRate) {
     if (axis == FD_YAW && mixerIsTricopter()) {
-        return mixerTricopterIsServoSaturated(errorRate);
+      return mixerTricopterIsServoSaturated(errorRate);
     }
-
-    return motorMixRange >= 1.0f;
+    return (motorMixRange >= 1.0f);
 }
 
 // All PWM motor scaling is done to standard PWM range of 1000-2000 for easier tick conversion with legacy code / configurator
 // DSHOT scaling is done to the actual dshot range
-void initEscEndpoints(void)
-{
-    // Can't use 'isMotorProtocolDshot()' here since motors haven't been initialised yet
-    switch (motorConfig()->dev.motorPwmProtocol) {
-#ifdef USE_DSHOT
+void initEscEndpoints(void) {
+  // Can't use 'isMotorProtocolDshot()' here since motors haven't been initialised yet
+  switch (motorConfig()->dev.motorPwmProtocol) {
+  #ifdef USE_DSHOT
     case PWM_TYPE_PROSHOT1000:
     case PWM_TYPE_DSHOT1200:
     case PWM_TYPE_DSHOT600:
     case PWM_TYPE_DSHOT300:
     case PWM_TYPE_DSHOT150:
-        disarmMotorOutput = DSHOT_DISARM_COMMAND;
-        if (feature(FEATURE_3D)) {
-            motorOutputLow = DSHOT_MIN_THROTTLE + ((DSHOT_3D_DEADBAND_LOW - DSHOT_MIN_THROTTLE) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
-        } else {
-            motorOutputLow = DSHOT_MIN_THROTTLE + ((DSHOT_MAX_THROTTLE - DSHOT_MIN_THROTTLE) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
-        }
-        motorOutputHigh = DSHOT_MAX_THROTTLE;
-        deadbandMotor3dHigh = DSHOT_3D_DEADBAND_HIGH + ((DSHOT_MAX_THROTTLE - DSHOT_3D_DEADBAND_HIGH) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
-        deadbandMotor3dLow = DSHOT_3D_DEADBAND_LOW;
-
-        break;
-#endif
+      disarmMotorOutput = DSHOT_DISARM_COMMAND;
+      if (feature(FEATURE_3D)) {
+        motorOutputLow = DSHOT_MIN_THROTTLE + ((DSHOT_3D_DEADBAND_LOW - DSHOT_MIN_THROTTLE) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
+      } else {
+        motorOutputLow = DSHOT_MIN_THROTTLE + ((DSHOT_MAX_THROTTLE - DSHOT_MIN_THROTTLE) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
+      }
+      motorOutputHigh = DSHOT_MAX_THROTTLE;
+      deadbandMotor3dHigh = DSHOT_3D_DEADBAND_HIGH + ((DSHOT_MAX_THROTTLE - DSHOT_3D_DEADBAND_HIGH) / 100.0f) * CONVERT_PARAMETER_TO_PERCENT(motorConfig()->digitalIdleOffsetValue);
+      deadbandMotor3dLow = DSHOT_3D_DEADBAND_LOW;
+      break;
+  #endif
     default:
-        if (feature(FEATURE_3D)) {
-            disarmMotorOutput = flight3DConfig()->neutral3d;
-            motorOutputLow = flight3DConfig()->limit3d_low;
-            motorOutputHigh = flight3DConfig()->limit3d_high;
-            deadbandMotor3dHigh = flight3DConfig()->deadband3d_high;
-            deadbandMotor3dLow = flight3DConfig()->deadband3d_low;
-        } else {
-            disarmMotorOutput = motorConfig()->mincommand;
-            motorOutputLow = motorConfig()->minthrottle;
-            motorOutputHigh = motorConfig()->maxthrottle;
-        }
-        break;
+      if (feature(FEATURE_3D)) {
+        disarmMotorOutput = flight3DConfig()->neutral3d;
+        motorOutputLow = flight3DConfig()->limit3d_low;
+        motorOutputHigh = flight3DConfig()->limit3d_high;
+        deadbandMotor3dHigh = flight3DConfig()->deadband3d_high;
+        deadbandMotor3dLow = flight3DConfig()->deadband3d_low;
+      } else {
+        disarmMotorOutput = motorConfig()->mincommand;
+        motorOutputLow = motorConfig()->minthrottle;
+        motorOutputHigh = motorConfig()->maxthrottle;
+      }
+      break;
     }
-
     rcCommandThrottleRange = PWM_RANGE_MAX - rxConfig()->mincheck;
 }
 
-void mixerInit(mixerMode_e mixerMode)
-{
+void mixerInit(mixerMode_e mixerMode) {
     currentMixerMode = mixerMode;
-
     initEscEndpoints();
     if (mixerIsTricopter()) {
-        mixerTricopterInit();
+      mixerTricopterInit();
     }
 }
 
 #ifndef USE_QUAD_MIXER_ONLY
-
-void mixerConfigureOutput(void)
-{
+  void mixerConfigureOutput(void) {
     motorCount = 0;
 
     if (currentMixerMode == MIXER_CUSTOM || currentMixerMode == MIXER_CUSTOM_TRI || currentMixerMode == MIXER_CUSTOM_AIRPLANE) {
-        // load custom mixer into currentMixer
-        for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
-            // check if done
-            if (customMotorMixer(i)->throttle == 0.0f) {
-                break;
-            }
-            currentMixer[i] = *customMotorMixer(i);
-            motorCount++;
+      // load custom mixer into currentMixer
+      for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
+        // check if done
+        if (customMotorMixer(i)->throttle == 0.0f) {
+          break;
         }
+        currentMixer[i] = *customMotorMixer(i);
+        motorCount++;
+      }
     } else {
-        motorCount = mixers[currentMixerMode].motorCount;
-        if (motorCount > MAX_SUPPORTED_MOTORS) {
-            motorCount = MAX_SUPPORTED_MOTORS;
+      motorCount = mixers[currentMixerMode].motorCount;
+      if (motorCount > MAX_SUPPORTED_MOTORS) {
+        motorCount = MAX_SUPPORTED_MOTORS;
+      }
+      // copy motor-based mixers
+      if (mixers[currentMixerMode].motor) {
+        for (int i = 0; i < motorCount; i++) {
+          currentMixer[i] = mixers[currentMixerMode].motor[i];
         }
-        // copy motor-based mixers
-        if (mixers[currentMixerMode].motor) {
-            for (int i = 0; i < motorCount; i++)
-                currentMixer[i] = mixers[currentMixerMode].motor[i];
-        }
+      }
     }
     mixerResetDisarmedMotors();
-}
+  }
 
-void mixerLoadMix(int index, motorMixer_t *customMixers)
-{
+  void mixerLoadMix(int index, motorMixer_t *customMixers) {
     // we're 1-based
     index++;
     // clear existing
     for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
-        customMixers[i].throttle = 0.0f;
+      customMixers[i].throttle = 0.0f;
     }
     // do we have anything here to begin with?
     if (mixers[index].motor != NULL) {
-        for (int i = 0; i < mixers[index].motorCount; i++) {
-            customMixers[i] = mixers[index].motor[i];
-        }
+      for (int i = 0; i < mixers[index].motorCount; i++) {
+          customMixers[i] = mixers[index].motor[i];
+      }
     }
-}
-#else
-void mixerConfigureOutput(void)
-{
-    motorCount = QUAD_MOTOR_COUNT;
-    for (int i = 0; i < motorCount; i++) {
+  }
+  #else
+    void mixerConfigureOutput(void) {
+      motorCount = QUAD_MOTOR_COUNT;
+      for (int i = 0; i < motorCount; i++) {
         currentMixer[i] = mixerQuadX[i];
+      }
+      mixerResetDisarmedMotors();
     }
-    mixerResetDisarmedMotors();
-}
-#endif // USE_QUAD_MIXER_ONLY
+#endif //USE_QUAD_MIXER_ONLY
 
-void mixerResetDisarmedMotors(void)
-{
-    // set disarmed motor values
-    for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
-        motor_disarmed[i] = disarmMotorOutput;
-    }
-}
-
-void writeMotors(void)
-{
-    if (pwmAreMotorsEnabled()) {
-        for (int i = 0; i < motorCount; i++) {
-            pwmWriteMotor(i, motor[i]);
-        }
-        pwmCompleteMotorUpdate(motorCount);
-    }
+void mixerResetDisarmedMotors(void) {
+  // set disarmed motor values
+  for (int i = 0; i < MAX_SUPPORTED_MOTORS; i++) {
+    motor_disarmed[i] = disarmMotorOutput;
+  }
 }
 
-static void writeAllMotors(int16_t mc)
-{
-    // Sends commands to all motors
+void writeMotors(void) {
+  if (pwmAreMotorsEnabled()) {
     for (int i = 0; i < motorCount; i++) {
-        motor[i] = mc;
+      pwmWriteMotor(i, motor[i]);
     }
-    writeMotors();
+    pwmCompleteMotorUpdate(motorCount);
+  }
 }
 
-void stopMotors(void)
-{
-    writeAllMotors(disarmMotorOutput);
-    delay(50); // give the timers and ESCs a chance to react.
+static void writeAllMotors(int16_t mc) {
+  // Sends commands to all motors
+  for (int i = 0; i < motorCount; i++) {
+    motor[i] = mc;
+  }
+  writeMotors();
 }
 
-void stopPwmAllMotors(void)
-{
-    pwmShutdownPulsesForAllMotors(motorCount);
-    delayMicroseconds(1500);
+void stopMotors(void) {
+  writeAllMotors(disarmMotorOutput);
+  delay(50); // give the timers and ESCs a chance to react.
+}
+
+void stopPwmAllMotors(void) {
+  pwmShutdownPulsesForAllMotors(motorCount);
+  delayMicroseconds(1500);
 }
 
 static FAST_RAM_ZERO_INIT float throttle = 0;
@@ -502,388 +479,363 @@ static FAST_RAM_ZERO_INIT float motorRangeMax;
 static FAST_RAM_ZERO_INIT float motorOutputRange;
 static FAST_RAM_ZERO_INIT int8_t motorOutputMixSign;
 
-static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs)
-{
-    static uint16_t rcThrottlePrevious = 0;   // Store the last throttle direction for deadband transitions
-    static timeUs_t reversalTimeUs = 0; // time when motors last reversed in 3D mode
-    float currentThrottleInputRange = 0;
+static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs) {
+  static uint16_t rcThrottlePrevious = 0;   // Store the last throttle direction for deadband transitions
+  static timeUs_t reversalTimeUs = 0; // time when motors last reversed in 3D mode
+  float currentThrottleInputRange = 0;
 
-    if (feature(FEATURE_3D)) {
-        uint16_t rcCommand3dDeadBandLow;
-        uint16_t rcCommand3dDeadBandHigh;
+  if (feature(FEATURE_3D)) {
+    uint16_t rcCommand3dDeadBandLow;
+    uint16_t rcCommand3dDeadBandHigh;
 
-        if (!ARMING_FLAG(ARMED)) {
-            rcThrottlePrevious = rxConfig()->midrc; // When disarmed set to mid_rc. It always results in positive direction after arming.
-        }
-
-        if (IS_RC_MODE_ACTIVE(BOX3D) || flight3DConfig()->switched_mode3d) {
-            // The min_check range is halved because the output throttle is scaled to 500us.
-            // So by using half of min_check we maintain the same low-throttle deadband
-            // stick travel as normal non-3D mode.
-            const int mincheckOffset = (rxConfig()->mincheck - PWM_RANGE_MIN) / 2;
-            rcCommand3dDeadBandLow = rxConfig()->midrc - mincheckOffset;
-            rcCommand3dDeadBandHigh = rxConfig()->midrc + mincheckOffset;
-        } else {
-            rcCommand3dDeadBandLow = rxConfig()->midrc - flight3DConfig()->deadband3d_throttle;
-            rcCommand3dDeadBandHigh = rxConfig()->midrc + flight3DConfig()->deadband3d_throttle;
-        }
-
-        const float rcCommandThrottleRange3dLow = rcCommand3dDeadBandLow - PWM_RANGE_MIN;
-        const float rcCommandThrottleRange3dHigh = PWM_RANGE_MAX - rcCommand3dDeadBandHigh;
-
-        if (rcCommand[THROTTLE] <= rcCommand3dDeadBandLow) {
-            // INVERTED
-            motorRangeMin = motorOutputLow;
-            motorRangeMax = deadbandMotor3dLow;
-            if (isMotorProtocolDshot()) {
-                motorOutputMin = motorOutputLow;
-                motorOutputRange = deadbandMotor3dLow - motorOutputLow;
-            } else {
-                motorOutputMin = deadbandMotor3dLow;
-                motorOutputRange = motorOutputLow - deadbandMotor3dLow;
-            }
-            if (motorOutputMixSign != -1) {
-                reversalTimeUs = currentTimeUs;
-            }
-            motorOutputMixSign = -1;
-            rcThrottlePrevious = rcCommand[THROTTLE];
-            throttle = rcCommand3dDeadBandLow - rcCommand[THROTTLE];
-            currentThrottleInputRange = rcCommandThrottleRange3dLow;
-        } else if (rcCommand[THROTTLE] >= rcCommand3dDeadBandHigh) {
-            // NORMAL
-            motorRangeMin = deadbandMotor3dHigh;
-            motorRangeMax = motorOutputHigh;
-            motorOutputMin = deadbandMotor3dHigh;
-            motorOutputRange = motorOutputHigh - deadbandMotor3dHigh;
-            if (motorOutputMixSign != 1) {
-                reversalTimeUs = currentTimeUs;
-            }
-            motorOutputMixSign = 1;
-            rcThrottlePrevious = rcCommand[THROTTLE];
-            throttle = rcCommand[THROTTLE] - rcCommand3dDeadBandHigh;
-            currentThrottleInputRange = rcCommandThrottleRange3dHigh;
-        } else if ((rcThrottlePrevious <= rcCommand3dDeadBandLow &&
-                !flight3DConfigMutable()->switched_mode3d) ||
-                isMotorsReversed()) {
-            // INVERTED_TO_DEADBAND
-            motorRangeMin = motorOutputLow;
-            motorRangeMax = deadbandMotor3dLow;
-            if (isMotorProtocolDshot()) {
-                motorOutputMin = motorOutputLow;
-                motorOutputRange = deadbandMotor3dLow - motorOutputLow;
-            } else {
-                motorOutputMin = deadbandMotor3dLow;
-                motorOutputRange = motorOutputLow - deadbandMotor3dLow;
-            }
-            if (motorOutputMixSign != -1) {
-                reversalTimeUs = currentTimeUs;
-            }
-            motorOutputMixSign = -1;
-            throttle = 0;
-            currentThrottleInputRange = rcCommandThrottleRange3dLow;
-        } else {
-            // NORMAL_TO_DEADBAND
-            motorRangeMin = deadbandMotor3dHigh;
-            motorRangeMax = motorOutputHigh;
-            motorOutputMin = deadbandMotor3dHigh;
-            motorOutputRange = motorOutputHigh - deadbandMotor3dHigh;
-            if (motorOutputMixSign != 1) {
-                reversalTimeUs = currentTimeUs;
-            }
-            motorOutputMixSign = 1;
-            throttle = 0;
-            currentThrottleInputRange = rcCommandThrottleRange3dHigh;
-        }
-        if (currentTimeUs - reversalTimeUs < 250000) {
-            // keep ITerm zero for 250ms after motor reversal
-            pidResetITerm();
-        }
-    } else {
-        throttle = rcCommand[THROTTLE] - rxConfig()->mincheck + throttleAngleCorrection;
-        currentThrottleInputRange = rcCommandThrottleRange;
-        motorRangeMin = motorOutputLow;
-        motorRangeMax = motorOutputHigh;
-        motorOutputMin = motorOutputLow;
-        motorOutputRange = motorOutputHigh - motorOutputLow;
-        motorOutputMixSign = 1;
+    if (!ARMING_FLAG(ARMED)) {
+      rcThrottlePrevious = rxConfig()->midrc; // When disarmed set to mid_rc. It always results in positive direction after arming.
     }
 
-    throttle = constrainf(throttle / currentThrottleInputRange, 0.0f, 1.0f);
+    if (IS_RC_MODE_ACTIVE(BOX3D) || flight3DConfig()->switched_mode3d) {
+      // The min_check range is halved because the output throttle is scaled to 500us.
+      // So by using half of min_check we maintain the same low-throttle deadband
+      // stick travel as normal non-3D mode.
+      const int mincheckOffset = (rxConfig()->mincheck - PWM_RANGE_MIN) / 2;
+      rcCommand3dDeadBandLow = rxConfig()->midrc - mincheckOffset;
+      rcCommand3dDeadBandHigh = rxConfig()->midrc + mincheckOffset;
+    } else {
+      rcCommand3dDeadBandLow = rxConfig()->midrc - flight3DConfig()->deadband3d_throttle;
+      rcCommand3dDeadBandHigh = rxConfig()->midrc + flight3DConfig()->deadband3d_throttle;
+    }
+
+    const float rcCommandThrottleRange3dLow = rcCommand3dDeadBandLow - PWM_RANGE_MIN;
+    const float rcCommandThrottleRange3dHigh = PWM_RANGE_MAX - rcCommand3dDeadBandHigh;
+
+    if (rcCommand[THROTTLE] <= rcCommand3dDeadBandLow) {
+      // INVERTED
+      motorRangeMin = motorOutputLow;
+      motorRangeMax = deadbandMotor3dLow;
+      if (isMotorProtocolDshot()) {
+        motorOutputMin = motorOutputLow;
+        motorOutputRange = deadbandMotor3dLow - motorOutputLow;
+      } else {
+        motorOutputMin = deadbandMotor3dLow;
+        motorOutputRange = motorOutputLow - deadbandMotor3dLow;
+      }
+      if (motorOutputMixSign != -1) {
+        reversalTimeUs = currentTimeUs;
+      }
+      motorOutputMixSign = -1;
+      rcThrottlePrevious = rcCommand[THROTTLE];
+      throttle = rcCommand3dDeadBandLow - rcCommand[THROTTLE];
+      currentThrottleInputRange = rcCommandThrottleRange3dLow;
+    } else if (rcCommand[THROTTLE] >= rcCommand3dDeadBandHigh) {
+      // NORMAL
+      motorRangeMin = deadbandMotor3dHigh;
+      motorRangeMax = motorOutputHigh;
+      motorOutputMin = deadbandMotor3dHigh;
+      motorOutputRange = motorOutputHigh - deadbandMotor3dHigh;
+      if (motorOutputMixSign != 1) {
+        reversalTimeUs = currentTimeUs;
+      }
+      motorOutputMixSign = 1;
+      rcThrottlePrevious = rcCommand[THROTTLE];
+      throttle = rcCommand[THROTTLE] - rcCommand3dDeadBandHigh;
+      currentThrottleInputRange = rcCommandThrottleRange3dHigh;
+    } else if ((rcThrottlePrevious <= rcCommand3dDeadBandLow && !flight3DConfigMutable()->switched_mode3d) || isMotorsReversed()) {
+      // INVERTED_TO_DEADBAND
+      motorRangeMin = motorOutputLow;
+      motorRangeMax = deadbandMotor3dLow;
+      if (isMotorProtocolDshot()) {
+        motorOutputMin = motorOutputLow;
+        motorOutputRange = deadbandMotor3dLow - motorOutputLow;
+      } else {
+        motorOutputMin = deadbandMotor3dLow;
+        motorOutputRange = motorOutputLow - deadbandMotor3dLow;
+      }
+      if (motorOutputMixSign != -1) {
+        reversalTimeUs = currentTimeUs;
+      }
+      motorOutputMixSign = -1;
+      throttle = 0;
+      currentThrottleInputRange = rcCommandThrottleRange3dLow;
+    } else {
+      // NORMAL_TO_DEADBAND
+      motorRangeMin = deadbandMotor3dHigh;
+      motorRangeMax = motorOutputHigh;
+      motorOutputMin = deadbandMotor3dHigh;
+      motorOutputRange = motorOutputHigh - deadbandMotor3dHigh;
+      if (motorOutputMixSign != 1) {
+        reversalTimeUs = currentTimeUs;
+      }
+      motorOutputMixSign = 1;
+      throttle = 0;
+      currentThrottleInputRange = rcCommandThrottleRange3dHigh;
+    }
+    if (currentTimeUs - reversalTimeUs < 250000) {
+      // keep ITerm zero for 250ms after motor reversal
+      pidResetITerm();
+    }
+  } else {
+    throttle = rcCommand[THROTTLE] - rxConfig()->mincheck + throttleAngleCorrection;
+    currentThrottleInputRange = rcCommandThrottleRange;
+    motorRangeMin = motorOutputLow;
+    motorRangeMax = motorOutputHigh;
+    motorOutputMin = motorOutputLow;
+    motorOutputRange = motorOutputHigh - motorOutputLow;
+    motorOutputMixSign = 1;
+  }
+
+  throttle = constrainf(throttle / currentThrottleInputRange, 0.0f, 1.0f);
 }
 
 #define CRASH_FLIP_DEADBAND 20
 #define CRASH_FLIP_STICK_MINF 0.15f
 
-static void applyFlipOverAfterCrashModeToMotors(void)
-{
-    if (ARMING_FLAG(ARMED)) {
-        float stickDeflectionPitchAbs = getRcDeflectionAbs(FD_PITCH);
-        float stickDeflectionRollAbs = getRcDeflectionAbs(FD_ROLL);
-        float stickDeflectionYawAbs = getRcDeflectionAbs(FD_YAW);
-        float signPitch = getRcDeflection(FD_PITCH) < 0 ? 1 : -1;
-        float signRoll = getRcDeflection(FD_ROLL) < 0 ? 1 : -1;
-        float signYaw = (getRcDeflection(FD_YAW) < 0 ? 1 : -1) * (mixerConfig()->yaw_motors_reversed ? 1 : -1);
+static void applyFlipOverAfterCrashModeToMotors(void) {
+  if (ARMING_FLAG(ARMED)) {
+    float stickDeflectionPitchAbs = getRcDeflectionAbs(FD_PITCH);
+    float stickDeflectionRollAbs = getRcDeflectionAbs(FD_ROLL);
+    float stickDeflectionYawAbs = getRcDeflectionAbs(FD_YAW);
+    float signPitch = getRcDeflection(FD_PITCH) < 0 ? 1 : -1;
+    float signRoll = getRcDeflection(FD_ROLL) < 0 ? 1 : -1;
+    float signYaw = (getRcDeflection(FD_YAW) < 0 ? 1 : -1) * (mixerConfig()->yaw_motors_reversed ? 1 : -1);
 
-        float stickDeflectionLength = sqrtf(stickDeflectionPitchAbs*stickDeflectionPitchAbs + stickDeflectionRollAbs*stickDeflectionRollAbs);
+    float stickDeflectionLength = sqrtf(stickDeflectionPitchAbs*stickDeflectionPitchAbs + stickDeflectionRollAbs*stickDeflectionRollAbs);
 
-        if (stickDeflectionYawAbs > MAX(stickDeflectionPitchAbs, stickDeflectionRollAbs)) {
-            // If yaw is the dominant, disable pitch and roll
-            stickDeflectionLength = stickDeflectionYawAbs;
-            signRoll = 0;
-            signPitch = 0;
-        } else {
-            // If pitch/roll dominant, disable yaw
-            signYaw = 0;
-        }
-
-        float cosPhi = (stickDeflectionPitchAbs + stickDeflectionRollAbs) / (sqrtf(2.0f) * stickDeflectionLength);
-        const float cosThreshold = sqrtf(3.0f)/2.0f; // cos(PI/6.0f)
-
-        if (cosPhi < cosThreshold) {
-            // Enforce either roll or pitch exclusively, if not on diagonal
-            if (stickDeflectionRollAbs > stickDeflectionPitchAbs) {
-                signPitch = 0;
-            } else {
-                signRoll = 0;
-            }
-        }
-
-        // Apply a reasonable amount of stick deadband
-        const float flipStickRange = 1.0f - CRASH_FLIP_STICK_MINF;
-        float flipPower = MAX(0.0f, stickDeflectionLength - CRASH_FLIP_STICK_MINF) / flipStickRange;
-
-        for (int i = 0; i < motorCount; ++i) {
-            float motorOutput =
-                signPitch*currentMixer[i].pitch +
-                signRoll*currentMixer[i].roll +
-                signYaw*currentMixer[i].yaw;
-
-            if (motorOutput < 0) {
-                if (mixerConfig()->crashflip_motor_percent > 0) {
-                    motorOutput = -motorOutput * (float)mixerConfig()->crashflip_motor_percent / 100.0f;
-                } else {
-                    motorOutput = disarmMotorOutput;
-                }
-            }
-            motorOutput = MIN(1.0f, flipPower * motorOutput);
-            motorOutput = motorOutputMin + motorOutput * motorOutputRange;
-
-            // Add a little bit to the motorOutputMin so props aren't spinning when sticks are centered
-            motorOutput = (motorOutput < motorOutputMin + CRASH_FLIP_DEADBAND) ? disarmMotorOutput : (motorOutput - CRASH_FLIP_DEADBAND);
-            motor[i] = motorOutput;
-        }
+    if (stickDeflectionYawAbs > MAX(stickDeflectionPitchAbs, stickDeflectionRollAbs)) {
+      // If yaw is the dominant, disable pitch and roll
+      stickDeflectionLength = stickDeflectionYawAbs;
+      signRoll = 0;
+      signPitch = 0;
     } else {
-        // Disarmed mode
-        for (int i = 0; i < motorCount; i++) {
-            motor[i] = motor_disarmed[i];
-        }
+      // If pitch/roll dominant, disable yaw
+      signYaw = 0;
     }
-}
 
-static void applyMixToMotors(float motorMix[MAX_SUPPORTED_MOTORS])
-{
-    // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
-    // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
-    for (int i = 0; i < motorCount; i++) {
-        float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
-        if (mixerIsTricopter()) {
-            motorOutput += mixerTricopterMotorCorrection(i);
-        }
-        if (failsafeIsActive()) {
-            if (isMotorProtocolDshot()) {
-                motorOutput = (motorOutput < motorRangeMin) ? disarmMotorOutput : motorOutput; // Prevent getting into special reserved range
-            }
-            motorOutput = constrain(motorOutput, disarmMotorOutput, motorRangeMax);
+    float cosPhi = (stickDeflectionPitchAbs + stickDeflectionRollAbs) / (sqrtf(2.0f) * stickDeflectionLength);
+    const float cosThreshold = sqrtf(3.0f)/2.0f; // cos(PI/6.0f)
+
+    if (cosPhi < cosThreshold) {
+      // Enforce either roll or pitch exclusively, if not on diagonal
+      if (stickDeflectionRollAbs > stickDeflectionPitchAbs) {
+        signPitch = 0;
+      } else {
+        signRoll = 0;
+      }
+    }
+
+    // Apply a reasonable amount of stick deadband
+    const float flipStickRange = 1.0f - CRASH_FLIP_STICK_MINF;
+    float flipPower = MAX(0.0f, stickDeflectionLength - CRASH_FLIP_STICK_MINF) / flipStickRange;
+
+    for (int i = 0; i < motorCount; ++i) {
+      float motorOutput = signPitch*currentMixer[i].pitch + signRoll*currentMixer[i].roll + signYaw*currentMixer[i].yaw;
+
+      if (motorOutput < 0) {
+        if (mixerConfig()->crashflip_motor_percent > 0) {
+          motorOutput = -motorOutput * (float)mixerConfig()->crashflip_motor_percent / 100.0f;
         } else {
-            motorOutput = constrain(motorOutput, motorRangeMin, motorRangeMax);
+          motorOutput = disarmMotorOutput;
         }
-        // Motor stop handling
-        if (feature(FEATURE_MOTOR_STOP) && ARMING_FLAG(ARMED) && !feature(FEATURE_3D) && !isAirmodeActive()
-            && !FLIGHT_MODE(GPS_RESCUE_MODE)) {   // disable motor_stop while GPS Rescue is active
+      }
+      motorOutput = MIN(1.0f, flipPower * motorOutput);
+      motorOutput = motorOutputMin + motorOutput * motorOutputRange;
 
-            if (((rcData[THROTTLE]) < rxConfig()->mincheck)) {
-                motorOutput = disarmMotorOutput;
-            }
-        }
-        motor[i] = motorOutput;
+      // Add a little bit to the motorOutputMin so props aren't spinning when sticks are centered
+      motorOutput = (motorOutput < motorOutputMin + CRASH_FLIP_DEADBAND) ? disarmMotorOutput : (motorOutput - CRASH_FLIP_DEADBAND);
+      motor[i] = motorOutput;
     }
-
+  } else {
     // Disarmed mode
-    if (!ARMING_FLAG(ARMED)) {
-        for (int i = 0; i < motorCount; i++) {
-            motor[i] = motor_disarmed[i];
-        }
+    for (int i = 0; i < motorCount; i++) {
+      motor[i] = motor_disarmed[i];
     }
+  }
 }
 
-float applyThrottleLimit(float throttle)
-{
-    if (currentControlRateProfile->throttle_limit_percent < 100) {
-        const float throttleLimitFactor = currentControlRateProfile->throttle_limit_percent / 100.0f;
-        switch (currentControlRateProfile->throttle_limit_type) {
-            case THROTTLE_LIMIT_TYPE_SCALE:
-                return throttle * throttleLimitFactor;
-            case THROTTLE_LIMIT_TYPE_CLIP:
-                return MIN(throttle, throttleLimitFactor);
-        }
+static void applyMixToMotors(float motorMix[MAX_SUPPORTED_MOTORS]) {
+  // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
+  // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
+  for (int i = 0; i < motorCount; i++) {
+    float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
+    if (mixerIsTricopter()) {
+      motorOutput += mixerTricopterMotorCorrection(i);
     }
+    if (failsafeIsActive()) {
+      if (isMotorProtocolDshot()) {
+        motorOutput = (motorOutput < motorRangeMin) ? disarmMotorOutput : motorOutput; // Prevent getting into special reserved range
+      }
+      motorOutput = constrain(motorOutput, disarmMotorOutput, motorRangeMax);
+    } else {
+      motorOutput = constrain(motorOutput, motorRangeMin, motorRangeMax);
+    }
+    // Motor stop handling
+    if (feature(FEATURE_MOTOR_STOP) && ARMING_FLAG(ARMED) && !feature(FEATURE_3D) && !isAirmodeActive()
+      && !FLIGHT_MODE(GPS_RESCUE_MODE)) {   // disable motor_stop while GPS Rescue is active
 
-    return throttle;
+      if (((rcData[THROTTLE]) < rxConfig()->mincheck)) {
+        motorOutput = disarmMotorOutput;
+      }
+    }
+    motor[i] = motorOutput;
+  }
+
+  // Disarmed mode
+  if (!ARMING_FLAG(ARMED)) {
+    for (int i = 0; i < motorCount; i++) {
+      motor[i] = motor_disarmed[i];
+    }
+  }
 }
 
-FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs, uint8_t vbatPidCompensation)
-{
-    if (isFlipOverAfterCrashMode()) {
-        applyFlipOverAfterCrashModeToMotors();
-        return;
+float applyThrottleLimit(float throttle) {
+  if (currentControlRateProfile->throttle_limit_percent < 100) {
+    const float throttleLimitFactor = currentControlRateProfile->throttle_limit_percent / 100.0f;
+    switch (currentControlRateProfile->throttle_limit_type) {
+      case THROTTLE_LIMIT_TYPE_SCALE:
+        return (throttle * throttleLimitFactor);
+      case THROTTLE_LIMIT_TYPE_CLIP:
+        return (MIN(throttle, throttleLimitFactor));
     }
+  }
+  return (throttle);
+}
 
-    // Find min and max throttle based on conditions. Throttle has to be known before mixing
-    calculateThrottleAndCurrentMotorEndpoints(currentTimeUs);
+FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs, uint8_t vbatPidCompensation) {
+  if (isFlipOverAfterCrashMode()) {
+    applyFlipOverAfterCrashModeToMotors();
+    return;
+  }
 
-    // Calculate and Limit the PIDsum
-    const float scaledAxisPidRoll =
-        constrainf(pidData[FD_ROLL].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
-    const float scaledAxisPidPitch =
-        constrainf(pidData[FD_PITCH].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
+  // Find min and max throttle based on conditions. Throttle has to be known before mixing
+  calculateThrottleAndCurrentMotorEndpoints(currentTimeUs);
 
-    float scaledAxisPidYaw =
-        constrainf(pidData[FD_YAW].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
-    if (!mixerConfig()->yaw_motors_reversed) {
-        scaledAxisPidYaw = -scaledAxisPidYaw;
-    }
+  // Calculate and Limit the PIDsum
+  const float scaledAxisPidRoll = constrainf(pidData[FD_ROLL].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
+  const float scaledAxisPidPitch = constrainf(pidData[FD_PITCH].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
+  float scaledAxisPidYaw = constrainf(pidData[FD_YAW].Sum, -currentPidProfile->pidSumLimit, currentPidProfile->pidSumLimit) / PID_MIXER_SCALING;
+  if (!mixerConfig()->yaw_motors_reversed) {
+    scaledAxisPidYaw = -scaledAxisPidYaw;
+  }
 
-    // Calculate voltage compensation
-    const float vbatCompensationFactor = vbatPidCompensation ? calculateVbatPidCompensation() : 1.0f;
+  // Calculate voltage compensation
+  const float vbatCompensationFactor = vbatPidCompensation ? calculateVbatPidCompensation() : 1.0f;
 
-    // Apply the throttle_limit_percent to scale or limit the throttle based on throttle_limit_type
-    if (currentControlRateProfile->throttle_limit_type != THROTTLE_LIMIT_TYPE_OFF) {
-        throttle = applyThrottleLimit(throttle);
-    }
+  // Apply the throttle_limit_percent to scale or limit the throttle based on throttle_limit_type
+  if (currentControlRateProfile->throttle_limit_type != THROTTLE_LIMIT_TYPE_OFF) {
+    throttle = applyThrottleLimit(throttle);
+  }
 
-#ifdef USE_YAW_SPIN_RECOVERY
+  #ifdef USE_YAW_SPIN_RECOVERY
     // 50% throttle provides the maximum authority for yaw recovery when airmode is not active.
     // When airmode is active the throttle setting doesn't impact recovery authority.
     if (gyroYawSpinDetected() && !isAirmodeActive()) {
-        throttle = 0.5f;   //
+      throttle = 0.5f;
     }
-#endif // USE_YAW_SPIN_RECOVERY
+  #endif
 
-    // Find roll/pitch/yaw desired output
-    float motorMix[MAX_SUPPORTED_MOTORS];
-    float motorMixMax = 0, motorMixMin = 0;
-    for (int i = 0; i < motorCount; i++) {
-        float mix =
-            scaledAxisPidRoll  * currentMixer[i].roll +
-            scaledAxisPidPitch * currentMixer[i].pitch +
-            scaledAxisPidYaw   * currentMixer[i].yaw;
+  // Find roll/pitch/yaw desired output
+  float motorMix[MAX_SUPPORTED_MOTORS];
+  float motorMixMax = 0, motorMixMin = 0;
+  for (int i = 0; i < motorCount; i++) {
+    float mix = scaledAxisPidRoll  * currentMixer[i].roll + scaledAxisPidPitch * currentMixer[i].pitch + scaledAxisPidYaw   * currentMixer[i].yaw;
+    mix *= vbatCompensationFactor;  // Add voltage compensation
 
-        mix *= vbatCompensationFactor;  // Add voltage compensation
-
-        if (mix > motorMixMax) {
-            motorMixMax = mix;
-        } else if (mix < motorMixMin) {
-            motorMixMin = mix;
-        }
-        motorMix[i] = mix;
+    if (mix > motorMixMax) {
+      motorMixMax = mix;
+    } else if (mix < motorMixMin) {
+      motorMixMin = mix;
     }
+    motorMix[i] = mix;
+  }
 
-        pidUpdateAntiGravityThrottleFilter(throttle);
+  pidUpdateAntiGravityThrottleFilter(throttle);
 
-#if defined(USE_THROTTLE_BOOST)
+  #if defined(USE_THROTTLE_BOOST)
     if (throttleBoost > 0.0f) {
-        const float throttleHpf = throttle - pt1FilterApply(&throttleLpf, throttle);
-        throttle = constrainf(throttle + throttleBoost * throttleHpf, 0.0f, 1.0f);
+      const float throttleHpf = throttle - pt1FilterApply(&throttleLpf, throttle);
+      throttle = constrainf(throttle + throttleBoost * throttleHpf, 0.0f, 1.0f);
     }
-#endif
+  #endif
 
-#ifdef USE_GPS_RESCUE
+  #ifdef USE_GPS_RESCUE
     // If gps rescue is active then override the throttle. This prevents things
     // like throttle boost or throttle limit from negatively affecting the throttle.
     if (FLIGHT_MODE(GPS_RESCUE_MODE)) {
-        throttle = gpsRescueGetThrottle();
+      throttle = gpsRescueGetThrottle();
     }
-#endif
+  #endif
 
-    motorMixRange = motorMixMax - motorMixMin;
-    if (motorMixRange > 1.0f) {
-        for (int i = 0; i < motorCount; i++) {
-            motorMix[i] /= motorMixRange;
-        }
-        // Get the maximum correction by setting offset to center when airmode enabled
-        if (isAirmodeActive()) {
-            throttle = 0.5f;
-        }
-    } else {
-        if (isAirmodeActive() || throttle > 0.5f) {  // Only automatically adjust throttle when airmode enabled. Airmode logic is always active on high throttle
-            throttle = constrainf(throttle, -motorMixMin, 1.0f - motorMixMax);
-        }
+  motorMixRange = motorMixMax - motorMixMin;
+  if (motorMixRange > 1.0f) {
+    for (int i = 0; i < motorCount; i++) {
+      motorMix[i] /= motorMixRange;
     }
+    // Get the maximum correction by setting offset to center when airmode enabled
+    if (isAirmodeActive()) {
+      throttle = 0.5f;
+    }
+  } else {
+    if (isAirmodeActive() || throttle > 0.5f) {  // Only automatically adjust throttle when airmode enabled. Airmode logic is always active on high throttle
+      throttle = constrainf(throttle, -motorMixMin, 1.0f - motorMixMax);
+    }
+  }
 
-    // Apply the mix to motor endpoints
-    applyMixToMotors(motorMix);
+  // Apply the mix to motor endpoints
+  applyMixToMotors(motorMix);
 }
 
-float convertExternalToMotor(uint16_t externalValue)
-{
-    uint16_t motorValue;
-    switch ((int)isMotorProtocolDshot()) {
-#ifdef USE_DSHOT
+float convertExternalToMotor(uint16_t externalValue) {
+  uint16_t motorValue;
+  switch ((int)isMotorProtocolDshot()) {
+  #ifdef USE_DSHOT
     case true:
-        externalValue = constrain(externalValue, PWM_RANGE_MIN, PWM_RANGE_MAX);
-
-        if (feature(FEATURE_3D)) {
-            if (externalValue == PWM_RANGE_MID) {
-                motorValue = DSHOT_DISARM_COMMAND;
-            } else if (externalValue < PWM_RANGE_MID) {
-                motorValue = scaleRange(externalValue, PWM_RANGE_MIN, PWM_RANGE_MID - 1, DSHOT_3D_DEADBAND_LOW, DSHOT_MIN_THROTTLE);
-            } else {
-                motorValue = scaleRange(externalValue, PWM_RANGE_MID + 1, PWM_RANGE_MAX, DSHOT_3D_DEADBAND_HIGH, DSHOT_MAX_THROTTLE);
-            }
+      externalValue = constrain(externalValue, PWM_RANGE_MIN, PWM_RANGE_MAX);
+      if (feature(FEATURE_3D)) {
+        if (externalValue == PWM_RANGE_MID) {
+          motorValue = DSHOT_DISARM_COMMAND;
+        } else if (externalValue < PWM_RANGE_MID) {
+          motorValue = scaleRange(externalValue, PWM_RANGE_MIN, PWM_RANGE_MID - 1, DSHOT_3D_DEADBAND_LOW, DSHOT_MIN_THROTTLE);
         } else {
-            motorValue = (externalValue == PWM_RANGE_MIN) ? DSHOT_DISARM_COMMAND : scaleRange(externalValue, PWM_RANGE_MIN + 1, PWM_RANGE_MAX, DSHOT_MIN_THROTTLE, DSHOT_MAX_THROTTLE);
+          motorValue = scaleRange(externalValue, PWM_RANGE_MID + 1, PWM_RANGE_MAX, DSHOT_3D_DEADBAND_HIGH, DSHOT_MAX_THROTTLE);
         }
-
-        break;
+      } else {
+        motorValue = (externalValue == PWM_RANGE_MIN) ? DSHOT_DISARM_COMMAND : scaleRange(externalValue, PWM_RANGE_MIN + 1, PWM_RANGE_MAX, DSHOT_MIN_THROTTLE, DSHOT_MAX_THROTTLE);
+      }
+      break;
     case false:
-#endif
+  #endif
     default:
-        motorValue = externalValue;
-        break;
-    }
-
-    return (float)motorValue;
+      motorValue = externalValue;
+      break;
+  }
+  return (float)motorValue;
 }
 
-uint16_t convertMotorToExternal(float motorValue)
-{
-    uint16_t externalValue;
-    switch ((int)isMotorProtocolDshot()) {
-#ifdef USE_DSHOT
+uint16_t convertMotorToExternal(float motorValue) {
+  uint16_t externalValue;
+  switch ((int)isMotorProtocolDshot()) {
+  #ifdef USE_DSHOT
     case true:
-        if (feature(FEATURE_3D)) {
-            if (motorValue == DSHOT_DISARM_COMMAND || motorValue < DSHOT_MIN_THROTTLE) {
-                externalValue = PWM_RANGE_MID;
-            } else if (motorValue <= DSHOT_3D_DEADBAND_LOW) {
-                externalValue = scaleRange(motorValue, DSHOT_MIN_THROTTLE, DSHOT_3D_DEADBAND_LOW, PWM_RANGE_MID - 1, PWM_RANGE_MIN);
-            } else {
-                externalValue = scaleRange(motorValue, DSHOT_3D_DEADBAND_HIGH, DSHOT_MAX_THROTTLE, PWM_RANGE_MID + 1, PWM_RANGE_MAX);
-            }
+      if (feature(FEATURE_3D)) {
+        if (motorValue == DSHOT_DISARM_COMMAND || motorValue < DSHOT_MIN_THROTTLE) {
+          externalValue = PWM_RANGE_MID;
+        } else if (motorValue <= DSHOT_3D_DEADBAND_LOW) {
+          externalValue = scaleRange(motorValue, DSHOT_MIN_THROTTLE, DSHOT_3D_DEADBAND_LOW, PWM_RANGE_MID - 1, PWM_RANGE_MIN);
         } else {
-            externalValue = (motorValue < DSHOT_MIN_THROTTLE) ? PWM_RANGE_MIN : scaleRange(motorValue, DSHOT_MIN_THROTTLE, DSHOT_MAX_THROTTLE, PWM_RANGE_MIN + 1, PWM_RANGE_MAX);
+          externalValue = scaleRange(motorValue, DSHOT_3D_DEADBAND_HIGH, DSHOT_MAX_THROTTLE, PWM_RANGE_MID + 1, PWM_RANGE_MAX);
         }
-        break;
+      } else {
+        externalValue = (motorValue < DSHOT_MIN_THROTTLE) ? PWM_RANGE_MIN : scaleRange(motorValue, DSHOT_MIN_THROTTLE, DSHOT_MAX_THROTTLE, PWM_RANGE_MIN + 1, PWM_RANGE_MAX);
+      }
+      break;
     case false:
-#endif
+  #endif
     default:
-        externalValue = motorValue;
-        break;
-    }
+      externalValue = motorValue;
+      break;
+  }
 
-    return externalValue;
+  return (externalValue);
 }
 
-void mixerSetThrottleAngleCorrection(int correctionValue)
-{
-    throttleAngleCorrection = correctionValue;
+void mixerSetThrottleAngleCorrection(int correctionValue) {
+  throttleAngleCorrection = correctionValue;
 }
