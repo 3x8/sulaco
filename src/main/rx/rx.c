@@ -62,18 +62,15 @@ rssiSource_e rssiSource;
 
 static bool rxDataProcessingRequired = false;
 static bool auxiliaryProcessingRequired = false;
-
 static bool rxSignalReceived = false;
 static bool rxFlightChannelsValid = false;
 static bool rxIsInFailsafeMode = true;
 static uint8_t rxChannelCount;
-
 static timeUs_t rxNextUpdateAtUs = 0;
 static uint32_t needRxSignalBefore = 0;
 static uint32_t needRxSignalMaxDelayUs;
 static uint32_t suspendRxSignalUntil = 0;
 static uint8_t  skipRxSamples = 0;
-
 static int16_t rcRaw[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
 int16_t rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
 uint32_t rcInvalidPulsPeriod[MAX_SUPPORTED_RC_CHANNEL_COUNT];
@@ -92,131 +89,117 @@ rxRuntimeConfig_t rxRuntimeConfig;
 static uint8_t rcSampleIndex = 0;
 
 PG_REGISTER_ARRAY_WITH_RESET_FN(rxChannelRangeConfig_t, NON_AUX_CHANNEL_COUNT, rxChannelRangeConfigs, PG_RX_CHANNEL_RANGE_CONFIG, 0);
-void pgResetFn_rxChannelRangeConfigs(rxChannelRangeConfig_t *rxChannelRangeConfigs)
-{
-    // set default calibration to full range and 1:1 mapping
-    for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
-        rxChannelRangeConfigs[i].min = PWM_RANGE_MIN;
-        rxChannelRangeConfigs[i].max = PWM_RANGE_MAX;
-    }
+void pgResetFn_rxChannelRangeConfigs(rxChannelRangeConfig_t *rxChannelRangeConfigs) {
+  // set default calibration to full range and 1:1 mapping
+  for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
+    rxChannelRangeConfigs[i].min = PWM_RANGE_MIN;
+    rxChannelRangeConfigs[i].max = PWM_RANGE_MAX;
+  }
 }
 
 PG_REGISTER_ARRAY_WITH_RESET_FN(rxFailsafeChannelConfig_t, MAX_SUPPORTED_RC_CHANNEL_COUNT, rxFailsafeChannelConfigs, PG_RX_FAILSAFE_CHANNEL_CONFIG, 0);
-void pgResetFn_rxFailsafeChannelConfigs(rxFailsafeChannelConfig_t *rxFailsafeChannelConfigs)
-{
-    for (int i = 0; i < MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) {
-        rxFailsafeChannelConfigs[i].mode = (i < NON_AUX_CHANNEL_COUNT) ? RX_FAILSAFE_MODE_AUTO : RX_FAILSAFE_MODE_HOLD;
-        rxFailsafeChannelConfigs[i].step = (i == THROTTLE)
-            ? CHANNEL_VALUE_TO_RXFAIL_STEP(RX_MIN_USEC)
-            : CHANNEL_VALUE_TO_RXFAIL_STEP(RX_MID_USEC);
-    }
+void pgResetFn_rxFailsafeChannelConfigs(rxFailsafeChannelConfig_t *rxFailsafeChannelConfigs) {
+  for (int i = 0; i < MAX_SUPPORTED_RC_CHANNEL_COUNT; i++) {
+    rxFailsafeChannelConfigs[i].mode = (i < NON_AUX_CHANNEL_COUNT) ? RX_FAILSAFE_MODE_AUTO : RX_FAILSAFE_MODE_HOLD;
+    rxFailsafeChannelConfigs[i].step = (i == THROTTLE) ? CHANNEL_VALUE_TO_RXFAIL_STEP(RX_MIN_USEC) : CHANNEL_VALUE_TO_RXFAIL_STEP(RX_MID_USEC);
+  }
 }
 
 void resetAllRxChannelRangeConfigurations(rxChannelRangeConfig_t *rxChannelRangeConfig) {
-    // set default calibration to full range and 1:1 mapping
-    for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
-        rxChannelRangeConfig->min = PWM_RANGE_MIN;
-        rxChannelRangeConfig->max = PWM_RANGE_MAX;
-        rxChannelRangeConfig++;
-    }
+  // set default calibration to full range and 1:1 mapping
+  for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
+    rxChannelRangeConfig->min = PWM_RANGE_MIN;
+    rxChannelRangeConfig->max = PWM_RANGE_MAX;
+    rxChannelRangeConfig++;
+  }
 }
 
-static uint16_t nullReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel)
-{
+static uint16_t nullReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel) {
     UNUSED(rxRuntimeConfig);
     UNUSED(channel);
-
-    return PPM_RCVR_TIMEOUT;
+    return (PPM_RCVR_TIMEOUT);
 }
 
-static uint8_t nullFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
-{
+static uint8_t nullFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig) {
     UNUSED(rxRuntimeConfig);
-
-    return RX_FRAME_PENDING;
+    return (RX_FRAME_PENDING);
 }
 
-static bool nullProcessFrame(const rxRuntimeConfig_t *rxRuntimeConfig)
-{
+static bool nullProcessFrame(const rxRuntimeConfig_t *rxRuntimeConfig) {
     UNUSED(rxRuntimeConfig);
-
-    return true;
+    return (true);
 }
 
-STATIC_UNIT_TESTED bool isPulseValid(uint16_t pulseDuration)
-{
-    return  pulseDuration >= rxConfig()->rx_min_usec &&
-            pulseDuration <= rxConfig()->rx_max_usec;
+STATIC_UNIT_TESTED bool isPulseValid(uint16_t pulseDuration) {
+    return  (pulseDuration >= rxConfig()->rx_min_usec && pulseDuration <= rxConfig()->rx_max_usec);
 }
 
 #ifdef USE_SERIAL_RX
-bool serialRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig)
-{
+  bool serialRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig) {
     bool enabled = false;
     switch (rxConfig->serialrx_provider) {
-#ifdef USE_SERIALRX_SPEKTRUM
-    case SERIALRX_SRXL:
-    case SERIALRX_SPEKTRUM1024:
-    case SERIALRX_SPEKTRUM2048:
+    #ifdef USE_SERIALRX_SPEKTRUM
+      case SERIALRX_SRXL:
+      case SERIALRX_SPEKTRUM1024:
+      case SERIALRX_SPEKTRUM2048:
         enabled = spektrumInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_SBUS
-    case SERIALRX_SBUS:
+    #endif
+    #ifdef USE_SERIALRX_SBUS
+      case SERIALRX_SBUS:
         enabled = sbusInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_SUMD
-    case SERIALRX_SUMD:
+    #endif
+    #ifdef USE_SERIALRX_SUMD
+      case SERIALRX_SUMD:
         enabled = sumdInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_SUMH
-    case SERIALRX_SUMH:
+    #endif
+    #ifdef USE_SERIALRX_SUMH
+      case SERIALRX_SUMH:
         enabled = sumhInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_XBUS
-    case SERIALRX_XBUS_MODE_B:
-    case SERIALRX_XBUS_MODE_B_RJ01:
+    #endif
+    #ifdef USE_SERIALRX_XBUS
+      case SERIALRX_XBUS_MODE_B:
+      case SERIALRX_XBUS_MODE_B_RJ01:
         enabled = xBusInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_IBUS
-    case SERIALRX_IBUS:
+    #endif
+    #ifdef USE_SERIALRX_IBUS
+      case SERIALRX_IBUS:
         enabled = ibusInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_JETIEXBUS
-    case SERIALRX_JETIEXBUS:
+    #endif
+    #ifdef USE_SERIALRX_JETIEXBUS
+      case SERIALRX_JETIEXBUS:
         enabled = jetiExBusInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_CRSF
-    case SERIALRX_CRSF:
+    #endif
+    #ifdef USE_SERIALRX_CRSF
+      case SERIALRX_CRSF:
         enabled = crsfRxInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_TARGET_CUSTOM
-    case SERIALRX_TARGET_CUSTOM:
+    #endif
+    #ifdef USE_SERIALRX_TARGET_CUSTOM
+      case SERIALRX_TARGET_CUSTOM:
         enabled = targetCustomSerialRxInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
-#ifdef USE_SERIALRX_FPORT
-    case SERIALRX_FPORT:
+    #endif
+    #ifdef USE_SERIALRX_FPORT
+      case SERIALRX_FPORT:
         enabled = fportRxInit(rxConfig, rxRuntimeConfig);
         break;
-#endif
+    #endif
     default:
-        enabled = false;
-        break;
+      enabled = false;
+      break;
     }
-    return enabled;
-}
+    return (enabled);
+  }
 #endif
 
-void rxInit(void)
-{
+void rxInit(void) {
     rxRuntimeConfig.rcReadRawFn = nullReadRawRC;
     rxRuntimeConfig.rcFrameStatusFn = nullFrameStatus;
     rxRuntimeConfig.rcProcessFrameFn = nullProcessFrame;
