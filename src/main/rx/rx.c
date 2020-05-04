@@ -115,23 +115,23 @@ void resetAllRxChannelRangeConfigurations(rxChannelRangeConfig_t *rxChannelRange
 }
 
 static uint16_t nullReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel) {
-    UNUSED(rxRuntimeConfig);
-    UNUSED(channel);
-    return (PPM_RCVR_TIMEOUT);
+  UNUSED(rxRuntimeConfig);
+  UNUSED(channel);
+  return (PPM_RCVR_TIMEOUT);
 }
 
 static uint8_t nullFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig) {
-    UNUSED(rxRuntimeConfig);
-    return (RX_FRAME_PENDING);
+  UNUSED(rxRuntimeConfig);
+  return (RX_FRAME_PENDING);
 }
 
 static bool nullProcessFrame(const rxRuntimeConfig_t *rxRuntimeConfig) {
-    UNUSED(rxRuntimeConfig);
-    return (true);
+  UNUSED(rxRuntimeConfig);
+  return (true);
 }
 
 STATIC_UNIT_TESTED bool isPulseValid(uint16_t pulseDuration) {
-    return  (pulseDuration >= rxConfig()->rx_min_usec && pulseDuration <= rxConfig()->rx_max_usec);
+  return  (pulseDuration >= rxConfig()->rx_min_usec && pulseDuration <= rxConfig()->rx_max_usec);
 }
 
 #ifdef USE_SERIAL_RX
