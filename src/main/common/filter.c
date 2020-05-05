@@ -202,7 +202,7 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
   filter->meanSum += filter->window[filter->windowIndex];
   filter->varianceSum = filter->varianceSum + (filter->window[filter->windowIndex] * filter->window[filter->windowIndex]);
   if (++filter->windowIndex >= filter->w) {
-      filter->windowIndex = 0;
+    filter->windowIndex = 0;
   }
   filter->meanSum -= filter->window[filter->windowIndex];
   filter->varianceSum = filter->varianceSum - (filter->window[filter->windowIndex] * filter->window[filter->windowIndex]);
