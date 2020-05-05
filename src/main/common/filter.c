@@ -177,7 +177,6 @@ void kalmanInit(kalman_t *filter, float q, uint32_t w) {
 #pragma GCC push_options
 #pragma GCC optimize("O3")
 
-#define VARIANCE_SCALE 1.0f
 FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
   const float windowSizeInverse = 1.0f/(filter->w - 1);
 
@@ -208,7 +207,7 @@ FAST_CODE float kalmanUpdate(kalman_t *filter, float input) {
   filter->varianceSum = filter->varianceSum - (filter->window[filter->windowIndex] * filter->window[filter->windowIndex]);
   filter->mean = filter->meanSum * windowSizeInverse;
   filter->variance = ABS(filter->varianceSum * windowSizeInverse - (filter->mean * filter->mean));
-  filter->r = sqrtf(filter->variance) * VARIANCE_SCALE;
+  filter->r = sqrtf(filter->variance);
 
   return (filter->x);
 }
