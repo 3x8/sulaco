@@ -122,7 +122,7 @@
 #endif
 
 #if (FLASH_SIZE > 64)
-  #define USE_ACRO_TRAINER
+  //#define USE_ACRO_TRAINER
   #define USE_BLACKBOX
   #define USE_RESOURCE_MGMT
   //#define USE_RUNAWAY_TAKEOFF     // Runaway Takeoff Prevention (anti-taz) - Marked for removal
@@ -139,8 +139,8 @@
   #define USE_CMS
   #define USE_EXTENDED_CMS_MENUS
   #define USE_DSHOT_DMAR
-  #define USE_GYRO_OVERFLOW_CHECK
-  #define USE_YAW_SPIN_RECOVERY
+  //#define USE_GYRO_OVERFLOW_CHECK
+  //#define USE_YAW_SPIN_RECOVERY
   #define USE_HUFFMAN
   #define USE_MSP_DISPLAYPORT
   #define USE_MSP_OVER_TELEMETRY
@@ -187,11 +187,11 @@
   #define USE_SERVOS
   #define USE_LED_STRIP
   #define USE_PEGASUS_UI
-  #define USE_ALT_HOLD
+  //#define USE_ALT_HOLD
   #define USE_DASHBOARD
-  #define USE_GPS
-  #define USE_GPS_NMEA
-  #define USE_GPS_UBLOX
+  //#define USE_GPS
+  //#define USE_GPS_NMEA
+  //#define USE_GPS_UBLOX
   //#define USE_GPS_RESCUE
   #define USE_OSD
   #define USE_OSD_OVER_MSP_DISPLAYPORT
