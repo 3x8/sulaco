@@ -116,31 +116,31 @@ typedef union gyroLowpassFilter_u {
 } gyroLowpassFilter_t;
 
 typedef struct gyroSensor_s {
-    gyroDev_t gyroDev;
-    gyroCalibration_t calibration;
-    // lowpass gyro soft filter
-    filterApplyFnPtr lowpassFilterApplyFn;
-    gyroLowpassFilter_t lowpassFilter[XYZ_AXIS_COUNT];
-    // lowpass2 gyro soft filter
-    filterApplyFnPtr lowpass2FilterApplyFn;
-    gyroLowpassFilter_t lowpass2Filter[XYZ_AXIS_COUNT];
-    // notch filters
-    filterApplyFnPtr notchFilter1ApplyFn;
-    biquadFilter_t notchFilter1[XYZ_AXIS_COUNT];
-    filterApplyFnPtr notchFilter2ApplyFn;
-    biquadFilter_t notchFilter2[XYZ_AXIS_COUNT];
-    filterApplyFnPtr notchFilterDynApplyFn;
-    biquadFilter_t notchFilterDyn[XYZ_AXIS_COUNT];
-    // overflow and recovery
-    timeUs_t overflowTimeUs;
-    bool overflowDetected;
-    #ifdef USE_YAW_SPIN_RECOVERY
-      timeUs_t yawSpinTimeUs;
-      bool yawSpinDetected;
-    #endif //USE_YAW_SPIN_RECOVERY
-    #ifdef USE_GYRO_DATA_ANALYSE
-      gyroAnalyseState_t gyroAnalyseState;
-    #endif
+  gyroDev_t gyroDev;
+  gyroCalibration_t calibration;
+  // lowpass gyro soft filter
+  filterApplyFnPtr lowpassFilterApplyFn;
+  gyroLowpassFilter_t lowpassFilter[XYZ_AXIS_COUNT];
+  // lowpass2 gyro soft filter
+  filterApplyFnPtr lowpass2FilterApplyFn;
+  gyroLowpassFilter_t lowpass2Filter[XYZ_AXIS_COUNT];
+  // notch filters
+  filterApplyFnPtr notchFilter1ApplyFn;
+  biquadFilter_t notchFilter1[XYZ_AXIS_COUNT];
+  filterApplyFnPtr notchFilter2ApplyFn;
+  biquadFilter_t notchFilter2[XYZ_AXIS_COUNT];
+  filterApplyFnPtr notchFilterDynApplyFn;
+  biquadFilter_t notchFilterDyn[XYZ_AXIS_COUNT];
+  // overflow and recovery
+  timeUs_t overflowTimeUs;
+  bool overflowDetected;
+  #ifdef USE_YAW_SPIN_RECOVERY
+    timeUs_t yawSpinTimeUs;
+    bool yawSpinDetected;
+  #endif //USE_YAW_SPIN_RECOVERY
+  #ifdef USE_GYRO_DATA_ANALYSE
+    gyroAnalyseState_t gyroAnalyseState;
+  #endif
 } gyroSensor_t;
 
 STATIC_UNIT_TESTED FAST_RAM_ZERO_INIT gyroSensor_t gyroSensor1;
