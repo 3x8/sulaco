@@ -546,4 +546,4 @@ bool isMotorProtocolDshot(void) {
       beeperPwm.enabled = false;
     }
   }
-#endif
+#endif //USE_BEEPER
