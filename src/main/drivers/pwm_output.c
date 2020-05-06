@@ -357,7 +357,7 @@ bool isMotorProtocolDshot(void) {
   void pwmWriteDshotCommand(uint8_t index, uint8_t motorCount, uint8_t command, bool blocking) {
     timeUs_t timeNowUs = micros();
 
-    if (!isMotorProtocolDshot() || (command > DSHOT_MAX_COMMAND) || pwmDshotCommandIsQueued()) {
+    if (!isMotorProtocolDshot() || (command > DSHOT_CMD_MAX) || pwmDshotCommandIsQueued()) {
       return;
     }
 
