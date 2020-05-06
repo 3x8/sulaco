@@ -284,14 +284,14 @@ void motorDevInit(const motorDevConfig_t *motorConfig, uint16_t idlePulse, uint8
     const unsigned pwmRateHz = useUnsyncedPwm ? motorConfig->motorPwmRate : ceilf(1 / ((sMin + sLen) * 4));
 
     const uint32_t clock = timerClock(timerHardware->tim);
-    /* used to find the desired timer frequency for max resolution */
+    // used to find the desired timer frequency for max resolution
     const unsigned prescaler = ((clock / pwmRateHz) + 0xffff) / 0x10000; /* rounding up */
     const uint32_t hz = clock / prescaler;
     const unsigned period = useUnsyncedPwm ? hz / pwmRateHz : 0xffff;
 
     /* if brushed then it is the entire length of the period.
-        TODO: this can be moved back to periodMin and periodLen
-        once mixer outputs a 0..1 float value. */
+    TODO: this can be moved back to periodMin and periodLen
+    once mixer outputs a 0..1 float value. */
     motors[motorIndex].pulseScale = ((motorConfig->motorPwmProtocol == PWM_TYPE_BRUSHED) ? period : (sLen * hz)) / 1000.0f;
     motors[motorIndex].pulseOffset = (sMin * hz) - (motors[motorIndex].pulseScale * 1000);
 
