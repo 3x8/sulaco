@@ -934,11 +934,13 @@ static FAST_CODE_NOINLINE void subTaskRcCommand(timeUs_t currentTimeUs)
 }
 
 // Function for loop trigger
+static uint32_t index = 0;
+
 FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
 {
     static uint32_t pidUpdateCountdown = 0;
     static uint32_t rcupdateCountdown = 0;
-    static uint32_t index = 0;
+
 
 #ifdef USE_DMA_SPI_DEVICE
     dmaSpiDeviceDataReady = false;
