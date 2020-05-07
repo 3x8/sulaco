@@ -934,7 +934,7 @@ static FAST_CODE_NOINLINE void subTaskRcCommand(timeUs_t currentTimeUs)
 }
 
 // Function for loop trigger
-static uint32_t index = 0;
+static uint32_t ouputIndex = 0;
 
 FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
 {
@@ -960,7 +960,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     gyroUpdate(currentTimeUs);
     DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
 
-    ++index;
+    ++ouputIndex;
 
     if (pidUpdateCountdown) {
         pidUpdateCountdown--;
@@ -979,7 +979,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
             subTaskRcCommand(currentTimeUs);
         }
         subTaskPidController(currentTimeUs);
-        if(index % 2) {
+        if(ouputIndex % 2) {
           subTaskMotorUpdate(currentTimeUs);
         }
         subTaskPidSubprocesses(currentTimeUs);
