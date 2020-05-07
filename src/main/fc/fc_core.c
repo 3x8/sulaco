@@ -938,6 +938,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
 {
     static uint32_t pidUpdateCountdown = 0;
     static uint32_t rcupdateCountdown = 0;
+    static uint32_t index = 0;
 
 #ifdef USE_DMA_SPI_DEVICE
     dmaSpiDeviceDataReady = false;
@@ -957,6 +958,8 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     gyroUpdate(currentTimeUs);
     DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
 
+    ++index;
+
     if (pidUpdateCountdown) {
         pidUpdateCountdown--;
     } else {
@@ -974,7 +977,9 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
             subTaskRcCommand(currentTimeUs);
         }
         subTaskPidController(currentTimeUs);
-        subTaskMotorUpdate(currentTimeUs);
+        if(index % 2) {
+          subTaskMotorUpdate(currentTimeUs);
+        }
         subTaskPidSubprocesses(currentTimeUs);
     }
 
