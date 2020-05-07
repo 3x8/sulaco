@@ -960,11 +960,13 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     gyroUpdate(currentTimeUs);
     DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
 
-    ++ouputIndex;
+
 
     if (pidUpdateCountdown) {
         pidUpdateCountdown--;
     } else {
+      ++ouputIndex;
+      
         pidUpdateCountdown = pidConfig()->pid_process_denom - 1;
         if (rcupdateCountdown) {
             rcupdateCountdown--;
