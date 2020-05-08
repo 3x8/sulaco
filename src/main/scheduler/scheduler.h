@@ -8,145 +8,137 @@
 
 
 typedef enum {
-    TASK_PRIORITY_IDLE = 0,     // Disables dynamic scheduling, task is executed only if no other task is active this cycle
-    TASK_PRIORITY_LOW = 1,
-    TASK_PRIORITY_MEDIUM = 3,
-    TASK_PRIORITY_MEDIUM_HIGH = 4,
-    TASK_PRIORITY_HIGH = 5,
-    TASK_PRIORITY_REALTIME = 6,
-    TASK_PRIORITY_TRIGGER = 7,
-    TASK_PRIORITY_MAX = 255
+  TASK_PRIORITY_IDLE = 0,     // Disables dynamic scheduling, task is executed only if no other task is active this cycle
+  TASK_PRIORITY_LOW = 1,
+  TASK_PRIORITY_MEDIUM = 3,
+  TASK_PRIORITY_MEDIUM_HIGH = 4,
+  TASK_PRIORITY_HIGH = 5,
+  TASK_PRIORITY_REALTIME = 6,
+  TASK_PRIORITY_TRIGGER = 7,
+  TASK_PRIORITY_MAX = 255
 } cfTaskPriority_e;
 
 typedef struct {
-    timeUs_t     maxExecutionTime;
-    timeUs_t     totalExecutionTime;
-    timeUs_t     averageExecutionTime;
+  timeUs_t     maxExecutionTime;
+  timeUs_t     totalExecutionTime;
+  timeUs_t     averageExecutionTime;
 } cfCheckFuncInfo_t;
 
 typedef struct {
-    const char * taskName;
-    const char * subTaskName;
-    bool         isEnabled;
-    uint8_t      staticPriority;
-    timeDelta_t  desiredPeriod;
-    timeDelta_t  latestDeltaTime;
-    timeUs_t     maxExecutionTime;
-    timeUs_t     totalExecutionTime;
-    timeUs_t     averageExecutionTime;
+  const char * taskName;
+  const char * subTaskName;
+  bool         isEnabled;
+  uint8_t      staticPriority;
+  timeDelta_t  desiredPeriod;
+  timeDelta_t  latestDeltaTime;
+  timeUs_t     maxExecutionTime;
+  timeUs_t     totalExecutionTime;
+  timeUs_t     averageExecutionTime;
 } cfTaskInfo_t;
 
 typedef enum {
-    /* Actual tasks */
-    TASK_SYSTEM = 0,
-    TASK_MAIN,
-    TASK_GYROPID,
-    TASK_ACCEL,
-    TASK_ATTITUDE,
-    TASK_RX,
-    TASK_MOTOR,
-    TASK_SERIAL,
-    TASK_DISPATCH,
-    TASK_BATTERY_VOLTAGE,
-    TASK_BATTERY_CURRENT,
-    TASK_BATTERY_ALERTS,
-#ifdef USE_BEEPER
+  // Actual tasks
+  TASK_SYSTEM = 0,
+  TASK_MAIN,
+  TASK_GYROPID,
+  TASK_ACCEL,
+  TASK_ATTITUDE,
+  TASK_RX,
+  TASK_MOTOR,
+  TASK_SERIAL,
+  TASK_DISPATCH,
+  TASK_BATTERY_VOLTAGE,
+  TASK_BATTERY_CURRENT,
+  TASK_BATTERY_ALERTS,
+  #ifdef USE_BEEPER
     TASK_BEEPER,
-#endif
-#ifdef USE_GPS
+  #endif
+  #ifdef USE_GPS
     TASK_GPS,
-#endif
-#ifdef USE_MAG
+  #endif
+  #ifdef USE_MAG
     TASK_COMPASS,
-#endif
-#ifdef USE_BARO
+  #endif
+  #ifdef USE_BARO
     TASK_BARO,
-#endif
-#ifdef USE_RANGEFINDER
+  #endif
+  #ifdef USE_RANGEFINDER
     TASK_RANGEFINDER,
-#endif
-#if defined(USE_BARO) || defined(USE_GPS)
+  #endif
+  #if defined(USE_BARO) || defined(USE_GPS)
     TASK_ALTITUDE,
-#endif
-#ifdef USE_DASHBOARD
+  #endif
+  #ifdef USE_DASHBOARD
     TASK_DASHBOARD,
-#endif
-#ifdef USE_TELEMETRY
+  #endif
+  #ifdef USE_TELEMETRY
     TASK_TELEMETRY,
-#endif
-#ifdef USE_LED_STRIP
+  #endif
+  #ifdef USE_LED_STRIP
     TASK_LEDSTRIP,
-#endif
-#ifdef USE_TRANSPONDER
+  #endif
+  #ifdef USE_TRANSPONDER
     TASK_TRANSPONDER,
-#endif
-#ifdef STACK_CHECK
+  #endif
+  #ifdef STACK_CHECK
     TASK_STACK_CHECK,
-#endif
-#ifdef USE_OSD
+  #endif
+  #ifdef USE_OSD
     TASK_OSD,
-#endif
-#ifdef USE_OSD_SLAVE
+  #endif
+  #ifdef USE_OSD_SLAVE
     TASK_OSD_SLAVE,
-#endif
-#ifdef USE_BST
+  #endif
+  #ifdef USE_BST
     TASK_BST_MASTER_PROCESS,
-#endif
-#ifdef USE_ESC_SENSOR
+  #endif
+  #ifdef USE_ESC_SENSOR
     TASK_ESC_SENSOR,
-#endif
-#ifdef USE_CMS
+  #endif
+  #ifdef USE_CMS
     TASK_CMS,
-#endif
-#ifdef USE_VTX_CONTROL
+  #endif
+  #ifdef USE_VTX_CONTROL
     TASK_VTXCTRL,
-#endif
-#ifdef USE_CAMERA_CONTROL
+  #endif
+  #ifdef USE_CAMERA_CONTROL
     TASK_CAMCTRL,
-#endif
-
-#ifdef USE_RCDEVICE
+  #endif
+  #ifdef USE_RCDEVICE
     TASK_RCDEVICE,
-#endif
-
-#ifdef USE_ADC_INTERNAL
+  #endif
+  #ifdef USE_ADC_INTERNAL
     TASK_ADC_INTERNAL,
-#endif
-
-#ifdef USE_PINIOBOX
+  #endif
+  #ifdef USE_PINIOBOX
     TASK_PINIOBOX,
-#endif
-
-    /* Count of real tasks */
-    TASK_COUNT,
-
-    /* Service task IDs */
-    TASK_NONE = TASK_COUNT,
-    TASK_SELF
+  #endif
+  TASK_COUNT, // Count of real tasks
+  TASK_NONE = TASK_COUNT, // Service task IDs
+  TASK_SELF
 } cfTaskId_e;
 
 typedef struct {
-    // Configuration
-    const char * taskName;
-    const char * subTaskName;
-    bool (*checkFunc)(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
-    void (*taskFunc)(timeUs_t currentTimeUs);
-    timeDelta_t desiredPeriod;      // target period of execution
-    const uint8_t staticPriority;   // dynamicPriority grows in steps of this size, shouldn't be zero
-    bool executeNow;
-    // Scheduling
-    uint16_t dynamicPriority;       // measurement of how old task was last executed, used to avoid task starvation
-    uint16_t taskAgeCycles;
-    timeDelta_t taskLatestDeltaTime;
-    timeUs_t lastExecutedAt;        // last time of invocation
-    timeUs_t lastSignaledAt;        // time of invocation event for event-driven tasks
-
-#ifndef SKIP_TASK_STATISTICS
+  // Configuration
+  const char * taskName;
+  const char * subTaskName;
+  bool (*checkFunc)(timeUs_t currentTimeUs, timeDelta_t currentDeltaTimeUs);
+  void (*taskFunc)(timeUs_t currentTimeUs);
+  timeDelta_t desiredPeriod;      // target period of execution
+  const uint8_t staticPriority;   // dynamicPriority grows in steps of this size, shouldn't be zero
+  bool executeNow;
+  // Scheduling
+  uint16_t dynamicPriority;       // measurement of how old task was last executed, used to avoid task starvation
+  uint16_t taskAgeCycles;
+  timeDelta_t taskLatestDeltaTime;
+  timeUs_t lastExecutedAt;        // last time of invocation
+  timeUs_t lastSignaledAt;        // time of invocation event for event-driven tasks
+  #ifndef SKIP_TASK_STATISTICS
     // Statistics
     timeUs_t movingSumExecutionTime;  // moving sum over 32 samples
     timeUs_t maxExecutionTime;
     timeUs_t totalExecutionTime;    // total time consumed by task since boot
-#endif
+    #endif
 } cfTask_t;
 
 extern cfTask_t cfTasks[TASK_COUNT];
