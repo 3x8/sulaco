@@ -26,6 +26,7 @@ bool processRx(timeUs_t currentTimeUs);
 void updateArmingStatus(void);
 
 void taskMainPidLoop(timeUs_t currentTimeUs);
+FAST_CODE void subTaskMotorUpdate(timeUs_t currentTimeUs);
 bool isFlipOverAfterCrashMode(void);
 
 void runawayTakeoffTemporaryDisable(uint8_t disableFlag);

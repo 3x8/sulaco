@@ -44,6 +44,7 @@ typedef enum {
     TASK_ACCEL,
     TASK_ATTITUDE,
     TASK_RX,
+    TASK_MOTOR,
     TASK_SERIAL,
     TASK_DISPATCH,
     TASK_BATTERY_VOLTAGE,

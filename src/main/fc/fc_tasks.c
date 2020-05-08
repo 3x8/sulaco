@@ -262,7 +262,8 @@ void fcTasksInit(void) {
     }
 
     setTaskEnabled(TASK_RX, true);
-    setTaskEnabled(TASK_OUTPUT, true);
+    setTaskEnabled(TASK_MOTOR, true);
+    rescheduleTask(TASK_MOTOR, motorConfig()->dev.motorPwmRate);
     setTaskEnabled(TASK_DISPATCH, dispatchIsEnabled());
 
     #ifdef USE_BEEPER
@@ -438,10 +439,10 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
       .desiredPeriod = TASK_PERIOD_HZ(160),        // If event-based scheduling doesn't work, fallback to periodic scheduling
       .staticPriority = TASK_PRIORITY_HIGH,
     },
-    [TASK_OUTPUT] = {
-      .taskName = "OUTPUT",
+    [TASK_MOTOR] = {
+      .taskName = "MOTOR",
       .taskFunc = subTaskMotorUpdate,
-      .desiredPeriod = TASK_PERIOD_HZ(111),
+      .desiredPeriod = TASK_PERIOD_HZ(1111),
       .staticPriority = TASK_PRIORITY_REALTIME,
     },
     [TASK_DISPATCH] = {
