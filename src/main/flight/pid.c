@@ -67,7 +67,7 @@ PG_REGISTER_WITH_RESET_TEMPLATE(pidConfig_t, pidConfig, PG_PID_CONFIG, 2);
 #endif
 
 #ifndef USE_BUTTERED_PIDS
-  #define USE_BUTTERED_PIDS false
+  #define USE_BUTTERED_PIDS true
 #endif
 
 #ifndef DEFAULT_PIDS_ROLL
