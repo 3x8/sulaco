@@ -20,68 +20,67 @@
 #define DSHOT_3D_DEADBAND_HIGH 1048
 
 // Note: this is called MultiType/MULTITYPE_* in baseflight.
-typedef enum mixerMode
-{
-    MIXER_TRI = 1,
-    MIXER_QUADP = 2,
-    MIXER_QUADX = 3,
-    MIXER_BICOPTER = 4,
-    MIXER_GIMBAL = 5,
-    MIXER_Y6 = 6,
-    MIXER_HEX6 = 7,
-    MIXER_FLYING_WING = 8,
-    MIXER_Y4 = 9,
-    MIXER_HEX6X = 10,
-    MIXER_OCTOX8 = 11,
-    MIXER_OCTOFLATP = 12,
-    MIXER_OCTOFLATX = 13,
-    MIXER_AIRPLANE = 14,        // airplane / singlecopter / dualcopter (not yet properly supported)
-    MIXER_HELI_120_CCPM = 15,
-    MIXER_HELI_90_DEG = 16,
-    MIXER_VTAIL4 = 17,
-    MIXER_HEX6H = 18,
-    MIXER_PPM_TO_SERVO = 19,    // PPM -> servo relay
-    MIXER_DUALCOPTER = 20,
-    MIXER_SINGLECOPTER = 21,
-    MIXER_ATAIL4 = 22,
-    MIXER_CUSTOM = 23,
-    MIXER_CUSTOM_AIRPLANE = 24,
-    MIXER_CUSTOM_TRI = 25,
-    MIXER_QUADX_1234 = 26
+typedef enum mixerMode {
+  MIXER_TRI = 1,
+  MIXER_QUADP = 2,
+  MIXER_QUADX = 3,
+  MIXER_BICOPTER = 4,
+  MIXER_GIMBAL = 5,
+  MIXER_Y6 = 6,
+  MIXER_HEX6 = 7,
+  MIXER_FLYING_WING = 8,
+  MIXER_Y4 = 9,
+  MIXER_HEX6X = 10,
+  MIXER_OCTOX8 = 11,
+  MIXER_OCTOFLATP = 12,
+  MIXER_OCTOFLATX = 13,
+  MIXER_AIRPLANE = 14,        // airplane / singlecopter / dualcopter (not yet properly supported)
+  MIXER_HELI_120_CCPM = 15,
+  MIXER_HELI_90_DEG = 16,
+  MIXER_VTAIL4 = 17,
+  MIXER_HEX6H = 18,
+  MIXER_PPM_TO_SERVO = 19,    // PPM -> servo relay
+  MIXER_DUALCOPTER = 20,
+  MIXER_SINGLECOPTER = 21,
+  MIXER_ATAIL4 = 22,
+  MIXER_CUSTOM = 23,
+  MIXER_CUSTOM_AIRPLANE = 24,
+  MIXER_CUSTOM_TRI = 25,
+  MIXER_QUADX_1234 = 26
 } mixerMode_e;
 
 // Custom mixer data per motor
 typedef struct motorMixer_s {
-    float throttle;
-    float roll;
-    float pitch;
-    float yaw;
+  float throttle;
+  float roll;
+  float pitch;
+  float yaw;
 } motorMixer_t;
 
 PG_DECLARE_ARRAY(motorMixer_t, MAX_SUPPORTED_MOTORS, customMotorMixer);
 
 // Custom mixer configuration
 typedef struct mixer_s {
-    uint8_t motorCount;
-    uint8_t useServo;
-    const motorMixer_t *motor;
+  uint8_t motorCount;
+  uint8_t useServo;
+  const motorMixer_t *motor;
 } mixer_t;
 
 typedef struct mixerConfig_s {
-    uint8_t mixerMode;
-    bool yaw_motors_reversed;
-    uint8_t crashflip_motor_percent;
+  uint8_t mixerMode;
+  bool yaw_motors_reversed;
+  uint8_t crashflip_motor_percent;
 } mixerConfig_t;
 
 PG_DECLARE(mixerConfig_t, mixerConfig);
 
 typedef struct motorConfig_s {
-    motorDevConfig_t dev;
-    uint16_t digitalIdleOffsetValue;        // Idle value for DShot protocol, full motor output = 10000
-    uint16_t minthrottle;                   // Set the minimum throttle command sent to the ESC (Electronic Speed Controller). This is the minimum value that allow motors to run at a idle speed.
-    uint16_t maxthrottle;                   // This is the maximum value for the ESCs at full power this value can be increased up to 2000
-    uint16_t mincommand;                    // This is the value for the ESCs when they are not armed. In some cases, this value must be lowered down to 900 for some specific ESCs
-    uint8_t motorPoleCount;                // Magnetic poles in the motors for calculating actual RPM from eRPM provided by ESC telemetry
+  motorDevConfig_t dev;
+  uint16_t digitalIdleOffsetValue;        // Idle value for DShot protocol, full motor output = 10000
+  uint16_t minthrottle;                   // Set the minimum throttle command sent to the ESC (Electronic Speed Controller). This is the minimum value that allow motors to run at a idle speed.
+  uint16_t maxthrottle;                   // This is the maximum value for the ESCs at full power this value can be increased up to 2000
+  uint16_t mincommand;                    // This is the value for the ESCs when they are not armed. In some cases, this value must be lowered down to 900 for some specific ESCs
+  uint8_t motorPoleCount;                // Magnetic poles in the motors for calculating actual RPM from eRPM provided by ESC telemetry
 } motorConfig_t;
 
 PG_DECLARE(motorConfig_t, motorConfig);
