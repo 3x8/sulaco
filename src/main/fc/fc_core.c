@@ -909,7 +909,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs) {
     }
     subTaskPidController(currentTimeUs);
     if((motorOutputIndex % 2) == 0) {
-      subTaskMotorUpdate(currentTimeUs);
+      //subTaskMotorUpdate(currentTimeUs);
     }
     subTaskPidSubprocesses(currentTimeUs);
   }

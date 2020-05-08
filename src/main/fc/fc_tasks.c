@@ -262,6 +262,7 @@ void fcTasksInit(void) {
     }
 
     setTaskEnabled(TASK_RX, true);
+    setTaskEnabled(TASK_OUTPUT, true);
     setTaskEnabled(TASK_DISPATCH, dispatchIsEnabled());
 
     #ifdef USE_BEEPER
@@ -436,6 +437,12 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
       .taskFunc = taskUpdateRxMain,
       .desiredPeriod = TASK_PERIOD_HZ(160),        // If event-based scheduling doesn't work, fallback to periodic scheduling
       .staticPriority = TASK_PRIORITY_HIGH,
+    },
+    [TASK_OUTPUT] = {
+      .taskName = "OUTPUT",
+      .taskFunc = subTaskMotorUpdate,
+      .desiredPeriod = TASK_PERIOD_HZ(111),
+      .staticPriority = TASK_PRIORITY_REALTIME,
     },
     [TASK_DISPATCH] = {
       .taskName = "DISPATCH",
