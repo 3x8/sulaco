@@ -445,7 +445,7 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
     [TASK_MOTOR] = {
       .taskName = "MOTOR",
       .taskFunc = subTaskMotorUpdate,
-      .desiredPeriod = TASK_PERIOD_HZ(1111),
+      .desiredPeriod = TASK_PERIOD_HZ(4000),
       .staticPriority = TASK_PRIORITY_REALTIME,
     },
     [TASK_DISPATCH] = {
