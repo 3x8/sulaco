@@ -865,8 +865,6 @@ static FAST_CODE_NOINLINE void subTaskRcCommand(timeUs_t currentTimeUs) {
 }
 
 // Function for loop trigger
-static uint32_t motorOutputIndex = 0;
-
 FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs) {
   static uint32_t pidUpdateCountdown = 0;
   static uint32_t rcupdateCountdown = 0;
@@ -892,8 +890,6 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs) {
   if (pidUpdateCountdown) {
     pidUpdateCountdown--;
   } else {
-    ++motorOutputIndex;
-
     pidUpdateCountdown = pidConfig()->pid_process_denom - 1;
     if (rcupdateCountdown) {
       rcupdateCountdown--;
@@ -908,9 +904,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs) {
       subTaskRcCommand(currentTimeUs);
     }
     subTaskPidController(currentTimeUs);
-    if((motorOutputIndex % 2) == 0) {
-      //subTaskMotorUpdate(currentTimeUs);
-    }
+    //subTaskMotorUpdate(currentTimeUs);
     subTaskPidSubprocesses(currentTimeUs);
   }
 

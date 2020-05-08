@@ -10,7 +10,7 @@
 
 #define QUAD_MOTOR_COUNT 4
 #define BRUSHED_MOTORS_PWM_RATE 16000
-#define BRUSHLESS_MOTORS_PWM_RATE 480
+#define BRUSHLESS_MOTORS_PWM_RATE 4000
 
 // Digital protocol has fixed values
 #define DSHOT_DISARM_COMMAND      0
