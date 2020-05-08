@@ -24,7 +24,7 @@
 #include "drivers/transponder_ir.h"
 #include "drivers/usb_io.h"
 #include "drivers/vtx_common.h"
-#include "drivers/pwm_esc_detect.h"
+
 #ifdef USB_CDC_HID
   #include "vcpf4/usbd_cdc_vcp.h"
   #include "usbd_hid_core.h"
@@ -263,10 +263,10 @@ void fcTasksInit(void) {
     }
 
     setTaskEnabled(TASK_RX, true);
-    if (hardwareMotorType == MOTOR_BRUSHLESS) {
-      setTaskEnabled(TASK_MOTOR, true);
-      rescheduleTask(TASK_MOTOR, TASK_PERIOD_HZ(motorConfig()->dev.motorPwmRate));
-    }
+
+    setTaskEnabled(TASK_MOTOR, true);
+    rescheduleTask(TASK_MOTOR, TASK_PERIOD_HZ(motorConfig()->dev.motorPwmRate));
+
     setTaskEnabled(TASK_DISPATCH, dispatchIsEnabled());
 
     #ifdef USE_BEEPER
