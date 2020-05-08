@@ -263,7 +263,7 @@ void fcTasksInit(void) {
 
     setTaskEnabled(TASK_RX, true);
     setTaskEnabled(TASK_MOTOR, true);
-    rescheduleTask(TASK_MOTOR, motorConfig()->dev.motorPwmRate);
+    rescheduleTask(TASK_MOTOR, TASK_PERIOD_HZ(motorConfig()->dev.motorPwmRate));
     setTaskEnabled(TASK_DISPATCH, dispatchIsEnabled());
 
     #ifdef USE_BEEPER
