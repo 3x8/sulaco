@@ -25,7 +25,6 @@
 #include "drivers/system.h"
 #include "drivers/time.h"
 #include "drivers/transponder_ir.h"
-#include "drivers/pwm_esc_detect.h"
 
 #include "sensors/acceleration.h"
 #include "sensors/barometer.h"
@@ -905,9 +904,7 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs) {
       subTaskRcCommand(currentTimeUs);
     }
     subTaskPidController(currentTimeUs);
-    if (hardwareMotorType == MOTOR_BRUSHED) {
-      subTaskMotorUpdate(currentTimeUs);
-    }
+    //subTaskMotorUpdate(currentTimeUs);
     subTaskPidSubprocesses(currentTimeUs);
   }
 
