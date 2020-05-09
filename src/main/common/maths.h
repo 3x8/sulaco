@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifndef sq
-#define sq(x) ((x)*(x))
+  #define sq(x) ((x)*(x))
 #endif
 #define power3(x) ((x)*(x)*(x))
 
@@ -35,33 +35,33 @@
 typedef int32_t fix12_t;
 
 typedef struct stdev_s {
-    float m_oldM, m_newM, m_oldS, m_newS;
-    int m_n;
+  float m_oldM, m_newM, m_oldS, m_newS;
+  int m_n;
 } stdev_t;
 
 // Floating point 3 vector.
 typedef struct fp_vector {
-    float X;
-    float Y;
-    float Z;
+  float X;
+  float Y;
+  float Z;
 } t_fp_vector_def;
 
 typedef union u_fp_vector {
-    float A[3];
-    t_fp_vector_def V;
+  float A[3];
+  t_fp_vector_def V;
 } t_fp_vector;
 
 // Floating point Euler angles.
 // Be carefull, could be either of degrees or radians.
 typedef struct fp_angles {
-    float roll;
-    float pitch;
-    float yaw;
+  float roll;
+  float pitch;
+  float yaw;
 } fp_angles_def;
 
 typedef union {
-    float raw[3];
-    fp_angles_def angles;
+  float raw[3];
+  fp_angles_def angles;
 } fp_angles_t;
 
 int gcd(int num, int denom);
@@ -95,23 +95,23 @@ float quickMedianFilter7f(float * v);
 float quickMedianFilter9f(float * v);
 
 #if defined(FAST_MATH) || defined(VERY_FAST_MATH)
-float sin_approx(float x);
-float cos_approx(float x);
-float atan2_approx(float y, float x);
-float acos_approx(float x);
-#define tan_approx(x)       (sin_approx(x) / cos_approx(x))
-float exp_approx(float val);
-float log_approx(float val);
-float pow_approx(float a, float b);
+  float sin_approx(float x);
+  float cos_approx(float x);
+  float atan2_approx(float y, float x);
+  float acos_approx(float x);
+  #define tan_approx(x)       (sin_approx(x) / cos_approx(x))
+  float exp_approx(float val);
+  float log_approx(float val);
+  float pow_approx(float a, float b);
 #else
-#define sin_approx(x)   sinf(x)
-#define cos_approx(x)   cosf(x)
-#define atan2_approx(y,x)   atan2f(y,x)
-#define acos_approx(x)      acosf(x)
-#define tan_approx(x)       tanf(x)
-#define exp_approx(x)       expf(x)
-#define log_approx(x)       logf(x)
-#define pow_approx(a, b)    powf(b, a)
+  #define sin_approx(x) sinf(x)
+  #define cos_approx(x) cosf(x)
+  #define atan2_approx(y, x) atan2f(y,x)
+  #define acos_approx(x)  acosf(x)
+  #define tan_approx(x) tanf(x)
+  #define exp_approx(x) expf(x)
+  #define log_approx(x) logf(x)
+  #define pow_approx(a, b)  powf(b, a)
 #endif
 
 void arraySubInt32(int32_t *dest, int32_t *array1, int32_t *array2, int count);
@@ -120,35 +120,39 @@ int16_t qPercent(fix12_t q);
 int16_t qMultiply(fix12_t q, int16_t input);
 fix12_t qConstruct(int16_t num, int16_t den);
 
-static inline int constrain(int amt, int low, int high)
-{
-    if (amt < low)
-        return low;
-    else if (amt > high)
-        return high;
-    else
-        return amt;
+static inline int constrain(int amt, int low, int high) {
+  if (amt < low) {
+    return (low);
+  }
+  else if (amt > high) {
+    return (high);
+  }
+  else {
+    return (amt);
+  }
 }
 
-static inline float constrainf(float amt, float low, float high)
-{
-    if (amt < low)
-        return low;
-    else if (amt > high)
-        return high;
-    else
-        return amt;
+static inline float constrainf(float amt, float low, float high) {
+  if (amt < low) {
+    return (low);
+  }
+  else if (amt > high) {
+    return (high);
+  }
+  else {
+    return (amt);
+  }
 }
 
 // quaternions
 typedef struct {
-    float w,x,y,z;
+  float w,x,y,z;
 } quaternion;
 #define QUATERNION_INITIALIZE   {.w=1, .x=0, .y=0,.z=0}
 #define VECTOR_INITIALIZE       {.w=0, .x=0, .y=0,.z=0}
 
 typedef struct {
-    float ww,wx,wy,wz,xx,xy,xz,yy,yz,zz;
+  float ww,wx,wy,wz,xx,xy,xz,yy,yz,zz;
 } quaternionProducts;
 #define QUATERNION_PRODUCTS_INITIALIZE  {.ww=1, .wx=0, .wy=0, .wz=0, .xx=0, .xy=0, .xz=0, .yy=0, .yz=0, .zz=0}
 
