@@ -2503,7 +2503,7 @@ uint8_t cliMode = 0;
     static void cliImufBootloaderMode(char *cmdline) {
       (void)(cmdline);
       if(imufBootloader()) {
-        liPrintLine("BOOTLOADER");
+        cliPrintLine("BOOTLOADER");
       }
       else {
         cliPrintLine("FAIL");
@@ -3656,7 +3656,7 @@ uint8_t cliMode = 0;
         UNUSED(sensorTypeNames);
         cliPrintf(" | IMU-F Version: %lu", imufCurrentVersion);
       #endif
-    #endif //USE_SENSOR_NAMES 
+    #endif //USE_SENSOR_NAMES
     cliPrintLinefeed();
 
     #ifdef USE_SDCARD
