@@ -1,8 +1,7 @@
 #  sulaco
-<br />
+![quad](icon.png)
 
-###  quadcopter firmware  GPLv3.0
+***flight controller firmware (GPLv3.0)***
 
-<br />
-forked from: <br />
-https://github.com/ButterFlight/butterflight <br />
+forked from: <br/>
+https://github.com/ButterFlight/butterflight <br/>
