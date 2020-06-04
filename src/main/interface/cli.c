@@ -4261,7 +4261,7 @@ uint8_t cliMode = 0;
       #endif
 
       if (dumpMask & DUMP_ALL) {
-        cliMcuId(NULL);
+        //cliMcuId(NULL);
         #if defined(USE_BOARD_INFO) && defined(USE_SIGNATURE)
           cliSignature("");
         #endif
