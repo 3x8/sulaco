@@ -27,6 +27,8 @@
 #define USE_ACC
 #define USE_GYRO
 
+#define DEFAULT_ATTITUDE_UPDATE_INTERVAL 1000
+
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
