@@ -180,6 +180,7 @@ void crsfFrameBatterySensor(sbuf_t *dst)
     // use sbufWrite since CRC does not include frame length
     sbufWriteU8(dst, CRSF_FRAME_BATTERY_SENSOR_PAYLOAD_SIZE + CRSF_FRAME_LENGTH_TYPE_CRC);
     sbufWriteU8(dst, CRSF_FRAMETYPE_BATTERY_SENSOR);
+    const uint8_t cellCount = getBatteryCellCount();
     if (telemetryConfig()->report_cell_voltage && cellCount) {
       sbufWriteU16BigEndian(dst, (uint16_t)(getBatteryVoltage() / cellCount)); // vbat is in units of 0.1V
     } else {
