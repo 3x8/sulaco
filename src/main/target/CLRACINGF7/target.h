@@ -1,4 +1,5 @@
 #pragma once
+
 #define TARGET_BOARD_IDENTIFIER "CLR7"
 #define USBD_PRODUCT_STRING "CLRACINGF7"
 
