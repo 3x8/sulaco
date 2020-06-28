@@ -538,7 +538,7 @@ FAST_RAM cfTask_t cfTasks[TASK_COUNT] = {
       [TASK_ESC_SENSOR] = {
         .taskName = "ESC_SENSOR",
         .taskFunc = escSensorProcess,
-        .desiredPeriod = TASK_PERIOD_HZ(100),       // 100 Hz, 10ms
+        .desiredPeriod = TASK_PERIOD_HZ(200),       // 100 Hz, 10ms
         .staticPriority = TASK_PRIORITY_LOW,
       },
     #endif
