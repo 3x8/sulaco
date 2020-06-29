@@ -654,6 +654,8 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
   // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
   // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
 
+  //UNUSED(currentTimeUs);
+
   static timeUs_t lastCalledUs = 0;
   static uint8_t direction = 0;
 
