@@ -480,7 +480,7 @@ static FAST_RAM_ZERO_INIT float motorOutputRange;
 static FAST_RAM_ZERO_INIT int8_t motorOutputMixSign;
 
 static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs) {
-  static uint16_t rcThrottlePrevious = 0;   // Store the last throttle direction for deadband transitions
+  static uint16_t rcThrottlePrevious = 0;   // Store the last throttle motorDirection for deadband transitions
   static timeUs_t reversalTimeUs = 0; // time when motors last reversed in 3D mode
   float currentThrottleInputRange = 0;
 
@@ -489,7 +489,7 @@ static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs) {
     uint16_t rcCommand3dDeadBandHigh;
 
     if (!ARMING_FLAG(ARMED)) {
-      rcThrottlePrevious = rxConfig()->midrc; // When disarmed set to mid_rc. It always results in positive direction after arming.
+      rcThrottlePrevious = rxConfig()->midrc; // When disarmed set to mid_rc. It always results in positive motorDirection after arming.
     }
 
     if (IS_RC_MODE_ACTIVE(BOX3D) || flight3DConfig()->switched_mode3d) {
@@ -654,39 +654,37 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
   // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
   // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
 
-  //UNUSED(currentTimeUs);
+  UNUSED(currentTimeUs);
 
-  static timeUs_t lastCalledUs = 0;
-  static uint8_t direction = 0;
+  //static timeUs_t lastCalledUs = 0;
+  static uint8_t motorDirection = 0;
 
-  if (direction == 0) {
+  if (motorDirection == 0) {
     motor[0] = motorOutputLow;
-    direction = 1;
+    motorDirection = 1;
   }
 
-  if (direction == 1) {
+  if (motorDirection == 1) {
     if (motor[0] < motorOutputHigh) {
       motor[0]++;
-    }
-    if (motor[0] == motorOutputHigh) {
-      direction = 2;
+    } else  {
+      motorDirection = 2;
     }
   }
 
-  if (direction == 2) {
+  if (motorDirection == 2) {
     if (motor[0] > motorOutputLow) {
       motor[0]--;
-    }
-    if (motor[0] == motorOutputHigh) {
-      direction = 3;
+    } else {
+      motorDirection = 3;
     }
   }
 
-  if (direction == 3) {
+  if (motorDirection == 3) {
     motor[0] = motorOutputLow;
   }
 
-  lastCalledUs = currentTimeUs;
+  //lastCalledUs = currentTimeUs;
 
 
     /*
@@ -719,7 +717,7 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
     for (int i = 0; i < motorCount; i++) {
       motor[i] = motor_disarmed[i];
     }
-    direction = 0;
+    //motorDirection = 0;
   }
 }
 
