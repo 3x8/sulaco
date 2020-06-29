@@ -650,11 +650,42 @@ static void applyFlipOverAfterCrashModeToMotors(void) {
   }
 }
 
-static void applyMixToMotors(float motorMix[MAX_SUPPORTED_MOTORS]) {
+static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTED_MOTORS]) {
   // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
   // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
 
-  motor[0] = motorOutputMin;
+  static timeUs_t lastCalledUs = 0;
+  static uint8_t direction = 0;
+
+  if (direction == 0) {
+    motor[0] = motorOutputLow;
+    direction = 1
+  }
+
+  if (direction == 1) {
+    if (motor[0] < motorOutputHigh) {
+      motor[0]++;
+    }
+    if (motor[0] == motorOutputHigh) {
+      direction = 2;
+    }
+  }
+
+  if (direction == 2) {
+    if (motor[0] > motorOutputLow) {
+      motor[0]--;
+    }
+    if (motor[0] == motorOutputHigh) {
+      direction = 3;
+    }
+  }
+
+  if (direction == 3) {
+    motor[0] = motorOutputLow;
+  }
+
+  lastCalledUs = currentTimeUs;
+
 
     /*
   for (int i = 0; i < motorCount; i++) {
@@ -783,7 +814,7 @@ FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs, uint8_t vbatPidCompensa
   }
 
   // Apply the mix to motor endpoints
-  applyMixToMotors(motorMix);
+  applyMixToMotors(currentTimeUs, motorMix);
 }
 
 float convertExternalToMotor(uint16_t externalValue) {
