@@ -659,10 +659,13 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
 
   //static timeUs_t lastCalledUs = 0;
   static uint8_t motorDirection = 0;
+  static uint8_t delay = 0;
 
   if (motorDirection == 0) {
     motor[0] = motorOutputLow;
-    motorDirection = 1;
+    if (++delay > 1000) {
+      motorDirection = 1;
+    }
   }
 
   if (motorDirection == 1) {
