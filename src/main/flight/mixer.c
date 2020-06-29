@@ -653,11 +653,11 @@ static void applyFlipOverAfterCrashModeToMotors(void) {
 static void applyMixToMotors(float motorMix[MAX_SUPPORTED_MOTORS]) {
   // Now add in the desired throttle, but keep in a range that doesn't clip adjusted
   // roll/pitch/yaw. This could move throttle down, but also up for those low throttle flips.
-  for (int i = 0; i < motorCount; i++) {
 
-    motor[0] = motorOutputMin;
+  motor[0] = motorOutputMin;
 
     /*
+  for (int i = 0; i < motorCount; i++) {
     float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
     if (mixerIsTricopter()) {
       motorOutput += mixerTricopterMotorCorrection(i);
