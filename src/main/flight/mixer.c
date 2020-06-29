@@ -664,14 +664,14 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
   if (motorDirection == 0) {
     motorDelay++;
     motor[0] = motorOutputLow;
-    if (motorDelay > 10000) {
+    if (motorDelay > 5000) {
       motorDirection = 1;
     }
   }
 
   if (motorDirection == 1) {
     if (motor[0] < motorOutputHigh) {
-      motor[0]++;
+      motor[0] = motor[0] + 2;
     } else  {
       motorDirection = 2;
     }
@@ -679,7 +679,7 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
 
   if (motorDirection == 2) {
     if (motor[0] > motorOutputLow) {
-      motor[0]--;
+      motor[0] = motor[0] - 2;;
     } else {
       motorDirection = 3;
     }
