@@ -671,11 +671,11 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
   }
 
   if (motorDirection == 1) {
-    if (motor[0] < motorOutputHigh) {
+    if (motor[0] < (motorOutputHigh - 7)) {
       motor[0] = motor[0] + 2;
     } else  {
       motorDelay++;
-      if (motorDelay > 613) {
+      if (motorDelay > 2017) {
         motorDirection = 2;
         motorDelay = 0;
       }
