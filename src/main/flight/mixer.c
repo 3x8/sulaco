@@ -722,10 +722,10 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
     for (int i = 0; i < motorCount; i++) {
       motor[i] = motor_disarmed[i];
     }
-    if (motorDirection == 3) {
+    if (motorDirection > 0) {
       motorDirection = 0;
-      motorDelay = 0;
     }
+    motorDelay = 0;
   }
 }
 
