@@ -661,69 +661,86 @@ static void applyMixToMotors(timeUs_t currentTimeUs, float motorMix[MAX_SUPPORTE
   static uint8_t motorDirection = 0;
   static uint32_t motorDelay = 0;
 
-  if (motorDirection == 0) {
-    motorDelay++;
-    motor[0] = motorOutputLow;
-    if (motorDelay > 5000) {
-      motorDirection = 1;
-      motorDelay = 0;
-    }
-  }
+  if (ARMING_FLAG(ARMED)) {
+    if (FLIGHT_MODE(ANGLE_MODE)) {
+      if (motorDirection == 0) {
+        motorDelay++;
+        motor[0] = motorOutputLow;
+        if (motorDelay > 2000) {
+          motorDirection = 1;
+          motorDelay = 0;
+        }
+      }
 
-  if (motorDirection == 1) {
-    if (motor[0] < (motorOutputHigh - 7)) {
-      motor[0] = motor[0] + 2;
-    } else  {
-      motorDelay++;
-      if (motorDelay > 2017) {
-        motorDirection = 2;
-        motorDelay = 0;
+      if (motorDirection == 1) {
+        if (motor[0] < (motorOutputHigh - 7)) {
+          motor[0] = motor[0] + 1;
+        } else  {
+          motorDelay++;
+          if (motorDelay > 2000) {
+            motorDirection = 2;
+            motorDelay = 0;
+          }
+        }
+      }
+
+      if (motorDirection == 2) {
+        if (motor[0] > motorOutputLow) {
+          motor[0] = motor[0] - 1;;
+        } else {
+          motorDelay++;
+          if (motorDelay > 2000) {
+            motorDirection = 3;
+            motorDelay = 0;
+          }
+        }
+      }
+
+      if (motorDirection == 3) {
+        motor[0] = motor_disarmed[0];
       }
     }
-  }
 
-  if (motorDirection == 2) {
-    if (motor[0] > motorOutputLow) {
-      motor[0] = motor[0] - 2;;
-    } else {
-      motorDirection = 3;
-    }
-  }
-
-  if (motorDirection == 3) {
-    motor[0] = motorOutputLow;
-  }
-
-  //lastCalledUs = currentTimeUs;
-
-
-    /*
-  for (int i = 0; i < motorCount; i++) {
-    float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
-    if (mixerIsTricopter()) {
-      motorOutput += mixerTricopterMotorCorrection(i);
-    }
-    if (failsafeIsActive()) {
-      if (isMotorProtocolDshot()) {
-        motorOutput = (motorOutput < motorRangeMin) ? disarmMotorOutput : motorOutput; // Prevent getting into special reserved range
+    if (FLIGHT_MODE(HORIZON_MODE)) {
+      if (motorDirection == 0) {
+        motorDelay++;
+        motor[0] = motorOutputLow;
+        if (motorDelay > 2000) {
+          motorDirection = 1;
+          motorDelay = 0;
+        }
       }
-      motorOutput = constrain(motorOutput, disarmMotorOutput, motorRangeMax);
-    } else {
-      motorOutput = constrain(motorOutput, motorRangeMin, motorRangeMax);
-    }
-    // Motor stop handling
-    if (feature(FEATURE_MOTOR_STOP) && ARMING_FLAG(ARMED) && !feature(FEATURE_3D) && !isAirmodeActive()
-      && !FLIGHT_MODE(GPS_RESCUE_MODE)) {   // disable motor_stop while GPS Rescue is active
 
-      if (((rcData[THROTTLE]) < rxConfig()->mincheck)) {
-        motorOutput = disarmMotorOutput;
+      if (motorDirection == 1) {
+        if (motor[0] < (motorOutputHigh - 7)) {
+          motor[0] = motor[0] + 5;
+        } else  {
+          motorDelay++;
+          if (motorDelay > 400) {
+            motorDirection = 2;
+            motorDelay = 0;
+          }
+        }
+      }
+
+      if (motorDirection == 2) {
+        if (motor[0] > motorOutputLow) {
+          motor[0] = motor[0] - 5;;
+        } else {
+          motorDelay++;
+          if (motorDelay > 2000) {
+            motorDirection = 3;
+            motorDelay = 0;
+          }
+        }
+      }
+
+      if (motorDirection == 3) {
+        motor[0] = motor_disarmed[0];
       }
     }
-    motor[i] = motorOutput;
-  } */
-
-  // Disarmed mode
-  if (!ARMING_FLAG(ARMED)) {
+    //lastCalledUs = currentTimeUs;
+  } else {
     for (int i = 0; i < motorCount; i++) {
       motor[i] = motor_disarmed[i];
     }
