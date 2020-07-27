@@ -171,7 +171,10 @@ FAST_CODE float biquadFilterApply(biquadFilter_t *filter, float input) {
 void kalmanInit(kalman_t *filter, float q, uint32_t w) {
   memset(filter, 0, sizeof(kalman_t));
   filter->q = q * 0.001f;
-  filter->w = w;
+  filter->w = w + 1;
+  if (filter->w > MAX_WINDOW_SIZE) {
+    filter->w = MAX_WINDOW_SIZE;
+  }
 }
 
 #pragma GCC push_options
