@@ -92,24 +92,24 @@
 #define USE_ESCSERIAL
 
 #define USE_SPI
-#define USE_SPI_DEVICE_1
-#define USE_SPI_DEVICE_2
-#define USE_SPI_DEVICE_3
 
-#define SPI1_NSS_PIN             PA4
-#define SPI1_SCK_PIN             PA5
+#define USE_SPI_DEVICE_1
+#define SPI1_NSS_PIN            PA4
+#define SPI1_SCK_PIN            PA5
 #define SPI1_MISO_PIN            PA6
 #define SPI1_MOSI_PIN            PA7
 
-#define SPI2_NSS_PIN             PB12
-#define SPI2_SCK_PIN             PB13
-#define SPI2_MISO_PIN            PB14
-#define SPI2_MOSI_PIN            PB15
+#define USE_SPI_DEVICE_2
+#define SPI2_NSS_PIN            PB12
+#define SPI2_SCK_PIN            PB13
+#define SPI2_MISO_PIN           PB14
+#define SPI2_MOSI_PIN           PB15
 
-#define SPI3_NSS_PIN             PA15
-#define SPI3_SCK_PIN             PC10
-#define SPI3_MISO_PIN            PC11
-#define SPI3_MOSI_PIN            PB5
+#define USE_SPI_DEVICE_3
+#define SPI3_NSS_PIN            PA15
+#define SPI3_SCK_PIN            PC10
+#define SPI3_MISO_PIN           PC11
+#define SPI3_MOSI_PIN           PB5
 
 #define USE_ADC
 #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
@@ -130,5 +130,5 @@
 #define TARGET_IO_PORTC         0xffff
 #define TARGET_IO_PORTD         (BIT(2))
 
-#define USABLE_TIMER_CHANNEL_COUNT      6
+#define USABLE_TIMER_CHANNEL_COUNT 6
 #define USED_TIMERS             (TIM_N(2) | TIM_N(3) | TIM_N(4))

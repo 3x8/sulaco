@@ -98,7 +98,6 @@
 #define USE_ESCSERIAL
 #define ESCSERIAL_TIMER_TX_PIN  NONE
 
-
 #define USE_SPI
 
 #define USE_SPI_DEVICE_1
@@ -120,7 +119,7 @@
 #define SPI3_MOSI_PIN           PB5
 
 #define USE_ADC
-#define ADC_INSTANCE                   ADC1
+#define ADC_INSTANCE                  ADC1
 #define DEFAULT_VOLTAGE_METER_SOURCE  VOLTAGE_METER_ADC
 #define DEFAULT_CURRENT_METER_SOURCE  CURRENT_METER_ADC
 #define CURRENT_METER_ADC_PIN         PA1
