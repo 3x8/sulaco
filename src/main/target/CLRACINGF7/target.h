@@ -7,6 +7,7 @@
 
 #define USE_TARGET_CONFIG
 
+#define USE_DSHOT_DMAR
 #define ENABLE_DSHOT_DMAR       true
 
 #define LED0_PIN                PB0
@@ -17,6 +18,10 @@
 #define CAMERA_CONTROL_PIN      PB3
 
 #define USE_BUTTERED_PIDS       true
+
+#define DEFAULT_PIDS_ROLL   {27, 17, 37, 0}
+#define DEFAULT_PIDS_PITCH  {27, 17, 37, 0}
+#define DEFAULT_PIDS_YAW    {41, 51, 1, 0}
 
 // EXTI ICM20601 allways 125us -> 8kHz (some lost at 250us ... at 16K and 32K gyro rate ... also)
 //#define DEBUG_MPU_DATA_READY_INTERRUPT
@@ -29,6 +34,7 @@
 #define USE_GYRO
 
 #define DEFAULT_ATTITUDE_UPDATE_INTERVAL 1000
+#define DEFAULT_ACC_SAMPLE_INTERVAL      1000
 
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
@@ -60,6 +66,8 @@
 #define USE_FLASH_W25N01G
 #define USE_FLASHFS
 
+#define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
+
 // UARTS
 #define USE_VCP
 
@@ -87,8 +95,6 @@
 #define UART6_RX_PIN            PC7
 #define UART6_TX_PIN            PC6
 
-#define SERIAL_PORT_COUNT       7 //VCP, USART1, USART2,USART3,USART4,USART5,USART6
-
 #define USE_ESCSERIAL
 
 #define USE_SPI
@@ -96,8 +102,8 @@
 #define USE_SPI_DEVICE_1
 #define SPI1_NSS_PIN            PA4
 #define SPI1_SCK_PIN            PA5
-#define SPI1_MISO_PIN            PA6
-#define SPI1_MOSI_PIN            PA7
+#define SPI1_MISO_PIN           PA6
+#define SPI1_MOSI_PIN           PA7
 
 #define USE_SPI_DEVICE_2
 #define SPI2_NSS_PIN            PB12
@@ -112,12 +118,13 @@
 #define SPI3_MOSI_PIN           PB5
 
 #define USE_ADC
-#define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
-#define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
-#define CURRENT_METER_ADC_PIN   PC1
-#define VBAT_ADC_PIN            PC2
-#define RSSI_ADC_PIN            PC3
-#define CURRENT_METER_SCALE_DEFAULT 250                     // 3.3/120A  = 25mv/A
+#define ADC_INSTANCE                  ADC1
+#define DEFAULT_VOLTAGE_METER_SOURCE  VOLTAGE_METER_ADC
+#define DEFAULT_CURRENT_METER_SOURCE  CURRENT_METER_ADC
+#define CURRENT_METER_ADC_PIN         PC1
+#define VBAT_ADC_PIN                  PC2
+#define RSSI_ADC_PIN                  PC3
+#define CURRENT_METER_SCALE_DEFAULT   250                     // 3.3/120A  = 25mv/A
 
 #define BINDPLUG_PIN            PB2
 #define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL

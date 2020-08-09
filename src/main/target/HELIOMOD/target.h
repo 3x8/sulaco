@@ -18,7 +18,6 @@
 
 #define CAMERA_CONTROL_PIN      PB6
 
-
 #define USE_BUTTERED_PIDS       true
 
 #define DEFAULT_PIDS_ROLL   {27, 17, 37, 0}
@@ -93,7 +92,7 @@
 #define UART5_RX_PIN            PD2
 #define UART5_TX_PIN            PC12
 
-#define SERIAL_PORT_COUNT       6 //VCP, USART1, USART2, USART3, UART4, USART5
+#define SERIAL_PORT_COUNT       6
 
 #define USE_ESCSERIAL
 #define ESCSERIAL_TIMER_TX_PIN  NONE
@@ -140,10 +139,4 @@
 #define TARGET_IO_PORTD         (BIT(2))
 
 #define USABLE_TIMER_CHANNEL_COUNT 7
-#define USED_TIMERS             ( TIM_N(1) | TIM_N(8) | TIM_N(4) | TIM_N(12) )
-
-
-#define IMUF_RST_PIN              GPIO_Pin_4
-#define IMUF_RST_PORT             GPIOA
-#define IMUF_EXTI_PIN             GPIO_Pin_0
-#define IMUF_EXTI_PORT            GPIOB
+#define USED_TIMERS             (TIM_N(1) | TIM_N(8) | TIM_N(4) | TIM_N(12))
