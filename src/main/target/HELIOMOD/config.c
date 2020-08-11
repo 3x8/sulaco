@@ -18,11 +18,11 @@
 #include "rx/rx.h"
 
 void targetConfiguration(void) {
-    gyroConfigMutable()->gyro_sync_denom  = 4;
+  gyroConfigMutable()->gyro_sync_denom = 4;
   gyroConfigMutable()->gyro_use_32khz = 1;
   gyroConfigMutable()->gyro_32khz_hardware_lpf = 1;
-
-    pidConfigMutable()->pid_process_denom = 1;
+  
+  pidConfigMutable()->pid_process_denom = 1;
 
   motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
 
@@ -36,11 +36,11 @@ void targetConfiguration(void) {
   rcControlsConfigMutable()->deadband = 7;
   rcControlsConfigMutable()->yaw_deadband = 11;
 
-    featureClear(FEATURE_DYNAMIC_FILTER);
+  featureClear(FEATURE_DYNAMIC_FILTER);
   featureSet(FEATURE_AIRMODE | FEATURE_TELEMETRY);
 
-    for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
-        pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
-        pidProfile->dterm_notch_cutoff = 0;
-    }
+  for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
+    pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
+    pidProfile->dterm_notch_cutoff = 0;
+  }
 }

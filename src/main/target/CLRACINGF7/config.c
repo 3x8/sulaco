@@ -18,7 +18,7 @@
 #include "rx/rx.h"
 
 void targetConfiguration(void) {
-  gyroConfigMutable()->gyro_sync_denom  = 4;
+  gyroConfigMutable()->gyro_sync_denom = 4;
   gyroConfigMutable()->gyro_use_32khz = 1;
   gyroConfigMutable()->gyro_32khz_hardware_lpf = 1;
 
@@ -28,10 +28,10 @@ void targetConfiguration(void) {
 
   rxConfigMutable()->rcInterpolation = RC_SMOOTHING_MANUAL;
   rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
-  rxConfigMutable()->rc_smoothing_input_cutoff = 61;
-  rxConfigMutable()->rc_smoothing_derivative_cutoff = 61;
+  rxConfigMutable()->rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT1;
+  rxConfigMutable()->rc_smoothing_input_cutoff = 113;
+  rxConfigMutable()->rc_smoothing_derivative_cutoff = 127;
   rxConfigMutable()->rcInterpolationChannels = INTERPOLATION_CHANNELS_RPYT;
-  rxConfigMutable()->rcInterpolationInterval = 9;
 
   rcControlsConfigMutable()->deadband = 7;
   rcControlsConfigMutable()->yaw_deadband = 11;
