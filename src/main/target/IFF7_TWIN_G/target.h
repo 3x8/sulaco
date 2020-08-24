@@ -24,12 +24,6 @@
 #define DEFAULT_PIDS_PITCH  {27, 17, 37, 0}
 #define DEFAULT_PIDS_YAW    {41, 51, 1, 0}
 
-#define USE_PINIO
-#define USE_PINIOBOX
-#define PINIO1_PIN              PC13
-#define PINIO2_PIN              PC14
-#define PINIO3_PIN              PB8
-
 #define USE_DUAL_GYRO
 
 #define USE_EXTI
@@ -83,15 +77,19 @@
 #define USE_UART1
 #define UART1_TX_PIN            PA9
 #define UART1_RX_PIN            PA10
+
 #define USE_UART2
 #define UART2_TX_PIN            PA2
 #define UART2_RX_PIN            PA3
+
 #define USE_UART3
 #define UART3_TX_PIN            PB10
 #define UART3_RX_PIN            PB11
+
 #define USE_UART4
 #define UART4_TX_PIN            PC10
 #define UART4_RX_PIN            PC11
+
 #define USE_UART5
 #define UART5_TX_PIN            PC12
 #define UART5_RX_PIN            PD2
