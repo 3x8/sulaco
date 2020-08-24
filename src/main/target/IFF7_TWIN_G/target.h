@@ -100,7 +100,7 @@
 
 #define USE_SPI
 
-#define USE_SPI_DEVICE_1 // 2 x MPU
+#define USE_SPI_DEVICE_1
 #define SPI1_NSS_PIN            PA15
 #define SPI1_SCK_PIN            PA5
 #define SPI1_MISO_PIN           PA6
