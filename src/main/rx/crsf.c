@@ -36,9 +36,9 @@
 
   #define CRSF_PAYLOAD_OFFSET offsetof(crsfFrameDef_t, type)
 
-  STATIC_UNIT_TESTED bool crsfFrameDone = false;
-  STATIC_UNIT_TESTED crsfFrame_t crsfFrame;
-  STATIC_UNIT_TESTED uint32_t crsfChannelData[CRSF_MAX_CHANNEL];
+  static bool crsfFrameDone = false;
+  static crsfFrame_t crsfFrame;
+  static uint32_t crsfChannelData[CRSF_MAX_CHANNEL];
 
   static serialPort_t *serialPort;
   static uint32_t crsfFrameStartAtUs = 0;
@@ -94,7 +94,7 @@
 
   typedef struct crsfPayloadRcChannelsPacked_s crsfPayloadRcChannelsPacked_t;
 
-  STATIC_UNIT_TESTED uint8_t crsfFrameCRC(void) {
+  static uint8_t crsfFrameCRC(void) {
     // CRC includes type and payload
     uint8_t crc = crc8_dvb_s2(0, crsfFrame.frame.type);
     for (int ii = 0; ii < crsfFrame.frame.frameLength - CRSF_FRAME_LENGTH_TYPE_CRC; ++ii) {
@@ -104,7 +104,7 @@
   }
 
   // Receive ISR callback, called back from serial port
-  STATIC_UNIT_TESTED void crsfDataReceive(uint16_t c, void *data) {
+  static void crsfDataReceive(uint16_t c, void *data) {
     UNUSED(data);
 
     static uint8_t crsfFramePosition = 0;
@@ -165,7 +165,7 @@
       }
   }
 
-  STATIC_UNIT_TESTED uint8_t crsfFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig) {
+  static uint8_t crsfFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig) {
     UNUSED(rxRuntimeConfig);
 
     if (crsfFrameDone) {
@@ -200,7 +200,7 @@
       return (RX_FRAME_PENDING);
   }
 
-  STATIC_UNIT_TESTED uint16_t crsfReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) {
+  static uint16_t crsfReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan) {
     UNUSED(rxRuntimeConfig);
     /* conversion from RC value to PWM
      *       RC     PWM

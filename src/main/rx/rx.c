@@ -130,7 +130,7 @@ static bool nullProcessFrame(const rxRuntimeConfig_t *rxRuntimeConfig) {
   return (true);
 }
 
-STATIC_UNIT_TESTED bool isPulseValid(uint16_t pulseDuration) {
+static bool isPulseValid(uint16_t pulseDuration) {
   return  (pulseDuration >= rxConfig()->rx_min_usec && pulseDuration <= rxConfig()->rx_max_usec);
 }
 
@@ -413,7 +413,7 @@ static uint16_t getRxfailValue(uint8_t channel) {
     }
 }
 
-STATIC_UNIT_TESTED uint16_t applyRxChannelRangeConfiguraton(int sample, const rxChannelRangeConfig_t *range) {
+static uint16_t applyRxChannelRangeConfiguraton(int sample, const rxChannelRangeConfig_t *range) {
     // Avoid corruption of channel with a value of PPM_RCVR_TIMEOUT
     if (sample == PPM_RCVR_TIMEOUT) {
       return PPM_RCVR_TIMEOUT;

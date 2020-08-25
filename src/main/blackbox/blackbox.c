@@ -342,11 +342,11 @@ static uint16_t blackboxPFrameIndex;
 static uint16_t blackboxIFrameIndex;
 // number of flight loop iterations before logging I-frame
 // typically 32 for 1kHz loop, 64 for 2kHz loop etc
-STATIC_UNIT_TESTED int16_t blackboxIInterval = 0;
+static int16_t blackboxIInterval = 0;
 // number of flight loop iterations before logging P-frame
-STATIC_UNIT_TESTED int16_t blackboxPInterval = 0;
-STATIC_UNIT_TESTED int32_t blackboxSInterval = 0;
-STATIC_UNIT_TESTED int32_t blackboxSlowFrameIterationTimer;
+static int16_t blackboxPInterval = 0;
+static int32_t blackboxSInterval = 0;
+static int32_t blackboxSlowFrameIterationTimer;
 static bool blackboxLoggedAnyFrames;
 
 /*
@@ -764,7 +764,7 @@ static void loadSlowState(blackboxSlowState_t *slow)
  * If allowPeriodicWrite is true, the frame is also logged if it has been more than blackboxSInterval logging iterations
  * since the field was last logged.
  */
-STATIC_UNIT_TESTED bool writeSlowFrameIfNeeded(void)
+static bool writeSlowFrameIfNeeded(void)
 {
     // Write the slow frame peridocially so it can be recovered if we ever lose sync
     bool shouldWrite = blackboxSlowFrameIterationTimer >= blackboxSInterval;
@@ -1146,7 +1146,7 @@ static bool sendFieldDefinition(char mainFrameChar, char deltaFrameChar, const v
 }
 
 // Buf must be at least FORMATTED_DATE_TIME_BUFSIZE
-STATIC_UNIT_TESTED char *blackboxGetStartDateTime(char *buf)
+static char *blackboxGetStartDateTime(char *buf)
 {
     #ifdef USE_RTC_TIME
     dateTime_t dt;
@@ -1404,12 +1404,12 @@ static void blackboxCheckAndLogFlightMode(void)
     }
 }
 
-STATIC_UNIT_TESTED bool blackboxShouldLogPFrame(void)
+static bool blackboxShouldLogPFrame(void)
 {
     return blackboxPFrameIndex == 0 && blackboxConfig()->p_ratio != 0;
 }
 
-STATIC_UNIT_TESTED bool blackboxShouldLogIFrame(void)
+static bool blackboxShouldLogIFrame(void)
 {
     return blackboxLoopIndex == 0;
 }
@@ -1422,7 +1422,7 @@ STATIC_UNIT_TESTED bool blackboxShouldLogIFrame(void)
  * still be interpreted correctly.
  */
 #ifdef USE_GPS
-STATIC_UNIT_TESTED bool blackboxShouldLogGpsHomeFrame(void)
+static bool blackboxShouldLogGpsHomeFrame(void)
 {
     if (GPS_home[0] != gpsHistory.GPS_home[0] || GPS_home[1] != gpsHistory.GPS_home[1]
         || (blackboxPFrameIndex == blackboxIInterval / 2 && blackboxIFrameIndex % 128 == 0)) {
@@ -1433,7 +1433,7 @@ STATIC_UNIT_TESTED bool blackboxShouldLogGpsHomeFrame(void)
 #endif // GPS
 
 // Called once every FC loop in order to keep track of how many FC loop iterations have passed
-STATIC_UNIT_TESTED void blackboxAdvanceIterationTimers(void)
+static void blackboxAdvanceIterationTimers(void)
 {
     ++blackboxSlowFrameIterationTimer;
     ++blackboxIteration;
@@ -1448,7 +1448,7 @@ STATIC_UNIT_TESTED void blackboxAdvanceIterationTimers(void)
 }
 
 // Called once every FC loop in order to log the current state
-STATIC_UNIT_TESTED void blackboxLogIteration(timeUs_t currentTimeUs)
+static void blackboxLogIteration(timeUs_t currentTimeUs)
 {
     // Write a keyframe every blackboxIInterval frames so we can resynchronise upon missing frames
     if (blackboxShouldLogIFrame()) {

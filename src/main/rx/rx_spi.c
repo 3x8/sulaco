@@ -30,8 +30,8 @@
 
 
 uint16_t rxSpiRcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];
-STATIC_UNIT_TESTED uint8_t rxSpiPayload[RX_SPI_MAX_PAYLOAD_SIZE];
-STATIC_UNIT_TESTED uint8_t rxSpiNewPacketAvailable; // set true when a new packet is received
+static uint8_t rxSpiPayload[RX_SPI_MAX_PAYLOAD_SIZE];
+static uint8_t rxSpiNewPacketAvailable; // set true when a new packet is received
 
 typedef bool (*protocolInitFnPtr)(const rxSpiConfig_t *rxSpiConfig, rxRuntimeConfig_t *rxRuntimeConfig);
 typedef rx_spi_received_e (*protocolDataReceivedFnPtr)(uint8_t *payload);
@@ -41,7 +41,7 @@ static protocolInitFnPtr protocolInit;
 static protocolDataReceivedFnPtr protocolDataReceived;
 static protocolSetRcDataFromPayloadFnPtr protocolSetRcDataFromPayload;
 
-STATIC_UNIT_TESTED uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel)
+static uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel)
 {
     BUILD_BUG_ON(NRF24L01_MAX_PAYLOAD_SIZE > RX_SPI_MAX_PAYLOAD_SIZE);
 
@@ -55,7 +55,7 @@ STATIC_UNIT_TESTED uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeCon
     return rxSpiRcData[channel];
 }
 
-STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
+static bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
 {
     switch (protocol) {
     default:

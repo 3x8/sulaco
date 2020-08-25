@@ -91,9 +91,9 @@ typedef enum {
     STATE_DATA
 } protocol_state_t;
 
-STATIC_UNIT_TESTED protocol_state_t protocolState;
+static protocol_state_t protocolState;
 
-STATIC_UNIT_TESTED uint8_t ackPayload[NRF24L01_MAX_PAYLOAD_SIZE];
+static uint8_t ackPayload[NRF24L01_MAX_PAYLOAD_SIZE];
 #define BIND_PAYLOAD0 0xae // 10101110
 #define BIND_PAYLOAD1 0xc9 // 11001001
 #define BIND_ACK_PAYLOAD0 0x83 // 10000111
@@ -102,28 +102,28 @@ STATIC_UNIT_TESTED uint8_t ackPayload[NRF24L01_MAX_PAYLOAD_SIZE];
 #define INAV_PROTOCOL_PAYLOAD_SIZE_MIN 8
 #define INAV_PROTOCOL_PAYLOAD_SIZE_DEFAULT 16
 #define INAV_PROTOCOL_PAYLOAD_SIZE_MAX 18
-STATIC_UNIT_TESTED const uint8_t payloadSize = INAV_PROTOCOL_PAYLOAD_SIZE_DEFAULT;
+static const uint8_t payloadSize = INAV_PROTOCOL_PAYLOAD_SIZE_DEFAULT;
 uint8_t receivedPowerSnapshot;
 
 #define RX_TX_ADDR_LEN 5
 // set rxTxAddr to the bind address
-STATIC_UNIT_TESTED uint8_t rxTxAddr[RX_TX_ADDR_LEN] = {0x4b,0x5c,0x6d,0x7e,0x8f};
+static uint8_t rxTxAddr[RX_TX_ADDR_LEN] = {0x4b,0x5c,0x6d,0x7e,0x8f};
 uint32_t *rxSpiIdPtr;
 #define RX_TX_ADDR_4 0xD2 // rxTxAddr[4] always set to this value
 
 // radio channels for frequency hopping
 #define INAV_RF_CHANNEL_COUNT_MAX 8
 #define INAV_RF_CHANNEL_HOPPING_COUNT_DEFAULT 4
-STATIC_UNIT_TESTED const uint8_t inavRfChannelHoppingCount = INAV_RF_CHANNEL_HOPPING_COUNT_DEFAULT;
-STATIC_UNIT_TESTED uint8_t inavRfChannelCount;
-STATIC_UNIT_TESTED uint8_t inavRfChannelIndex;
-STATIC_UNIT_TESTED uint8_t inavRfChannels[INAV_RF_CHANNEL_COUNT_MAX];
+static const uint8_t inavRfChannelHoppingCount = INAV_RF_CHANNEL_HOPPING_COUNT_DEFAULT;
+static uint8_t inavRfChannelCount;
+static uint8_t inavRfChannelIndex;
+static uint8_t inavRfChannels[INAV_RF_CHANNEL_COUNT_MAX];
 #define INAV_RF_BIND_CHANNEL 0x4c
 
 static uint32_t timeOfLastHop;
 static const uint32_t hopTimeout = 5000; // 5ms
 
-STATIC_UNIT_TESTED bool inavCheckBindPacket(const uint8_t *payload)
+static bool inavCheckBindPacket(const uint8_t *payload)
 {
     bool bindPacket = false;
     if (payload[0] == BIND_PAYLOAD0  && payload[1] == BIND_PAYLOAD1) {
@@ -221,7 +221,7 @@ static void inavHopToNextChannel(void)
 }
 
 // The hopping channels are determined by the low bits of rxTxAddr
-STATIC_UNIT_TESTED void inavSetHoppingChannels(void)
+static void inavSetHoppingChannels(void)
 {
 #ifdef NO_RF_CHANNEL_HOPPING
      // just stay on bind channel, useful for debugging

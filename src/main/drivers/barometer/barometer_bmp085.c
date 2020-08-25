@@ -94,14 +94,14 @@ typedef struct {
 #define SMD500_PARAM_MH     -7357        //calibration parameter
 #define SMD500_PARAM_MI      3791        //calibration parameter
 
-STATIC_UNIT_TESTED bmp085_t bmp085;
+static bmp085_t bmp085;
 
 #define UT_DELAY    6000        // 1.5ms margin according to the spec (4.5ms T conversion time)
 #define UP_DELAY    27000       // 6000+21000=27000 1.5ms margin according to the spec (25.5ms P conversion time with OSS=3)
 
 static bool bmp085InitDone = false;
-STATIC_UNIT_TESTED uint16_t bmp085_ut;  // static result of temperature measurement
-STATIC_UNIT_TESTED uint32_t bmp085_up;  // static result of pressure measurement
+static uint16_t bmp085_ut;  // static result of temperature measurement
+static uint32_t bmp085_up;  // static result of pressure measurement
 
 static void bmp085_get_cal_param(busDevice_t *busdev);
 static void bmp085_start_ut(baroDev_t *baro);
@@ -110,7 +110,7 @@ static void bmp085_start_up(baroDev_t *baro);
 static void bmp085_get_up(baroDev_t *baro);
 static int32_t bmp085_get_temperature(uint32_t ut);
 static int32_t bmp085_get_pressure(uint32_t up);
-STATIC_UNIT_TESTED void bmp085_calculate(int32_t *pressure, int32_t *temperature);
+static void bmp085_calculate(int32_t *pressure, int32_t *temperature);
 
 static IO_t xclrIO;
 
@@ -326,7 +326,7 @@ static void bmp085_get_up(baroDev_t *baro)
             >> (8 - bmp085.oversampling_setting);
 }
 
-STATIC_UNIT_TESTED void bmp085_calculate(int32_t *pressure, int32_t *temperature)
+static void bmp085_calculate(int32_t *pressure, int32_t *temperature)
 {
     int32_t temp, press;
 

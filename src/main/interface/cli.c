@@ -3200,7 +3200,7 @@ uint8_t cliMode = 0;
     }
   }
 
-  STATIC_UNIT_TESTED void cliGet(char *cmdline) {
+  static void cliGet(char *cmdline) {
     const clivalue_t *val;
     int matchedCommands = 0;
 
@@ -3485,7 +3485,7 @@ uint8_t cliMode = 0;
     return bufEnd - bufBegin;
   }
 
-  STATIC_UNIT_TESTED void cliSet(char *cmdline) {
+  static void cliSet(char *cmdline) {
     const uint32_t len = strlen(cmdline);
     char *eqptr;
 

@@ -44,7 +44,7 @@ void fakeGyroSet(gyroDev_t *gyro, int16_t x, int16_t y, int16_t z)
     gyroDevUnLock(gyro);
 }
 
-STATIC_UNIT_TESTED bool fakeGyroRead(gyroDev_t *gyro)
+static bool fakeGyroRead(gyroDev_t *gyro)
 {
     gyroDevLock(gyro);
     if (gyro->dataReady == false) {

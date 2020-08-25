@@ -35,11 +35,11 @@ FAST_RAM_ZERO_INIT uint16_t averageSystemLoadPercent = 0;
 
 
 static FAST_RAM_ZERO_INIT int taskQueuePos = 0;
-STATIC_UNIT_TESTED FAST_RAM_ZERO_INIT int taskQueueSize = 0;
+static FAST_RAM_ZERO_INIT int taskQueueSize = 0;
 
 // No need for a linked list for the queue, since items are only inserted at startup
 
-STATIC_UNIT_TESTED FAST_RAM_ZERO_INIT cfTask_t* taskQueueArray[TASK_COUNT + 1]; // extra item for NULL pointer at end of queue
+static FAST_RAM_ZERO_INIT cfTask_t* taskQueueArray[TASK_COUNT + 1]; // extra item for NULL pointer at end of queue
 
 void queueClear(void)
 {

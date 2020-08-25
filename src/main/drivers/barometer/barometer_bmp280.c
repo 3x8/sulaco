@@ -36,7 +36,7 @@ typedef struct bmp280_calib_param_s {
 } bmp280_calib_param_t;
 
 static uint8_t bmp280_chip_id = 0;
-STATIC_UNIT_TESTED bmp280_calib_param_t bmp280_cal;
+static bmp280_calib_param_t bmp280_cal;
 // uncompensated pressure and temperature
 int32_t bmp280_up = 0;
 int32_t bmp280_ut = 0;
@@ -46,7 +46,7 @@ static void bmp280_get_ut(baroDev_t *baro);
 static void bmp280_start_up(baroDev_t *baro);
 static void bmp280_get_up(baroDev_t *baro);
 
-STATIC_UNIT_TESTED void bmp280_calculate(int32_t *pressure, int32_t *temperature);
+static void bmp280_calculate(int32_t *pressure, int32_t *temperature);
 
 void bmp280BusInit(busDevice_t *busdev)
 {
@@ -181,7 +181,7 @@ static uint32_t bmp280_compensate_P(int32_t adc_P)
     return (uint32_t)p;
 }
 
-STATIC_UNIT_TESTED void bmp280_calculate(int32_t *pressure, int32_t *temperature)
+static void bmp280_calculate(int32_t *pressure, int32_t *temperature)
 {
     // calculate
     int32_t t;

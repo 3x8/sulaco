@@ -69,24 +69,24 @@ enum {
 #define FLAG_VIDEO_X5C  0x10
 #define FLAG_RATE_X5C   0x04
 
-STATIC_UNIT_TESTED rx_spi_protocol_e symaProtocol;
+static rx_spi_protocol_e symaProtocol;
 
 typedef enum {
     STATE_BIND = 0,
     STATE_DATA
 } protocol_state_t;
 
-STATIC_UNIT_TESTED protocol_state_t protocolState;
+static protocol_state_t protocolState;
 
 // X11, X12, X5C-1 have 10-byte payload, X5C has 16-byte payload
 #define SYMA_X_PROTOCOL_PAYLOAD_SIZE      10
 #define SYMA_X5C_PROTOCOL_PAYLOAD_SIZE    16
-STATIC_UNIT_TESTED uint8_t payloadSize;
+static uint8_t payloadSize;
 
 #define RX_TX_ADDR_LEN     5
 // set rxTxAddr to SymaX bind values
-STATIC_UNIT_TESTED uint8_t rxTxAddr[RX_TX_ADDR_LEN] = {0xab, 0xac, 0xad, 0xae, 0xaf};
-STATIC_UNIT_TESTED const uint8_t rxTxAddrX5C[RX_TX_ADDR_LEN] = {0x6d, 0x6a, 0x73, 0x73, 0x73};   // X5C uses same address for bind and data
+static uint8_t rxTxAddr[RX_TX_ADDR_LEN] = {0xab, 0xac, 0xad, 0xae, 0xaf};
+static const uint8_t rxTxAddrX5C[RX_TX_ADDR_LEN] = {0x6d, 0x6a, 0x73, 0x73, 0x73};   // X5C uses same address for bind and data
 
 // radio channels for frequency hopping
 #define SYMA_X_RF_BIND_CHANNEL             8
@@ -94,17 +94,17 @@ STATIC_UNIT_TESTED const uint8_t rxTxAddrX5C[RX_TX_ADDR_LEN] = {0x6d, 0x6a, 0x73
 #define SYMA_X5C_RF_BIND_CHANNEL_COUNT    16
 #define SYMA_X5C_RF_CHANNEL_COUNT         15
 
-STATIC_UNIT_TESTED uint8_t symaRfChannelCount = SYMA_X_RF_CHANNEL_COUNT;
-STATIC_UNIT_TESTED uint8_t symaRfChannelIndex = 0;
+static uint8_t symaRfChannelCount = SYMA_X_RF_CHANNEL_COUNT;
+static uint8_t symaRfChannelIndex = 0;
 // set rfChannels to SymaX bind channels, reserve enough space for SymaX5C channels
-STATIC_UNIT_TESTED uint8_t symaRfChannels[SYMA_X5C_RF_BIND_CHANNEL_COUNT]  = {0x4b, 0x30, 0x40, 0x20};
-STATIC_UNIT_TESTED const uint8_t symaRfChannelsX5C[SYMA_X5C_RF_CHANNEL_COUNT] = {0x1d, 0x2f, 0x26, 0x3d, 0x15, 0x2b, 0x25, 0x24, 0x27, 0x2c, 0x1c, 0x3e, 0x39, 0x2d, 0x22};
+static uint8_t symaRfChannels[SYMA_X5C_RF_BIND_CHANNEL_COUNT]  = {0x4b, 0x30, 0x40, 0x20};
+static const uint8_t symaRfChannelsX5C[SYMA_X5C_RF_CHANNEL_COUNT] = {0x1d, 0x2f, 0x26, 0x3d, 0x15, 0x2b, 0x25, 0x24, 0x27, 0x2c, 0x1c, 0x3e, 0x39, 0x2d, 0x22};
 
 static uint32_t packetCount = 0;
 static uint32_t timeOfLastHop;
 static uint32_t hopTimeout = 10000; // 10ms
 
-STATIC_UNIT_TESTED bool symaCheckBindPacket(const uint8_t *packet)
+static bool symaCheckBindPacket(const uint8_t *packet)
 {
     bool bindPacket = false;
     if (symaProtocol == RX_SPI_NRF24_SYMA_X) {
@@ -124,14 +124,14 @@ STATIC_UNIT_TESTED bool symaCheckBindPacket(const uint8_t *packet)
     return bindPacket;
 }
 
-STATIC_UNIT_TESTED uint16_t symaConvertToPwmUnsigned(uint8_t val)
+static uint16_t symaConvertToPwmUnsigned(uint8_t val)
 {
     uint32_t ret = val;
     ret = ret * (PWM_RANGE_MAX - PWM_RANGE_MIN) / UINT8_MAX + PWM_RANGE_MIN;
     return (uint16_t)ret;
 }
 
-STATIC_UNIT_TESTED uint16_t symaConvertToPwmSigned(uint8_t val)
+static uint16_t symaConvertToPwmSigned(uint8_t val)
 {
     int32_t ret = val & 0x7f;
     ret = (ret * (PWM_RANGE_MAX - PWM_RANGE_MIN)) / (2 * INT8_MAX);

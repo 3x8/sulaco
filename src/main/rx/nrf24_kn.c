@@ -41,11 +41,11 @@ enum {
     PHASE_BOUND
 };
 
-STATIC_UNIT_TESTED uint8_t rf_ch_num;
-STATIC_UNIT_TESTED uint8_t bind_phase;
+static uint8_t rf_ch_num;
+static uint8_t bind_phase;
 static uint32_t packet_timer;
-STATIC_UNIT_TESTED uint8_t txid[RX_TX_ADDR_LEN];
-STATIC_UNIT_TESTED uint8_t kn_freq_hopping[KN_NFREQCHANNELS];
+static uint8_t txid[RX_TX_ADDR_LEN];
+static uint8_t kn_freq_hopping[KN_NFREQCHANNELS];
 static uint32_t rx_timeout;
 extern uint16_t rxSpiRcData[];
 

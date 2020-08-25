@@ -31,17 +31,17 @@
 
 static void ms5611_reset(busDevice_t *busdev);
 static uint16_t ms5611_prom(busDevice_t *busdev, int8_t coef_num);
-STATIC_UNIT_TESTED int8_t ms5611_crc(uint16_t *prom);
+static int8_t ms5611_crc(uint16_t *prom);
 static uint32_t ms5611_read_adc(busDevice_t *busdev);
 static void ms5611_start_ut(baroDev_t *baro);
 static void ms5611_get_ut(baroDev_t *baro);
 static void ms5611_start_up(baroDev_t *baro);
 static void ms5611_get_up(baroDev_t *baro);
-STATIC_UNIT_TESTED void ms5611_calculate(int32_t *pressure, int32_t *temperature);
+static void ms5611_calculate(int32_t *pressure, int32_t *temperature);
 
-STATIC_UNIT_TESTED uint32_t ms5611_ut;  // static result of temperature measurement
-STATIC_UNIT_TESTED uint32_t ms5611_up;  // static result of pressure measurement
-STATIC_UNIT_TESTED uint16_t ms5611_c[PROM_NB];  // on-chip ROM
+static uint32_t ms5611_ut;  // static result of temperature measurement
+static uint32_t ms5611_up;  // static result of pressure measurement
+static uint16_t ms5611_c[PROM_NB];  // on-chip ROM
 static uint8_t ms5611_osr = CMD_ADC_4096;
 
 void ms5611BusInit(busDevice_t *busdev)
@@ -139,7 +139,7 @@ static uint16_t ms5611_prom(busDevice_t *busdev, int8_t coef_num)
     return rxbuf[0] << 8 | rxbuf[1];
 }
 
-STATIC_UNIT_TESTED int8_t ms5611_crc(uint16_t *prom)
+static int8_t ms5611_crc(uint16_t *prom)
 {
     int32_t i, j;
     uint32_t res = 0;
@@ -198,7 +198,7 @@ static void ms5611_get_up(baroDev_t *baro)
     ms5611_up = ms5611_read_adc(&baro->busdev);
 }
 
-STATIC_UNIT_TESTED void ms5611_calculate(int32_t *pressure, int32_t *temperature)
+static void ms5611_calculate(int32_t *pressure, int32_t *temperature)
 {
     uint32_t press;
     int64_t temp;

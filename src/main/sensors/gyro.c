@@ -143,14 +143,14 @@ typedef struct gyroSensor_s {
   #endif
 } gyroSensor_t;
 
-STATIC_UNIT_TESTED FAST_RAM_ZERO_INIT gyroSensor_t gyroSensor1;
+static FAST_RAM_ZERO_INIT gyroSensor_t gyroSensor1;
 #ifdef USE_DUAL_GYRO
-  STATIC_UNIT_TESTED FAST_RAM_ZERO_INIT gyroSensor_t gyroSensor2;
+  static FAST_RAM_ZERO_INIT gyroSensor_t gyroSensor2;
 #endif
 
 #ifdef UNIT_TEST
-  STATIC_UNIT_TESTED gyroSensor_t * const gyroSensorPtr = &gyroSensor1;
-  STATIC_UNIT_TESTED gyroDev_t * const gyroDevPtr = &gyroSensor1.gyroDev;
+  static gyroSensor_t * const gyroSensorPtr = &gyroSensor1;
+  static gyroDev_t * const gyroDevPtr = &gyroSensor1.gyroDev;
 #endif
 
 static void gyroInitSensorFilters(gyroSensor_t *gyroSensor);
@@ -296,7 +296,7 @@ const mpuDetectionResult_t *gyroMpuDetectionResult(void) {
   #endif
 }
 
-STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev) {
+static gyroSensor_e gyroDetect(gyroDev_t *dev) {
     gyroSensor_e gyroHardware = GYRO_DEFAULT;
 
     switch (gyroHardware) {
@@ -856,7 +856,7 @@ bool isFirstArmingGyroCalibrationRunning(void) {
   return firstArmingCalibrationWasStarted && !gyroCalibrationComplete();
 }
 
-STATIC_UNIT_TESTED void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t gyroMovementCalibrationThreshold) {
+static void performGyroCalibration(gyroSensor_t *gyroSensor, uint8_t gyroMovementCalibrationThreshold) {
   for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
     // Reset g[axis] at start of calibration
     if (gyroFirstCalibrationCycle(&gyroSensor->calibration)) {

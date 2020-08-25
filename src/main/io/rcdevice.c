@@ -71,7 +71,7 @@ static rcdeviceResponseParseContext_t* rcdeviceRespCtxQueuePeekFront(rcdeviceWai
     return ctx;
 }
 
-STATIC_UNIT_TESTED rcdeviceResponseParseContext_t* rcdeviceRespCtxQueueShift(rcdeviceWaitingResponseQueue *queue)
+static rcdeviceResponseParseContext_t* rcdeviceRespCtxQueueShift(rcdeviceWaitingResponseQueue *queue)
 {
     if (queue == NULL || queue->itemCount == 0) {
         return NULL;

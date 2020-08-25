@@ -276,7 +276,7 @@ void servoMixerLoadMix(int index)
     }
 }
 
-STATIC_UNIT_TESTED void forwardAuxChannelsToServos(uint8_t firstServoIndex)
+static void forwardAuxChannelsToServos(uint8_t firstServoIndex)
 {
     // start forwarding from this channel
     int channelOffset = servoConfig()->channelForwardingStartChannel;

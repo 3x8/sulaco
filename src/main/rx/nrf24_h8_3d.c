@@ -60,23 +60,23 @@ typedef enum {
     STATE_DATA
 } protocol_state_t;
 
-STATIC_UNIT_TESTED protocol_state_t protocolState;
+static protocol_state_t protocolState;
 
 #define H8_3D_PROTOCOL_PAYLOAD_SIZE   20
-STATIC_UNIT_TESTED uint8_t payloadSize;
+static uint8_t payloadSize;
 
 #define CRC_LEN 2
 #define RX_TX_ADDR_LEN     5
-STATIC_UNIT_TESTED uint8_t rxTxAddrXN297[RX_TX_ADDR_LEN] = {0x41, 0xbd, 0x42, 0xd4, 0xc2}; // converted XN297 address
+static uint8_t rxTxAddrXN297[RX_TX_ADDR_LEN] = {0x41, 0xbd, 0x42, 0xd4, 0xc2}; // converted XN297 address
 #define TX_ID_LEN 4
-STATIC_UNIT_TESTED uint8_t txId[TX_ID_LEN];
+static uint8_t txId[TX_ID_LEN];
 uint32_t *rxSpiIdPtr;
 
 // radio channels for frequency hopping
 #define H8_3D_RF_CHANNEL_COUNT 4
-STATIC_UNIT_TESTED uint8_t h8_3dRfChannelCount = H8_3D_RF_CHANNEL_COUNT;
-STATIC_UNIT_TESTED uint8_t h8_3dRfChannelIndex;
-STATIC_UNIT_TESTED uint8_t h8_3dRfChannels[H8_3D_RF_CHANNEL_COUNT];
+static uint8_t h8_3dRfChannelCount = H8_3D_RF_CHANNEL_COUNT;
+static uint8_t h8_3dRfChannelIndex;
+static uint8_t h8_3dRfChannels[H8_3D_RF_CHANNEL_COUNT];
 // hop between these channels in the bind phase
 #define H8_3D_RF_BIND_CHANNEL_START 0x06
 #define H8_3D_RF_BIND_CHANNEL_END 0x26
@@ -86,7 +86,7 @@ STATIC_UNIT_TESTED uint8_t h8_3dRfChannels[H8_3D_RF_CHANNEL_COUNT];
 static uint32_t hopTimeout = BIND_HOP_TIMEOUT;
 static uint32_t timeOfLastHop;
 
-STATIC_UNIT_TESTED bool h8_3dCheckBindPacket(const uint8_t *payload)
+static bool h8_3dCheckBindPacket(const uint8_t *payload)
 {
     bool bindPacket = false;
     if ((payload[5] == 0x00) && (payload[6] == 0x00) && (payload[7] == 0x01)) {
@@ -106,7 +106,7 @@ STATIC_UNIT_TESTED bool h8_3dCheckBindPacket(const uint8_t *payload)
     return bindPacket;
 }
 
-STATIC_UNIT_TESTED uint16_t h8_3dConvertToPwm(uint8_t val, int16_t _min, int16_t _max)
+static uint16_t h8_3dConvertToPwm(uint8_t val, int16_t _min, int16_t _max)
 {
 #define PWM_RANGE (PWM_RANGE_MAX - PWM_RANGE_MIN)
 

@@ -122,7 +122,7 @@ static const uint8_t voltageMeterAdcChannelMap[] = {
 #endif
 };
 
-STATIC_UNIT_TESTED uint16_t voltageAdcToVoltage(const uint16_t src, const voltageSensorADCConfig_t *config)
+static uint16_t voltageAdcToVoltage(const uint16_t src, const voltageSensorADCConfig_t *config)
 {
     // calculate battery voltage based on ADC reading
     // result is Vbatt in 0.1V steps. 3.3V = ADC Vref, 0xFFF = 12bit adc, 110 = 10:1 voltage divider (10k:1k) * 10 for 0.1V

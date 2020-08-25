@@ -225,7 +225,7 @@ static int32_t osdGetMetersToSelectedUnit(int32_t meters)
 }
 
 #if defined(USE_ADC_INTERNAL) || defined(USE_ESC_SENSOR)
-STATIC_UNIT_TESTED int osdConvertTemperatureToSelectedUnit(int tempInDegreesCelcius)
+static int osdConvertTemperatureToSelectedUnit(int tempInDegreesCelcius)
 {
     switch (osdConfig()->units) {
     case OSD_UNIT_IMPERIAL:
@@ -314,7 +314,7 @@ static timeUs_t osdGetTimerValue(osd_timer_source_e src)
     }
 }
 
-STATIC_UNIT_TESTED void osdFormatTime(char * buff, osd_timer_precision_e precision, timeUs_t time)
+static void osdFormatTime(char * buff, osd_timer_precision_e precision, timeUs_t time)
 {
     int seconds = time / 1000000;
     const int minutes = seconds / 60;
@@ -334,7 +334,7 @@ STATIC_UNIT_TESTED void osdFormatTime(char * buff, osd_timer_precision_e precisi
     }
 }
 
-STATIC_UNIT_TESTED void osdFormatTimer(char *buff, bool showSymbol, bool usePrecision, int timerIndex)
+static void osdFormatTimer(char *buff, bool showSymbol, bool usePrecision, int timerIndex)
 {
     const uint16_t timer = osdConfig()->timers[timerIndex];
     const uint8_t src = OSD_TIMER_SRC(timer);
@@ -1477,7 +1477,7 @@ static void osdShowArmed(void)
     displayWrite(osdDisplayPort, 12, 7, "ARMED");
 }
 
-STATIC_UNIT_TESTED void osdRefresh(timeUs_t currentTimeUs)
+static void osdRefresh(timeUs_t currentTimeUs)
 {
     static timeUs_t lastTimeUs = 0;
     static bool osdStatsEnabled = false;

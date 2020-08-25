@@ -59,7 +59,7 @@ static imuRuntimeConfig_t imuRuntimeConfig;
 
 // BodyFrame relative to EarthFrame
 quaternion qAttitude = QUATERNION_INITIALIZE;
-STATIC_UNIT_TESTED quaternionProducts qpAttitude = QUATERNION_PRODUCTS_INITIALIZE;
+static quaternionProducts qpAttitude = QUATERNION_PRODUCTS_INITIALIZE;
 // headfree
 quaternion qHeadfree = QUATERNION_INITIALIZE;
 quaternion qOffset = QUATERNION_INITIALIZE;
@@ -241,7 +241,7 @@ static void imuAhrsUpdate(float dt, quaternion *vGyro, quaternion *vError) {
     DEBUG_SET(DEBUG_IMU, DEBUG_IMU3, lrintf(vGyroStdDevModulus * 1000));
 }
 
-STATIC_UNIT_TESTED void imuUpdateEuler(void) {
+static void imuUpdateEuler(void) {
     quaternionProducts buffer;
 
     if (FLIGHT_MODE(HEADFREE_MODE)) {

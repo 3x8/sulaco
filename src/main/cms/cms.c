@@ -567,7 +567,7 @@ static void cmsMenuCountPage(displayPort_t *pDisplay)
     pageCount = (p - currentCtx.menu->entries - 1) / maxMenuItems + 1;
 }
 
-STATIC_UNIT_TESTED long cmsMenuBack(displayPort_t *pDisplay); // Forward; will be resolved after merging
+static long cmsMenuBack(displayPort_t *pDisplay); // Forward; will be resolved after merging
 
 long cmsMenuChange(displayPort_t *pDisplay, const void *ptr)
 {
@@ -618,7 +618,7 @@ long cmsMenuChange(displayPort_t *pDisplay, const void *ptr)
     return 0;
 }
 
-STATIC_UNIT_TESTED long cmsMenuBack(displayPort_t *pDisplay)
+static long cmsMenuBack(displayPort_t *pDisplay)
 {
     // Let onExit function decide whether to allow exit or not.
 
@@ -755,7 +755,7 @@ long cmsMenuExit(displayPort_t *pDisplay, const void *ptr)
 #define BUTTON_TIME   250 // msec
 #define BUTTON_PAUSE  500 // msec
 
-STATIC_UNIT_TESTED uint16_t cmsHandleKey(displayPort_t *pDisplay, uint8_t key)
+static uint16_t cmsHandleKey(displayPort_t *pDisplay, uint8_t key)
 {
     uint16_t res = BUTTON_TIME;
     OSD_Entry *p;

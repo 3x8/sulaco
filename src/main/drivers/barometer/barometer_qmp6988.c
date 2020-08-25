@@ -85,7 +85,7 @@ typedef struct qmp6988_calib_param_s {
 } qmp6988_calib_param_t;
 
 static uint8_t qmp6988_chip_id = 0;
-STATIC_UNIT_TESTED qmp6988_calib_param_t qmp6988_cal;
+static qmp6988_calib_param_t qmp6988_cal;
 // uncompensated pressure and temperature
 int32_t qmp6988_up = 0;
 int32_t qmp6988_ut = 0;
@@ -95,7 +95,7 @@ static void qmp6988_get_ut(baroDev_t *baro);
 static void qmp6988_start_up(baroDev_t *baro);
 static void qmp6988_get_up(baroDev_t *baro);
 
-STATIC_UNIT_TESTED void qmp6988_calculate(int32_t *pressure, int32_t *temperature);
+static void qmp6988_calculate(int32_t *pressure, int32_t *temperature);
 
 void qmp6988BusInit(busDevice_t *busdev)
 {
@@ -309,7 +309,7 @@ static float qmp6988_compensate_T(int32_t adc_T)
 
 
 
-STATIC_UNIT_TESTED void qmp6988_calculate(int32_t *pressure, int32_t *temperature)
+static void qmp6988_calculate(int32_t *pressure, int32_t *temperature)
 {
     float tr,pr;
     int32_t Dp;

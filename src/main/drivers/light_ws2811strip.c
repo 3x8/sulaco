@@ -81,13 +81,13 @@ bool isWS2811LedStripReady(void)
     return !ws2811LedDataTransferInProgress;
 }
 
-STATIC_UNIT_TESTED uint16_t dmaBufferOffset;
+static uint16_t dmaBufferOffset;
 static int16_t ledIndex;
 
 #define USE_FAST_DMA_BUFFER_IMPL
 #ifdef USE_FAST_DMA_BUFFER_IMPL
 
-STATIC_UNIT_TESTED void fastUpdateLEDDMABuffer(ledStripFormatRGB_e ledFormat, rgbColor24bpp_t *color)
+static void fastUpdateLEDDMABuffer(ledStripFormatRGB_e ledFormat, rgbColor24bpp_t *color)
 {
     uint32_t packed_colour;
 
@@ -107,7 +107,7 @@ STATIC_UNIT_TESTED void fastUpdateLEDDMABuffer(ledStripFormatRGB_e ledFormat, rg
     }
 }
 #else
-STATIC_UNIT_TESTED void updateLEDDMABuffer(uint8_t componentValue)
+static void updateLEDDMABuffer(uint8_t componentValue)
 {
     uint8_t bitIndex;
 

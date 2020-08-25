@@ -77,11 +77,11 @@ static const uint8_t v2x2_freq_hopping[][V2X2_NFREQCHANNELS] = {
    0x18, 0x2A, 0x21, 0x38, 0x10, 0x26, 0x20, 0x1F }  //  03
 };
 
-STATIC_UNIT_TESTED uint8_t rf_channels[V2X2_NFREQCHANNELS];
-STATIC_UNIT_TESTED uint8_t rf_ch_num;
-STATIC_UNIT_TESTED uint8_t bind_phase;
+static uint8_t rf_channels[V2X2_NFREQCHANNELS];
+static uint8_t rf_ch_num;
+static uint8_t bind_phase;
 static uint32_t packet_timer;
-STATIC_UNIT_TESTED uint8_t txid[TXIDSIZE];
+static uint8_t txid[TXIDSIZE];
 static uint32_t rx_timeout;
 extern uint16_t rxSpiRcData[];
 

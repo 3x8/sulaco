@@ -33,8 +33,8 @@ enum {
     TELEMETRY_MSP_ERROR=2
 };
 
-STATIC_UNIT_TESTED uint8_t checksum = 0;
-STATIC_UNIT_TESTED mspPackage_t mspPackage;
+static uint8_t checksum = 0;
+static mspPackage_t mspPackage;
 static mspRxBuffer_t mspRxBuffer;
 static mspTxBuffer_t mspTxBuffer;
 static mspPacket_t mspRxPacket;

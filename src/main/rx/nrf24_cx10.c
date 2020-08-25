@@ -63,7 +63,7 @@ typedef enum {
     STATE_DATA
 } protocol_state_t;
 
-STATIC_UNIT_TESTED protocol_state_t protocolState;
+static protocol_state_t protocolState;
 
 #define CX10_PROTOCOL_PAYLOAD_SIZE  15
 #define CX10A_PROTOCOL_PAYLOAD_SIZE 19
@@ -72,15 +72,15 @@ static uint8_t payloadSize;
 
 #define CRC_LEN 2
 #define RX_TX_ADDR_LEN     5
-STATIC_UNIT_TESTED uint8_t txAddr[RX_TX_ADDR_LEN] = {0x55, 0x0F, 0x71, 0x0C, 0x00}; // converted XN297 address, 0xC710F55 (28 bit)
-STATIC_UNIT_TESTED uint8_t rxAddr[RX_TX_ADDR_LEN] = {0x49, 0x26, 0x87, 0x7d, 0x2f}; // converted XN297 address
+static uint8_t txAddr[RX_TX_ADDR_LEN] = {0x55, 0x0F, 0x71, 0x0C, 0x00}; // converted XN297 address, 0xC710F55 (28 bit)
+static uint8_t rxAddr[RX_TX_ADDR_LEN] = {0x49, 0x26, 0x87, 0x7d, 0x2f}; // converted XN297 address
 #define TX_ID_LEN 4
-STATIC_UNIT_TESTED uint8_t txId[TX_ID_LEN];
+static uint8_t txId[TX_ID_LEN];
 
 #define CX10_RF_BIND_CHANNEL           0x02
 #define RF_CHANNEL_COUNT 4
-STATIC_UNIT_TESTED uint8_t cx10RfChannelIndex = 0;
-STATIC_UNIT_TESTED uint8_t cx10RfChannels[RF_CHANNEL_COUNT]; // channels are set using txId from bind packet
+static uint8_t cx10RfChannelIndex = 0;
+static uint8_t cx10RfChannels[RF_CHANNEL_COUNT]; // channels are set using txId from bind packet
 
 #define CX10_PROTOCOL_HOP_TIMEOUT  1500 // 1.5ms
 #define CX10A_PROTOCOL_HOP_TIMEOUT 6500 // 6.5ms
@@ -90,7 +90,7 @@ static uint32_t timeOfLastHop;
 /*
  * Returns true if it is a bind packet.
  */
-STATIC_UNIT_TESTED bool cx10CheckBindPacket(const uint8_t *packet)
+static bool cx10CheckBindPacket(const uint8_t *packet)
 {
     const bool bindPacket = (packet[0] == 0xaa); // 10101010
     if (bindPacket) {
@@ -103,7 +103,7 @@ STATIC_UNIT_TESTED bool cx10CheckBindPacket(const uint8_t *packet)
     return false;
 }
 
-STATIC_UNIT_TESTED uint16_t cx10ConvertToPwmUnsigned(const uint8_t *pVal)
+static uint16_t cx10ConvertToPwmUnsigned(const uint8_t *pVal)
 {
     uint16_t ret = (*(pVal + 1)) & 0x7f; // mask out top bit which is used for a flag for the rudder
     ret = (ret << 8) | *pVal;
@@ -144,7 +144,7 @@ static void cx10HopToNextChannel(void)
 }
 
 // The hopping channels are determined by the txId
-STATIC_UNIT_TESTED void cx10SetHoppingChannels(const uint8_t *txId)
+static void cx10SetHoppingChannels(const uint8_t *txId)
 {
     cx10RfChannelIndex = 0;
     cx10RfChannels[0] = 0x03 + (txId[0] & 0x0F);

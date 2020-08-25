@@ -109,14 +109,14 @@ const hsvColor_t hsv[] = {
 // macro to save typing on default colors
 #define HSV(color) (hsv[COLOR_ ## color])
 
-STATIC_UNIT_TESTED uint8_t ledGridRows;
+static uint8_t ledGridRows;
 // grid offsets
-STATIC_UNIT_TESTED int8_t highestYValueForNorth;
-STATIC_UNIT_TESTED int8_t lowestYValueForSouth;
-STATIC_UNIT_TESTED int8_t highestXValueForWest;
-STATIC_UNIT_TESTED int8_t lowestXValueForEast;
+static int8_t highestYValueForNorth;
+static int8_t lowestYValueForSouth;
+static int8_t highestXValueForWest;
+static int8_t lowestXValueForEast;
 
-STATIC_UNIT_TESTED ledCounts_t ledCounts;
+static ledCounts_t ledCounts;
 
 static const modeColorIndexes_t defaultModeColors[] = {
     //                          NORTH             EAST               SOUTH            WEST             UP          DOWN
@@ -164,7 +164,7 @@ static int auxInput;
 
 static void updateLedRingCounts(void);
 
-STATIC_UNIT_TESTED void updateDimensions(void)
+static void updateDimensions(void)
 {
     int maxX = 0;
     int minX = LED_XY_MASK;
@@ -201,7 +201,7 @@ STATIC_UNIT_TESTED void updateDimensions(void)
 
 }
 
-STATIC_UNIT_TESTED void updateLedCount(void)
+static void updateLedCount(void)
 {
     int count = 0, countRing = 0, countScanner= 0;
 
