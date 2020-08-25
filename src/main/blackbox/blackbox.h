@@ -6,35 +6,35 @@
 #include "pg/pg.h"
 
 typedef enum BlackboxDevice {
-    BLACKBOX_DEVICE_NONE = 0,
-#ifdef USE_FLASHFS
+  BLACKBOX_DEVICE_NONE = 0,
+  #ifdef USE_FLASHFS
     BLACKBOX_DEVICE_FLASH = 1,
-#endif
-#ifdef USE_SDCARD
+  #endif
+  #ifdef USE_SDCARD
     BLACKBOX_DEVICE_SDCARD = 2,
-#endif
+  #endif
     BLACKBOX_DEVICE_SERIAL = 3
 } BlackboxDevice_e;
 
 typedef enum BlackboxMode {
-    BLACKBOX_MODE_NORMAL = 0,
-    BLACKBOX_MODE_MOTOR_TEST,
-    BLACKBOX_MODE_ALWAYS_ON
+  BLACKBOX_MODE_NORMAL = 0,
+  BLACKBOX_MODE_MOTOR_TEST,
+  BLACKBOX_MODE_ALWAYS_ON
 } BlackboxMode;
 
 typedef enum FlightLogEvent {
-    FLIGHT_LOG_EVENT_SYNC_BEEP = 0,
-    FLIGHT_LOG_EVENT_INFLIGHT_ADJUSTMENT = 13,
-    FLIGHT_LOG_EVENT_LOGGING_RESUME = 14,
-    FLIGHT_LOG_EVENT_FLIGHTMODE = 30, // Add new event type for flight mode status.
-    FLIGHT_LOG_EVENT_LOG_END = 255
+  FLIGHT_LOG_EVENT_SYNC_BEEP = 0,
+  FLIGHT_LOG_EVENT_INFLIGHT_ADJUSTMENT = 13,
+  FLIGHT_LOG_EVENT_LOGGING_RESUME = 14,
+  FLIGHT_LOG_EVENT_FLIGHTMODE = 30, // Add new event type for flight mode status.
+  FLIGHT_LOG_EVENT_LOG_END = 255
 } FlightLogEvent;
 
 typedef struct blackboxConfig_s {
-    uint16_t p_ratio; // I-frame interval / P-frame interval
-    uint8_t device;
-    uint8_t record_acc;
-    uint8_t mode;
+  uint16_t p_ratio; // I-frame interval / P-frame interval
+  uint8_t device;
+  uint8_t record_acc;
+  uint8_t mode;
 } blackboxConfig_t;
 
 PG_DECLARE(blackboxConfig_t, blackboxConfig);
@@ -50,14 +50,3 @@ uint8_t blackboxGetRateDenom(void);
 void blackboxValidateConfig(void);
 void blackboxFinish(void);
 bool blackboxMayEditConfig(void);
-#ifdef UNIT_TEST
-static void blackboxLogIteration(timeUs_t currentTimeUs);
-static bool blackboxShouldLogPFrame(void);
-static bool blackboxShouldLogIFrame(void);
-static bool blackboxShouldLogGpsHomeFrame(void);
-static bool writeSlowFrameIfNeeded(void);
-// Called once every FC loop in order to keep track of how many FC loop iterations have passed
-static void blackboxAdvanceIterationTimers(void);
-extern int32_t blackboxSInterval;
-extern int32_t blackboxSlowFrameIterationTimer;
-#endif
