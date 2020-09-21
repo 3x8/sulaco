@@ -81,7 +81,7 @@ typedef enum {
 
 #define ESC_SENSOR_BAUDRATE 115200
 #define ESC_BOOTTIME 5000               // 5 seconds
-#define ESC_REQUEST_TIMEOUT 100         // 100 ms (data transfer takes only 900us)
+#define ESC_REQUEST_TIMEOUT 10         // 100 ms (data transfer takes only 900us)
 
 #define TELEMETRY_FRAME_SIZE 10
 static uint8_t telemetryBuffer[TELEMETRY_FRAME_SIZE] = { 0, };
