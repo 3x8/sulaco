@@ -45,6 +45,8 @@ void targetConfiguration(void) {
   rcControlsConfigMutable()->deadband = 7;
   rcControlsConfigMutable()->yaw_deadband = 11;
 
+  batteryConfigMutable()->vbatwarningcellvoltage = 34;
+
   featureClear(FEATURE_DYNAMIC_FILTER);
   featureSet(FEATURE_AIRMODE | FEATURE_TELEMETRY);
 
