@@ -10,6 +10,7 @@
 #include "sensors/gyro.h"
 #include "sensors/battery.h"
 #include "telemetry/telemetry.h"
+#include "flight/imu.h"
 #include "flight/mixer.h"
 #include "flight/pid.h"
 #include "fc/config.h"
@@ -18,13 +19,19 @@
 #include "rx/rx.h"
 
 void targetConfiguration(void) {
+  // ERROR in timer initialization (prescaler wrong) when not cpu_overclock
+  systemConfigMutable()->cpu_overclock  = 1;
+
   gyroConfigMutable()->gyro_sync_denom = 4;
   gyroConfigMutable()->gyro_use_32khz = 1;
   gyroConfigMutable()->gyro_32khz_hardware_lpf = 1;
-  
+  gyroConfigMutable()->gyro_lowpass_hz = 0;
+
+  imuConfigMutable()->small_angle = 180;
+
   pidConfigMutable()->pid_process_denom = 1;
 
-  motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
+  motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_PROSHOT1000;
 
   rxConfigMutable()->rcInterpolation = RC_SMOOTHING_MANUAL;
   rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
@@ -32,6 +39,8 @@ void targetConfiguration(void) {
   rxConfigMutable()->rc_smoothing_input_cutoff = 113;
   rxConfigMutable()->rc_smoothing_derivative_cutoff = 127;
   rxConfigMutable()->rcInterpolationChannels = INTERPOLATION_CHANNELS_RPYT;
+  rxConfigMutable()->mincheck = 1000;
+  rxConfigMutable()->maxcheck = 2000;
 
   rcControlsConfigMutable()->deadband = 7;
   rcControlsConfigMutable()->yaw_deadband = 11;
