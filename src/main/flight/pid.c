@@ -527,6 +527,7 @@ static float calcHorizonLevelStrength(void) {
   return (constrainf(horizonLevelStrength, 0, 1));
 }
 
+// ToDo quaternion
 static float pidLevel(int axis, const pidProfile_t *pidProfile, const rollAndPitchTrims_t *angleTrim, float currentPidSetpoint) {
     // calculate error angle and limit the angle to the max inclination
     // rcDeflection is in range [-1.0, 1.0]
