@@ -1,7 +1,7 @@
 #pragma once
 
 #define TARGET_BOARD_IDENTIFIER         "CLR7"
-#define USBD_PRODUCT_STRING             "CLRACINGF7"
+#define USBD_PRODUCT_STRING             "CLRACINGF7V21"
 #define TARGET_MANUFACTURER_IDENTIFIER  "CLR"
 
 #undef USE_BOARD_INFO
