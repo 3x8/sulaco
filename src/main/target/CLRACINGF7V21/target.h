@@ -36,12 +36,11 @@
 #define GYRO_2_EXTI_PIN         PC14
 #define USE_MPU_DATA_READY_SIGNAL
 #define ENSURE_MPU_DATA_READY_IS_LOW
+//#define DEBUG_MPU_DATA_READY_INTERRUPT
+// EXTI ICM20601 allways 125us -> 8kHz (some lost at 250us ... at 16K and 32K gyro rate ... also)
 
 #define USE_ACC
 #define USE_GYRO
-
-// EXTI ICM20601 allways 125us -> 8kHz (some lost at 250us ... at 16K and 32K gyro rate ... also)
-//#define DEBUG_MPU_DATA_READY_INTERRUPT
 
 // ICM20601
 #define USE_GYRO_SPI_ICM20601
@@ -68,7 +67,7 @@
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE    SPI3
 #define MAX7456_SPI_CS_PIN      SPI3_NSS_PIN
-#define MAX7456_SPI_CLK         (SPI_CLOCK_STANDARD) // 10MHz
+#define MAX7456_SPI_CLK         (SPI_CLOCK_STANDARD)
 #define MAX7456_RESTORE_CLK     (SPI_CLOCK_FAST)
 
 // FLASH
@@ -78,7 +77,6 @@
 #define USE_FLASH
 #define USE_FLASH_W25N01G
 #define USE_FLASHFS
-
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 
 // UARTS

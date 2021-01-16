@@ -24,7 +24,7 @@ void targetConfiguration(void) {
 
   pidConfigMutable()->pid_process_denom = 1;
 
-  motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
+  motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_PROSHOT1000;
 
   rxConfigMutable()->rcInterpolation = RC_SMOOTHING_MANUAL;
   rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
